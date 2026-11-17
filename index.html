@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Jaymart WHOLESALE</title>
+<title>Wholesale</title>
 
-<meta name="description" content="Jaymart WHOLESALE ระบบจัดการสินค้าส่ง">
+<meta name="description" content="Wholesale ระบบจัดการสินค้าส่ง">
 <meta name="theme-color" content="#0b1220">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
@@ -110,16 +110,16 @@
   <div id="loader">
     <div class="box-icon">📦</div>
     <div class="spinner"></div>
-    <div class="loader-title">Jaymart WHOLESALE</div>
-    <div class="loader-sub">กำลังโหลดระบบขายส่ง…</div>
+    <div class="loader-title">Wholesale</div>
+    <div class="loader-sub">กำลังโหลดระบบสินค้าส่ง…</div>
   </div>
 
   <!-- App -->
   <div id="frameWrap">
     <iframe
       id="appFrame"
-      title="Jaymart WHOLESALE"
-      allow="fullscreen; clipboard-read; clipboard-write; geolocation"
+      title="Wholesale"
+      allow="fullscreen; clipboard-read; clipboard-write; camera; geolocation"
       allowfullscreen
       referrerpolicy="no-referrer"
       scrolling="no"
@@ -143,7 +143,7 @@
       setTimeout(function () { loader.style.display = 'none'; }, 500);
     }
 
-    // กำหนด src ผ่าน JavaScript เพื่อป้องกันปัญหาบล็อกข้ามโดเมนชั่วขณะตอนเรนเดอร์หน้าแรก
+    // กำหนด URL ผ่าน JS เพื่อเลี่ยงปัญหาการบล็อกจังหวะเรนเดอร์แรก
     window.addEventListener('DOMContentLoaded', function() {
       frame.src = TARGET_URL;
     });
@@ -152,7 +152,7 @@
       setTimeout(hideLoader, 400);
     });
 
-    setTimeout(hideLoader, 15000);   // กรณีโหลดนานเกิน 15 วินาที ให้ซ่อน loader อัตโนมัติ
+    setTimeout(hideLoader, 15000);   // ซ่อน loader อัตโนมัติใน 15 วินาที
 
     // ปรับความสูงป้องกันจอล้นบนมือถือ
     function fixHeight() {
