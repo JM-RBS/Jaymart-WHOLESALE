@@ -434,13 +434,18 @@
     }
 
     function resolveCurrentPageUrl() {
+      // หากรันอยู่บน GitHub Pages ให้ใช้ origin + pathname จริงเสมอ และตัด query params ออกเพื่อความสะอาด
+      if (window.location.hostname.indexOf('github.io') !== -1) {
+        return window.location.origin + window.location.pathname;
+      }
       return window.location.origin + window.location.pathname;
     }
 
     window.addEventListener('DOMContentLoaded', function() {
       var cbDisplay = document.getElementById('exactRedirectUriDisplay');
       var gasDisplay = document.getElementById('gasApiUrlDisplay');
-      if (cbDisplay) cbDisplay.textContent = resolveCurrentPageUrl();
+      var cleanCurrentUrl = resolveCurrentPageUrl();
+      if (cbDisplay) cbDisplay.textContent = cleanCurrentUrl;
       if (gasDisplay) gasDisplay.textContent = GAS_API_URL;
 
       var urlParams = new URLSearchParams(window.location.search);
@@ -449,7 +454,7 @@
       // 1. กรณีเพิ่งกดยินยอมจากหน้า LINE Login แล้วเด้งกลับมาพร้อม ?code=...
       if (code) {
         document.getElementById('docDateBadge').textContent = 'กำลังยืนยันบัญชี LINE...';
-        callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: resolveCurrentPageUrl() })
+        callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanCurrentUrl })
           .then(function(res) {
             window.history.replaceState({}, document.title, window.location.pathname);
             if (res && res.ok && res.lineUser && res.lineUser.userId) {
@@ -469,7 +474,20 @@
         return;
       }
 
-      // 2. ตรวจสอบหน่วยความจำอุปกรณ์ (Remember Device) ว่าเคยยืนยันตัวตนในเครื่องนี้แล้วหรือไม่
+      // ตรวจสอบว่าอยู่ในหน้าพรีวิวจำลองหรือไม่ หากใช่ให้แสดงปุ่มจำลองแทนการพยายามเรียก LINE OAuth
+      var isInIframe = false;
+      try { isInIframe = (window.self !== window.top); } catch (e) { isInIframe = true; }
+      var isPreviewEnv = isInIframe ||
+                         window.location.protocol === 'blob:' ||
+                         cleanCurrentUrl.indexOf('scf.usercontent.goog') !== -1 ||
+                         cleanCurrentUrl.indexOf('googleusercontent.com') !== -1;
+
+      if (isPreviewEnv) {
+        var noticeEl = document.getElementById('previewSandboxNotice');
+        if (noticeEl) noticeEl.classList.remove('hidden');
+      }
+
+      // 2. ตรวจสอบหน่วยความจำอุปกรณ์ (Remember Device)
       var savedUser = null;
       try {
         var raw = localStorage.getItem('jm_device_line_user_v2');
@@ -488,11 +506,7 @@
     function triggerLineLoginConsent() {
       var targetRedirectUri = resolveCurrentPageUrl();
       var isInIframe = false;
-      try {
-        isInIframe = (window.self !== window.top);
-      } catch (e) {
-        isInIframe = true;
-      }
+      try { isInIframe = (window.self !== window.top); } catch (e) { isInIframe = true; }
 
       var isPreviewEnv = isInIframe ||
                          window.location.protocol === 'blob:' ||
@@ -502,7 +516,7 @@
       if (isPreviewEnv) {
         var noticeEl = document.getElementById('previewSandboxNotice');
         if (noticeEl) noticeEl.classList.remove('hidden');
-        showToast('หน้าพรีวิวไม่สามารถเปิดหน้าล็อกอิน LINE ซ้อนในกรอบได้ กรุณากดปุ่มจำลองด้านล่าง หรือเปิดผ่านลิงก์ GitHub Pages จริง');
+        showToast('หน้าพรีวิวไม่อนุญาตให้เปิดหน้า LINE Login จริง กรุณากดปุ่มจำลองด้านล่าง หรือเปิดผ่านลิงก์ GitHub Pages จริง');
         return;
       }
 
