@@ -214,10 +214,24 @@
         <div id="amFieldsGroup" class="hidden space-y-3 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
           <div>
             <label class="block text-xs font-bold text-slate-800 mb-1">รหัสพนักงาน (ตามรายชื่อในระบบ) <span class="text-rose-600">*</span></label>
-            <input id="regAmEmpId" type="text" placeholder="กรอกรหัสพนักงาน เช่น 14803" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
-            <p class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
-              * ระบบจะผูกสิทธิ์กับบัญชี LINE นี้เพียง 1 บัญชีเท่านั้น หากเปลี่ยนเครื่องหรือบัญชี LINE จะต้องรอแอดมินอนุมัติใหม่
-            </p>
+            <div class="flex items-center gap-2">
+              <input id="regAmEmpId" type="text" oninput="resetAmVerified()" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyAmEmployee();}" placeholder="กรอกรหัสพนักงาน เช่น 22307060" class="flex-1 h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
+              <button type="button" id="btnVerifyAm" onclick="verifyAmEmployee()" class="btn-press h-11 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold cursor-pointer shrink-0 whitespace-nowrap">
+                ตรวจสอบชื่อ
+              </button>
+            </div>
+          </div>
+
+          <div id="amVerifiedCard" class="hidden p-3.5 rounded-xl bg-white border border-emerald-300 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs text-slate-500">ชื่อพนักงานในระบบ:</span>
+              <span id="amVerifiedName" class="text-sm sm:text-base font-extrabold text-emerald-800">-</span>
+            </div>
+            <p id="amVerifiedNote" class="text-[11px] leading-relaxed"></p>
+            <label class="flex items-start gap-2 pt-1 border-t border-slate-100 cursor-pointer text-xs text-slate-800 font-semibold">
+              <input id="regAmConfirmCheck" type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 text-emerald-700">
+              <span>ยืนยันว่าชื่อ-สกุลตรงกับข้อมูลของข้าพเจ้าจริง</span>
+            </label>
           </div>
         </div>
 
@@ -635,6 +649,7 @@
           var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
           if (action === 'getWholesaleData') runner.getWholesaleData();
           else if (action === 'exchangeLineAuthCode') runner.exchangeLineAuthCode(payload.code, payload.redirectUri);
+          else if (action === 'lookupAmEmployee') runner.lookupAmEmployee(payload.employeeId);
           else if (action === 'checkDealerAccess') runner.checkDealerAccess(payload.lineUserId);
           else if (action === 'registerDealerRequest') runner.registerDealerRequest(payload);
           else if (action === 'verifyStaffPin') runner.verifyStaffPin(payload.pin, payload.lineUserId);
@@ -975,125 +990,63 @@
       if (sgInput) sgInput.required = !isAm;
       if (phoneInput) phoneInput.required = !isAm;
       if (emailInput) emailInput.required = !isAm;
+
+      var submitBtn = document.getElementById('btnSubmitDealerReg');
+      if (submitBtn) {
+        submitBtn.textContent = isAm ? 'ยืนยันลงทะเบียน AM' : 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
+      }
     }
 
-    var EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'jaymart.co.th'];
-    function handleEmailSuggest(val) {
-      var listEl = document.getElementById('emailSuggestList');
-      if (!listEl) return;
-      var trimmed = String(val || '').trim();
-      if (!trimmed) {
-        listEl.classList.add('hidden');
+    var VERIFIED_AM_DATA = null;
+    function resetAmVerified() {
+      VERIFIED_AM_DATA = null;
+      var card = document.getElementById('amVerifiedCard');
+      var chk = document.getElementById('regAmConfirmCheck');
+      if (card) card.classList.add('hidden');
+      if (chk) chk.checked = false;
+    }
+
+    function verifyAmEmployee() {
+      var empInput = document.getElementById('regAmEmpId');
+      var empId = empInput ? empInput.value.trim() : '';
+      if (!empId) {
+        showToast('กรุณากรอกรหัสพนักงานก่อนกดตรวจสอบ');
         return;
       }
 
-      var atIdx = trimmed.indexOf('@');
-      var localPart = atIdx === -1 ? trimmed : trimmed.slice(0, atIdx);
-      var typedDomain = atIdx === -1 ? '' : trimmed.slice(atIdx + 1).toLowerCase();
-
-      if (!localPart) {
-        listEl.classList.add('hidden');
-        return;
-      }
-
-      var matches = EMAIL_DOMAINS.filter(function(d) {
-        return !typedDomain || (d.indexOf(typedDomain) === 0 && d !== typedDomain);
-      });
-
-      if (!matches.length) {
-        listEl.classList.add('hidden');
-        return;
-      }
-
-      listEl.innerHTML = matches.map(function(d) {
-        var fullEmail = localPart + '@' + d;
-        return '<button type="button" onmousedown="selectEmailSuggest(\'' + escapeHtml(fullEmail) + '\')" class="w-full px-3.5 py-2 text-left text-xs sm:text-sm text-slate-700 hover:bg-slate-50 flex items-center justify-between cursor-pointer">' +
-          '<span class="font-medium">' + escapeHtml(fullEmail) + '</span>' +
-          '<span class="text-[11px] text-slate-400">เลือก</span>' +
-        '</button>';
-      }).join('');
-      listEl.classList.remove('hidden');
-    }
-
-    function selectEmailSuggest(email) {
-      var input = document.getElementById('regEmail');
-      var listEl = document.getElementById('emailSuggestList');
-      if (input) input.value = email;
-      if (listEl) listEl.classList.add('hidden');
-    }
-
-    document.addEventListener('click', function(e) {
-      var listEl = document.getElementById('emailSuggestList');
-      var inputEl = document.getElementById('regEmail');
-      if (listEl && e.target !== inputEl && !listEl.contains(e.target)) {
-        listEl.classList.add('hidden');
-      }
-    });
-
-    function submitDealerRegistration(e) {
-      e.preventDefault();
-      if (!STATE.lineUser) return;
-
-      var roleEl = document.querySelector('input[name="regRoleType"]:checked');
-      var roleType = roleEl ? roleEl.value : 'เจ้าของร้าน';
-      var isAm = roleType === 'AM (สำหรับสาขา)';
-
-      if (roleType === 'พนักงานร้าน') {
-        var consentChecked = document.getElementById('regStaffConsent').checked;
-        if (!consentChecked) {
-          showToast('กรุณาติ๊กยืนยันว่าได้รับความยินยอมจากเจ้าของร้านก่อนส่งข้อมูล');
-          return;
-        }
-      }
-
-      var payload = {
-        lineUserId: STATE.lineUser.userId,
-        lineName: STATE.lineUser.displayName,
-        linePicture: STATE.lineUser.pictureUrl,
-        roleType: roleType
-      };
-
-      if (isAm) {
-        var empId = document.getElementById('regAmEmpId').value.trim();
-        if (!empId) {
-          showToast('กรุณากรอกรหัสพนักงาน');
-          return;
-        }
-        payload.employeeId = empId;
-      } else {
-        payload.typedShopName = document.getElementById('regShopName').value.trim();
-        payload.sgFinanceUser = document.getElementById('regSgUser').value.trim();
-        payload.phone = document.getElementById('regPhone').value.trim();
-        payload.email = document.getElementById('regEmail').value.trim();
-      }
-
-      var btn = document.getElementById('btnSubmitDealerReg');
+      var btn = document.getElementById('btnVerifyAm');
       btn.disabled = true;
-      btn.textContent = 'กำลังส่งข้อมูล...';
+      btn.textContent = 'กำลังค้นหา...';
 
-      callBackendApi('registerDealerRequest', payload)
+      callBackendApi('lookupAmEmployee', { employeeId: empId })
         .then(function(res) {
           btn.disabled = false;
-          btn.textContent = 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
+          btn.textContent = 'ตรวจสอบชื่อ';
           if (!res || !res.ok) {
-            showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
+            resetAmVerified();
+            showToast((res && res.error) ? res.error : 'ไม่พบรหัสพนักงานนี้ในระบบ');
             return;
           }
-          STATE.dealerStatus = res.status || 'Pending';
-          STATE.dealerInfo = res.dealer || {
-            lineUserId: STATE.lineUser.userId,
-            lineName: STATE.lineUser.displayName,
-            typedShopName: isAm ? ('AM: ' + payload.employeeId) : payload.typedShopName,
-            sgFinanceUser: isAm ? payload.employeeId : payload.sgFinanceUser,
-            phone: payload.phone || '-',
-            roleType: roleType
-          };
-          applyDealerGateUI();
-          showToast(res.isDeviceSwitch ? 'ส่งคำขอเปลี่ยนเครื่องเข้าคิวรออนุมัติเรียบร้อยแล้ว' : 'ส่งข้อมูลลงทะเบียนเรียบร้อย กรุณารอแอดมินอนุมัติ');
+
+          VERIFIED_AM_DATA = res;
+          var card = document.getElementById('amVerifiedCard');
+          var nameEl = document.getElementById('amVerifiedName');
+          var noteEl = document.getElementById('amVerifiedNote');
+          if (nameEl) nameEl.textContent = res.name || res.employeeId;
+          if (noteEl) {
+            if (res.hasExistingLine) {
+              noteEl.className = 'text-[11px] text-amber-700 font-medium leading-relaxed';
+              noteEl.textContent = '* รหัสพนักงานนี้เคยผูกกับบัญชี LINE เดิมไว้แล้ว เมื่อกดยืนยันระบบจะส่งคำขอให้แอดมินอนุมัติการเปลี่ยนเครื่อง/บัญชี LINE';
+            } else {
+              noteEl.className = 'text-[11px] text-emerald-700 font-medium leading-relaxed';
+              noteEl.textContent = '✓ รหัสพนักงานนี้ยังไม่เคยผูกบัญชี LINE เมื่อกดยืนยันระบบจะอนุมัติเข้าใช้งานให้อัตโนมัติทันที';
+            }
+          }
+          if (card) card.classList.remove('hidden');
         })
         .catch(function(err) {
           btn.disabled = false;
-          btn.textContent = 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
+          btn.textContent = 'ตรวจสอบชื่อ';
           showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
     }
@@ -1143,21 +1096,22 @@
 
       var m2 = s.match(/(\d{1,2})\s*([a-zA-Z]{3})\s*[-–]\s*(\d{1,2})\s*([a-zA-Z]{3})/);
       if (m2) {
-        var monStart = months[m2[2].toLowerCase()];
-        var monEnd = months[m2[4].toLowerCase()];
-        if (monStart !== undefined && monEnd !== undefined) {
-          var endYear = monEnd < monStart ? year + 1 : year;
+        var mon1 = months[m2[2].toLowerCase()];
+        var mon2 = months[m2[4].toLowerCase()];
+        if (mon1 !== undefined && mon2 !== undefined) {
           return {
-            start: new Date(year, monStart, Number(m2[1]), 0, 0, 0),
-            end: new Date(endYear, monEnd, Number(m2[3]), 23, 59, 59)
+            start: new Date(year, mon1, Number(m2[1]), 0, 0, 0),
+            end: new Date(year, mon2, Number(m2[3]), 23, 59, 59)
           };
         }
       }
 
       var m3 = s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*[-–]\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
       if (m3) {
-        var y1 = m3[3] ? (Number(m3[3]) > 2400 ? Number(m3[3]) - 543 : (Number(m3[3]) < 100 ? 2000 + Number(m3[3]) : Number(m3[3]))) : year;
-        var y2 = m3[6] ? (Number(m3[6]) > 2400 ? Number(m3[6]) - 543 : (Number(m3[6]) < 100 ? 2000 + Number(m3[6]) : Number(m3[6]))) : y1;
+        var y1 = m3[3] ? (m3[3].length === 2 ? 2000 + Number(m3[3]) : Number(m3[3])) : year;
+        var y2 = m3[6] ? (m3[6].length === 2 ? 2000 + Number(m3[6]) : Number(m3[6])) : year;
+        if (y1 > 2400) y1 -= 543;
+        if (y2 > 2400) y2 -= 543;
         return {
           start: new Date(y1, Number(m3[2]) - 1, Number(m3[1]), 0, 0, 0),
           end: new Date(y2, Number(m3[5]) - 1, Number(m3[4]), 23, 59, 59)
@@ -1167,50 +1121,184 @@
     }
 
     function getPromoInfo(periodStr) {
-      var parsed = parsePromoPeriod(periodStr);
-      if (!parsed) return { state: 'active', label: '' };
+      var range = parsePromoPeriod(periodStr);
+      if (!range) return { state: 'active', label: '' };
       var now = new Date();
-      if (now < parsed.start) {
-        var diffDays = Math.ceil((parsed.start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        return { state: 'upcoming', label: 'เริ่มในอีก ' + diffDays + ' วัน' };
-      }
-      if (now > parsed.end) {
+      if (now > range.end) {
         return { state: 'expired', label: 'หมดโปรโมชั่น' };
+      }
+      if (now < range.start) {
+        var diffDays = Math.ceil((range.start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return { state: 'upcoming', label: 'เริ่มในอีก ' + diffDays + ' วัน' };
       }
       return { state: 'active', label: '' };
     }
 
-    function loadCatalogData(silent) {
-      var loadingEl = document.getElementById('loadingGrid');
-      if (!silent && loadingEl && !STATE.products.length) {
-        loadingEl.classList.remove('hidden');
+    async function loadCatalogData(silent) {
+      var loadingGrid = document.getElementById('loadingGrid');
+      if (!silent && loadingGrid && !STATE.products.length) {
+        loadingGrid.classList.remove('hidden');
       }
 
-      return callBackendApi('getWholesaleData', {})
+      try {
+        var res = await callBackendApi('getWholesaleData', {});
+        if (loadingGrid) loadingGrid.classList.add('hidden');
+        if (!res || !res.ok) {
+          if (!silent) showToast((res && res.error) || 'โหลดข้อมูลราคาไม่สำเร็จ');
+          return;
+        }
+
+        STATE.docTitle = res.docTitle || STATE.docTitle;
+        STATE.docDate = res.docDate || '';
+        STATE.warningText = res.warningText || STATE.warningText;
+        STATE.brands = res.brands || [];
+        STATE.products = res.products || [];
+        STATE.modelImages = res.modelImages || [];
+
+        setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'ใบราคาขายส่งล่าสุด');
+        var warnEl = document.getElementById('warningBanner');
+        if (warnEl) warnEl.textContent = STATE.warningText;
+
+        renderBrandTabs();
+        renderProducts();
+      } catch (err) {
+        if (loadingGrid) loadingGrid.classList.add('hidden');
+        if (!silent) showToast('โหลดข้อมูลผิดพลาด: ' + (err.message || err));
+      }
+    }
+
+    function handleEmailSuggest(val) {
+      var box = document.getElementById('emailSuggestList');
+      if (!box) return;
+      var trimmed = String(val || '').trim();
+      if (!trimmed || trimmed.indexOf('@') !== -1) {
+        box.classList.add('hidden');
+        return;
+      }
+      var domains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'co.th'];
+      box.innerHTML = domains.map(function(dom) {
+        var full = trimmed + '@' + dom;
+        return '<button type="button" onclick="selectSuggestedEmail(\'' + escapeHtml(full) + '\')" class="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">' +
+          escapeHtml(full) +
+        '</button>';
+      }).join('');
+      box.classList.remove('hidden');
+    }
+
+    function selectSuggestedEmail(email) {
+      var inp = document.getElementById('regEmail');
+      var box = document.getElementById('emailSuggestList');
+      if (inp) inp.value = email;
+      if (box) box.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      var box = document.getElementById('emailSuggestList');
+      var inp = document.getElementById('regEmail');
+      if (box && inp && e.target !== inp && !box.contains(e.target)) {
+        box.classList.add('hidden');
+      }
+    });
+
+    function submitDealerRegistration(e) {
+      if (e) e.preventDefault();
+      if (!STATE.lineUser || !STATE.lineUser.userId) {
+        showToast('กรุณายืนยันตัวตนผ่าน LINE ก่อนลงทะเบียน');
+        return;
+      }
+
+      var checked = document.querySelector('input[name="regRoleType"]:checked');
+      var roleType = checked ? checked.value : 'เจ้าของร้าน';
+      var isAm = roleType === 'AM (สำหรับสาขา)';
+
+      if (roleType === 'พนักงานร้าน') {
+        var consent = document.getElementById('regStaffConsent');
+        if (consent && !consent.checked) {
+          showToast('กรุณาติ๊กยืนยันว่าเป็นพนักงานของร้านค้าดังกล่าวจริง');
+          return;
+        }
+      }
+
+      var payload = {
+        lineUserId: STATE.lineUser.userId,
+        lineName: STATE.lineUser.displayName || '',
+        linePicture: STATE.lineUser.pictureUrl || '',
+        roleType: roleType
+      };
+
+      if (isAm) {
+        var empId = document.getElementById('regAmEmpId').value.trim();
+        if (!empId) {
+          showToast('กรุณากรอกรหัสพนักงาน');
+          return;
+        }
+        if (!VERIFIED_AM_DATA || VERIFIED_AM_DATA.employeeId !== empId) {
+          verifyAmEmployee();
+          showToast('กรุณาตรวจสอบชื่อพนักงานและติ๊กยืนยันก่อนส่งข้อมูล');
+          return;
+        }
+        var amConfirm = document.getElementById('regAmConfirmCheck').checked;
+        if (!amConfirm) {
+          showToast('กรุณาติ๊กยืนยันว่าชื่อ-สกุลตรงกับข้อมูลของท่าน');
+          return;
+        }
+        payload.employeeId = empId;
+      } else {
+        payload.typedShopName = document.getElementById('regShopName').value.trim();
+        payload.sgFinanceUser = document.getElementById('regSgUser').value.trim();
+        payload.phone = document.getElementById('regPhone').value.trim();
+        payload.email = document.getElementById('regEmail').value.trim();
+      }
+
+      var btn = document.getElementById('btnSubmitDealerReg');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึกข้อมูล...';
+
+      callBackendApi('registerDealerRequest', payload)
         .then(function(res) {
-          if (loadingEl) loadingEl.classList.add('hidden');
+          btn.disabled = false;
+          btn.textContent = isAm ? 'ยืนยันลงทะเบียน AM' : 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
           if (!res || !res.ok) {
-            if (!silent) showToast((res && res.error) ? res.error : 'ไม่สามารถโหลดข้อมูลสินค้าได้');
+            showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
+            return;
+          }
+          STATE.dealerStatus = res.status || 'Pending';
+          STATE.dealerInfo = res.dealer || {
+            lineUserId: STATE.lineUser.userId,
+            lineName: STATE.lineUser.displayName,
+            typedShopName: isAm ? ('AM: ' + payload.employeeId) : payload.typedShopName,
+            sgFinanceUser: isAm ? payload.employeeId : payload.sgFinanceUser,
+            phone: payload.phone || '-',
+            roleType: roleType
+          };
+
+          if (res.status === 'Approved') {
+            if (res.isAdmin) {
+              STATE.isAdmin = true;
+              STATE.verifiedPin = res.adminPin || payload.employeeId;
+              STATE.staffName = res.adminName || STATE.dealerInfo.typedShopName;
+              try {
+                localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
+                  pin: STATE.verifiedPin,
+                  name: STATE.staffName,
+                  lineUserId: STATE.lineUser.userId
+                }));
+              } catch (errSave) {}
+              updateAdminHeaderUI();
+            }
+            applyDealerGateUI();
+            loadCatalogData();
+            showToast('ยืนยันตัวตนสำเร็จ! อนุมัติเข้าใช้งานเรียบร้อยแล้ว');
             return;
           }
 
-          STATE.docTitle = res.docTitle || STATE.docTitle;
-          STATE.docDate = res.docDate || '';
-          STATE.warningText = res.warningText || STATE.warningText;
-          STATE.brands = res.brands || [];
-          STATE.products = res.products || [];
-          STATE.modelImages = res.modelImages || [];
-
-          setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'อัปเดตล่าสุด');
-          document.getElementById('warningBanner').textContent = STATE.warningText;
-
-          renderBrandTabs();
-          renderProducts();
-          populateBrandFilters();
+          applyDealerGateUI();
+          showToast(res.isDeviceSwitch ? 'ส่งคำขอเปลี่ยนเครื่องเข้าคิวรออนุมัติเรียบร้อยแล้ว' : 'ส่งข้อมูลลงทะเบียนเรียบร้อย กรุณารอแอดมินอนุมัติ');
         })
         .catch(function(err) {
-          if (loadingEl) loadingEl.classList.add('hidden');
-          if (!silent) showToast('โหลดข้อมูลผิดพลาด: ' + (err.message || err));
+          btn.disabled = false;
+          btn.textContent = isAm ? 'ยืนยันลงทะเบียน AM' : 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
     }
 
