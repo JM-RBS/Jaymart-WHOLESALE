@@ -92,12 +92,12 @@
         </div>
 
         <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4-5 บนมือถือ -->
-        <div id="headerActionsWrapper" class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
-          <!-- แถวปุ่มสำหรับแอดมิน / AM (เรียง 3 อันในแถวเดียว) -->
+        <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
+          <!-- บรรทัดที่ 4 (มือถือ): แอดมิน + สลับ LINE + ปุ่ม Admin เรียง 3 อันในแถวเดียวกัน -->
           <div id="headerStaffControlsRow" class="grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2">
-            <span id="dealerActiveBadge" class="hidden items-center justify-center h-9 px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
+            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 px-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
 
-            <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
+            <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
               <span>สลับ LINE</span>
             </button>
 
@@ -108,11 +108,9 @@
             </button>
           </div>
 
-          <!-- แถวปุ่มดาวน์โหลด PDF (และชื่อร้านสำหรับดีลเลอร์ทั่วไปให้อยู่บรรทัดเดียวกัน) -->
-          <div id="headerPdfRow" class="flex items-center justify-between lg:justify-end gap-2 lg:order-first">
-            <span id="dealerShopBadgeInline" class="hidden items-center h-9 px-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
-
-            <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap ml-auto">
+          <!-- บรรทัดที่ 5 (มือถือ): ปุ่มดาวน์โหลด PDF อยู่ขวาล่างต่อจาก 3 ปุ่มด้านบน -->
+          <div class="flex justify-end lg:order-first">
+            <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
               <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               <span>ดาวน์โหลด PDF</span>
             </button>
@@ -535,7 +533,7 @@
 
   <script>
     var LINE_CHANNEL_ID = '2012656454';
-    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgXntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
+    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
     var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v1';
     var STORAGE_ADMIN_KEY = 'jm_wholesale_admin_session_v1';
 
@@ -879,18 +877,6 @@
         });
     }
 
-    function showFlexEl(el) {
-      if (!el) return;
-      el.classList.remove('hidden');
-      el.classList.add('inline-flex');
-    }
-
-    function hideFlexEl(el) {
-      if (!el) return;
-      el.classList.add('hidden');
-      el.classList.remove('inline-flex');
-    }
-
     function applyDealerGateUI() {
       var loginGate = document.getElementById('lineLoginGate');
       var regView = document.getElementById('dealerRegistrationView');
@@ -899,41 +885,36 @@
       var filterBar = document.getElementById('catalogFilterBar');
       var pdfBtn = document.getElementById('headerPdfBtn');
       var switchBtn = document.getElementById('headerSwitchLineBtn');
-      var staffRow = document.getElementById('headerStaffControlsRow');
+      var adminBtn = document.getElementById('headerAdminBtn');
+      var controlsRow = document.getElementById('headerStaffControlsRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
-      var shopInlineBadge = document.getElementById('dealerShopBadgeInline');
 
-      [loginGate, regView, pendingView, catalogArea, filterBar].forEach(function(el) {
+      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
         if (el) el.classList.add('hidden');
       });
-      hideFlexEl(pdfBtn);
-      hideFlexEl(switchBtn);
-      hideFlexEl(dealerBadge);
-      hideFlexEl(shopInlineBadge);
-      if (staffRow) staffRow.classList.remove('hidden');
+      if (dealerBadge) dealerBadge.classList.add('hidden');
+      if (adminBtn) adminBtn.classList.remove('hidden');
+      if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
         if (catalogArea) catalogArea.classList.remove('hidden');
         if (filterBar) filterBar.classList.remove('hidden');
-        showFlexEl(pdfBtn);
+        if (pdfBtn) pdfBtn.classList.remove('hidden');
 
-        var shopLabel = (STATE.dealerInfo && STATE.dealerInfo.typedShopName) ? STATE.dealerInfo.typedShopName : '';
         var isStaffOrManager = STATE.isAdmin || (STATE.dealerInfo && STATE.dealerInfo.roleType === 'AM (สำหรับสาขา)');
-
         if (isStaffOrManager) {
-          if (staffRow) staffRow.classList.remove('hidden');
-          showFlexEl(switchBtn);
-          if (dealerBadge && shopLabel) {
-            dealerBadge.textContent = shopLabel;
-            showFlexEl(dealerBadge);
-          }
+          if (switchBtn) switchBtn.classList.remove('hidden');
+          if (adminBtn) adminBtn.classList.remove('hidden');
         } else {
-          // ดีลเลอร์ทั่วไป: ซ่อนแถวปุ่มแอดมินทั้งหมด แล้วแสดงชื่อร้าน + ปุ่มดาวน์โหลด PDF ในบรรทัดเดียวกัน
-          if (staffRow) staffRow.classList.add('hidden');
-          if (shopInlineBadge && shopLabel) {
-            shopInlineBadge.textContent = shopLabel;
-            showFlexEl(shopInlineBadge);
-          }
+          // ดีลเลอร์ทั่วไป: แสดงเฉพาะชื่อที่ลงทะเบียน และปุ่มดาวน์โหลด PDF เท่านั้น (ซ่อนสลับ LINE และ Workspace/Admin)
+          if (switchBtn) switchBtn.classList.add('hidden');
+          if (adminBtn) adminBtn.classList.add('hidden');
+          if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
+        }
+
+        if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
+          dealerBadge.textContent = STATE.dealerInfo.typedShopName;
+          dealerBadge.classList.remove('hidden');
         }
         return;
       }
@@ -1572,6 +1553,7 @@
 
           closeModal('pdfModal');
 
+          // บนมือถือรองรับกดส่งไฟล์ PDF เข้าแชท LINE หรือบันทึกลงเครื่องผ่านหน้าต่าง Share ได้ทันที
           if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
             try {
               await navigator.share({
@@ -2096,61 +2078,29 @@
       var banner = document.getElementById('imageUploadProgressBanner');
       var textEl = document.getElementById('imageUploadProgressText');
       if (banner) banner.classList.remove('hidden');
-      if (textEl) textEl.textContent = 'กำลังเตรียมและอัปโหลดรูป ' + modelKey + ' ขึ้น Google Drive...';
+      if (textEl) textEl.textContent = 'กำลังอัปโหลดรูป ' + modelKey + ' ขึ้น Google Drive...';
 
       var reader = new FileReader();
       reader.onload = function(evt) {
-        var img = new Image();
-        img.onload = function() {
-          try {
-            var maxDim = 900;
-            var w = img.width;
-            var h = img.height;
-            if (w > maxDim || h > maxDim) {
-              if (w > h) {
-                h = Math.round(h * (maxDim / w));
-                w = maxDim;
-              } else {
-                w = Math.round(w * (maxDim / h));
-                h = maxDim;
-              }
-            }
-            var canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-            callBackendApi('uploadModelImageFile', {
-              pin: STATE.verifiedPin,
-              brand: brand,
-              modelKey: modelKey,
-              fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg',
-              base64DataUrl: compressedDataUrl
-            }).then(function(res) {
-              if (banner) banner.classList.add('hidden');
-              if (!res || !res.ok) {
-                showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
-                return;
-              }
-              showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
-              if (onDone) onDone(res.imageUrl);
-              loadCatalogData(true).then(renderAdminImageList);
-            }).catch(function(err) {
-              if (banner) banner.classList.add('hidden');
-              showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-            });
-          } catch (canvasErr) {
-            if (banner) banner.classList.add('hidden');
-            showToast('ประมวลผลรูปภาพไม่สำเร็จ: ' + (canvasErr.message || canvasErr));
-          }
-        };
-        img.onerror = function() {
+        callBackendApi('uploadModelImageFile', {
+          pin: STATE.verifiedPin,
+          brand: brand,
+          modelKey: modelKey,
+          fileName: file.name,
+          base64DataUrl: evt.target.result
+        }).then(function(res) {
           if (banner) banner.classList.add('hidden');
-          showToast('ไฟล์รูปภาพไม่ถูกต้อง');
-        };
-        img.src = evt.target.result;
+          if (!res || !res.ok) {
+            showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
+            return;
+          }
+          showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
+          if (onDone) onDone(res.imageUrl);
+          loadCatalogData(true).then(renderAdminImageList);
+        }).catch(function(err) {
+          if (banner) banner.classList.add('hidden');
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+        });
       };
       reader.readAsDataURL(file);
     }
