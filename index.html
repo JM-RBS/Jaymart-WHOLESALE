@@ -63,15 +63,17 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
+          <span id="dealerActiveBadge" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap"></span>
           <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer whitespace-nowrap">
             <svg width="16" height="16" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="hidden sm:inline">ดาวน์โหลด PDF</span>
             <span class="sm:hidden">PDF</span>
           </button>
 
-          <button onclick="openAdminAuth()" class="btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
+          <button onclick="openAdminAuth()" class="relative btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
             <svg width="16" height="16" class="w-4 h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             <span>Login Admin</span>
+            <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
           </button>
         </div>
       </div>
@@ -104,114 +106,117 @@
   <!-- Main Content Area -->
   <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- Login / Verification Gate View (LINE Login API + Device Memory) -->
-    <div id="dealerGateView" class="max-w-md mx-auto my-6">
-
-      <!-- 1. LINE Connect Box -->
-      <div id="lineConnectBox" class="bg-white rounded-3xl p-7 shadow-xl border border-slate-200 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#06C755] flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 5.92 2 10.75c0 4.33 3.55 7.95 8.35 8.63.33.07.77.22.88.5.1.26.07.66.03.92l-.14.87c-.04.26-.2 1.01.89.55 1.09-.46 5.88-3.46 8.02-5.93C21.3 14.82 22 12.88 22 10.75 22 5.92 17.52 2 12 2zm-3.68 11.4H5.87c-.31 0-.56-.25-.56-.56V8.57c0-.31.25-.56.56-.56s.56.25.56.56v3.71h1.89c.31 0 .56.25.56.56s-.25.56-.56.56zm1.98-.56c0 .31-.25.56-.56.56s-.56-.25-.56-.56V8.57c0-.31.25-.56.56-.56s.56.25.56.56v4.27zm4.55 0c0 .24-.15.46-.38.53-.06.02-.12.03-.18.03-.18 0-.35-.08-.45-.22l-2.19-2.97v2.63c0 .31-.25.56-.56.56s-.56-.25-.56-.56V8.57c0-.24.15-.45.38-.53.06-.02.12-.03.18-.03.18 0 .35.08.45.22l2.19 2.97V8.57c0-.31.25-.56.56-.56s.56.25.56.56v4.27zm3.82-2.7c.31 0 .56.25.56.56s-.25.56-.56.56h-1.89v1.02h1.89c.31 0 .56.25.56.56s-.25.56-.56.56h-2.45c-.31 0-.56-.25-.56-.56V8.57c0-.31.25-.56.56-.56h2.45c.31 0 .56.25.56.56s-.25.56-.56.56h-1.89v1.01h1.89z"/>
-          </svg>
-        </div>
-        <h2 class="text-lg font-extrabold text-slate-900">เข้าสู่ระบบด้วย LINE</h2>
-        <p class="mt-2 mb-6 text-xs sm:text-sm text-slate-500 leading-relaxed">
-          ยืนยันตัวตนผ่านบัญชี LINE ของท่าน ระบบจะจดจำอุปกรณ์เครื่องนี้ไว้ให้อัตโนมัติสำหรับการใช้งานครั้งถัดไป
-        </p>
-
-        <button type="button" onclick="triggerLineLoginConsent()" class="btn-press w-full h-12 rounded-2xl bg-[#06C755] hover:bg-[#05b34c] text-white text-sm sm:text-base font-bold inline-flex items-center justify-center gap-2.5 cursor-pointer shadow-md shadow-emerald-500/20 whitespace-nowrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" class="shrink-0">
-            <path d="M12 2C6.48 2 2 5.92 2 10.75c0 4.33 3.55 7.95 8.35 8.63.33.07.77.22.88.5.1.26.07.66.03.92l-.14.87c-.04.26-.2 1.01.89.55 1.09-.46 5.88-3.46 8.02-5.93C21.3 14.82 22 12.88 22 10.75 22 5.92 17.52 2 12 2z"/>
-          </svg>
-          <span>อนุญาตเชื่อมต่อบัญชี LINE</span>
-        </button>
-
-        <div id="previewSandboxNotice" class="hidden mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
-          <p class="mb-2">กำลังเปิดในหน้าต่างพรีวิวจำลอง (ไม่สามารถเปิดหน้าต่าง LINE OAuth จริงได้)</p>
-          <button type="button" onclick="simulatePreviewLineAuth()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 text-xs font-bold cursor-pointer hover:bg-slate-100">
-            จำลองยืนยันตัวตนสำเร็จ (สำหรับทดสอบพรีวิว)
-          </button>
-        </div>
+    <!-- 1. LINE Login Consent Gate (ไม่มีกล่อง Callback URL) -->
+    <div id="lineLoginGate" class="max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 sm:p-8 text-center">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-[#06C755] flex items-center justify-center shadow-md mb-4">
+        <svg class="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3C6.48 3 2 6.58 2 11c0 3.92 3.55 7.19 8.35 7.87.33.07.77.22.88.5.1.26.07.66.03.92l-.14.84c-.04.26-.2 1.01.88.55 1.08-.46 5.83-3.43 7.95-5.88C21.35 14.3 22 12.73 22 11c0-4.42-4.48-8-10-8zm-3.2 10.2H6.7c-.28 0-.5-.22-.5-.5V8.9c0-.28.22-.5.5-.5s.5.22.5.5v3.3h1.6c.28 0 .5.22.5.5s-.22.5-.5.5zm1.9-.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5V8.9c0-.28.22-.5.5-.5s.5.22.5.5v3.8zm4.4 0c0 .21-.13.4-.33.47-.06.02-.11.03-.17.03-.15 0-.3-.07-.39-.19l-1.91-2.59v2.28c0 .28-.22.5-.5.5s-.5-.22-.5-.5V8.9c0-.21.13-.4.33-.47.2-.07.42 0 .55.16l1.92 2.6V8.9c0-.28.22-.5.5-.5s.5.22.5.5v3.8zm3.1-2.4c.28 0 .5.22.5.5s-.22.5-.5.5h-1.4v.9h1.4c.28 0 .5.22.5.5s-.22.5-.5.5h-1.9c-.28 0-.5-.22-.5-.5V8.9c0-.28.22-.5.5-.5h1.9c.28 0 .5.22.5.5s-.22.5-.5.5h-1.4v.9h1.4z"/>
+        </svg>
       </div>
+      <h2 class="text-xl font-bold text-slate-900">เข้าสู่ระบบด้วย LINE</h2>
+      <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
+        ยืนยันตัวตนผ่านบัญชี LINE ของท่าน ระบบจะจดจำอุปกรณ์เครื่องนี้ไว้ให้อัตโนมัติสำหรับการใช้งานครั้งถัดไป
+      </p>
 
-      <!-- 2. Dealer Registration Form -->
-      <div id="dealerRegistrationView" class="hidden bg-white rounded-3xl p-6 shadow-xl border border-slate-200 space-y-4">
-        <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
-          <img id="regLineAvatar" src="https://placehold.co/80x80/06C755/ffffff?text=LINE" alt="LINE" referrerpolicy="no-referrer" class="w-12 h-12 rounded-2xl object-cover border border-slate-200 bg-slate-50 shrink-0">
-          <div class="min-w-0 flex-1">
-            <span class="inline-block px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">เชื่อมต่อ LINE แล้ว</span>
-            <h2 id="regLineDisplayName" class="text-sm sm:text-base font-extrabold text-slate-900 truncate mt-0.5">ลงทะเบียนข้อมูลร้านค้า</h2>
-            <p class="text-[11px] text-slate-500 truncate">กรอกข้อมูลเพื่อส่งคำขออนุมัติสิทธิ์เข้าดูใบราคา</p>
-          </div>
-        </div>
+      <button id="btnLineLogin" onclick="startLineLogin()" class="btn-press w-full h-12 mt-6 rounded-2xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-sm sm:text-base shadow-md flex items-center justify-center gap-2.5 cursor-pointer">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3C6.48 3 2 6.58 2 11c0 3.92 3.55 7.19 8.35 7.87.33.07.77.22.88.5.1.26.07.66.03.92l-.14.84c-.04.26-.2 1.01.88.55 1.08-.46 5.83-3.43 7.95-5.88C21.35 14.3 22 12.73 22 11c0-4.42-4.48-8-10-8z"/>
+        </svg>
+        <span>อนุญาตเชื่อมต่อบัญชี LINE</span>
+      </button>
 
-        <div class="space-y-3.5">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">LINE User ID</label>
-            <input id="regLineUid" type="text" readonly class="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-100 text-xs font-num text-slate-500 cursor-not-allowed">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">สถานะผู้ลงทะเบียน <span class="text-red-500">*</span></label>
-            <select id="regRoleType" onchange="toggleStaffConsentBox()" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-medium focus:outline-none focus:border-slate-900">
-              <option value="เจ้าของร้าน">เจ้าของร้าน</option>
-              <option value="พนักงานร้าน">พนักงานร้าน</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-red-500">*</span></label>
-            <input id="regShopName" type="text" placeholder="เช่น เจแปนโมบาย, เคโฟน..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-red-500">*</span></label>
-            <input id="regSgUser" type="text" placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-red-500">*</span></label>
-            <input id="regPhone" type="tel" inputmode="tel" placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email)</label>
-            <input id="regEmail" type="email" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-          </div>
-
-          <div id="staffConsentBox" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
-            <label class="flex items-start gap-2.5 cursor-pointer">
-              <input id="staffConsentCheckbox" type="checkbox" class="mt-0.5 w-4 h-4 rounded border-amber-400 text-slate-900">
-              <span class="text-xs text-amber-900 font-medium leading-relaxed">ข้าพเจ้าเป็นพนักงานของร้านจริง และได้รับความยินยอมจากเจ้าของร้านในการลงทะเบียนขอสิทธิ์เข้าดูใบราคาขายส่งนี้</span>
-            </label>
-          </div>
-
-          <p id="regError" class="hidden text-xs text-red-600 font-medium text-center"></p>
-
-          <button type="button" id="btnSubmitDealerReg" onclick="submitDealerRegistration()" class="btn-press w-full h-12 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-sm font-bold shadow-md cursor-pointer">
-            ส่งคำขอลงทะเบียน
-          </button>
-        </div>
-      </div>
-
-      <!-- 3. Pending Approval Box -->
-      <div id="dealerPendingView" class="hidden bg-white rounded-3xl p-6 shadow-xl border border-slate-200 text-center space-y-4">
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 border border-amber-200">
-          <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold">อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์</span>
-          <h2 class="text-base font-extrabold text-slate-800 mt-2">ส่งข้อมูลลงทะเบียนเรียบร้อยแล้ว</h2>
-          <p class="text-xs text-slate-500 mt-1 leading-relaxed">เมื่อแอดมินกดอนุมัติแล้ว ท่านสามารถกดเข้ามาดูใบราคาขายส่งและดาวน์โหลด PDF ได้ทันที</p>
-        </div>
-        <button type="button" onclick="recheckLineUidStatus()" class="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold cursor-pointer">
-          ตรวจสอบสถานะอีกครั้ง
-        </button>
-      </div>
-
+      <div id="lineAuthErrorBox" class="hidden mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs text-left leading-relaxed"></div>
     </div>
 
-    <!-- Product Grid Container -->
+    <!-- 2. Dealer Registration Form -->
+    <div id="dealerRegistrationView" class="hidden max-w-lg mx-auto mt-2 sm:mt-6 bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-[#06C755] to-emerald-600 p-5 text-white flex items-center gap-3.5">
+        <img id="regLineAvatar" src="" alt="LINE Profile" referrerpolicy="no-referrer" class="w-14 h-14 rounded-full border-2 border-white/80 object-cover bg-white shrink-0">
+        <div class="min-w-0 flex-1">
+          <span class="inline-block px-2 py-0.5 rounded-md bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">ยืนยันบัญชี LINE สำเร็จ</span>
+          <h2 id="regLineName" class="text-base sm:text-lg font-bold truncate mt-0.5">-</h2>
+          <p id="regLineUidText" class="text-xs text-emerald-100 truncate font-num"></p>
+        </div>
+      </div>
+
+      <form onsubmit="submitDealerRegistration(event)" class="p-5 sm:p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">สถานะผู้ลงทะเบียน <span class="text-rose-600">*</span></label>
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="cursor-pointer">
+              <input type="radio" name="regRoleType" value="เจ้าของร้าน" checked onchange="toggleStaffConsentBox()" class="peer sr-only">
+              <div class="py-2.5 px-3 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-sm font-bold text-slate-700 transition">
+                เจ้าของร้าน
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="regRoleType" value="พนักงานร้าน" onchange="toggleStaffConsentBox()" class="peer sr-only">
+              <div class="py-2.5 px-3 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-sm font-bold text-slate-700 transition">
+                พนักงานร้าน
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
+          <input id="regShopName" type="text" required placeholder="เช่น เจแปนโมบาย, เคโฟน..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-rose-600">*</span></label>
+          <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
+          <input id="regPhone" type="tel" required inputmode="tel" placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900 font-num">
+        </div>
+
+        <div class="relative">
+          <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email) <span class="text-rose-600">*</span></label>
+          <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" onfocus="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+          <div id="emailSuggestList" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-44 overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg divide-y divide-slate-100"></div>
+        </div>
+
+        <div id="staffConsentBox" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+          <label class="flex items-start gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="regStaffConsent" class="mt-0.5 w-4 h-4 rounded border-amber-400 text-[#C8102E] shrink-0">
+            <span class="text-xs font-semibold text-amber-950 leading-relaxed">
+              ข้าพเจ้ายืนยันว่าได้รับความยินยอมและได้รับอนุญาตจากเจ้าของร้านในการเข้าถึงข้อมูลใบราคาขายส่งนี้เรียบร้อยแล้ว <span class="text-rose-600">*</span>
+            </span>
+          </label>
+        </div>
+
+        <button id="btnSubmitDealerReg" type="submit" class="btn-press w-full h-12 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white font-bold text-sm shadow-sm cursor-pointer">
+          ส่งข้อมูลลงทะเบียนขออนุมัติ
+        </button>
+      </form>
+    </div>
+
+    <!-- 3. Dealer Pending / Rejected Approval View -->
+    <div id="dealerPendingView" class="hidden max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 text-center space-y-4">
+      <div id="pendingIconBox" class="w-16 h-16 mx-auto rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+        <h2 id="pendingTitleText" class="text-lg font-bold text-slate-900">อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์</h2>
+        <p id="pendingSubText" class="text-sm text-slate-600 mt-1">ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา</p>
+      </div>
+
+      <div id="pendingSummaryCard" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5 text-slate-700"></div>
+
+      <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+        <button onclick="recheckDealerStatus()" class="btn-press flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold cursor-pointer">
+          รีเฟรชตรวจสอบสถานะ
+        </button>
+        <button onclick="editDealerRegistration()" class="btn-press h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold cursor-pointer">
+          แก้ไขข้อมูลที่ส่ง
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. Approved Catalog Grid Container -->
     <div id="catalogContentArea" class="hidden space-y-5">
       <div id="loadingGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-3 space-y-3"><div class="aspect-square rounded-xl skeleton"></div><div class="h-4 w-3/4 rounded skeleton"></div><div class="h-5 w-1/2 rounded skeleton"></div></div>
@@ -285,48 +290,31 @@
       </div>
 
       <div class="px-5 pt-3 border-b border-slate-200 flex items-center gap-2 shrink-0 bg-slate-50 overflow-x-auto no-scrollbar">
-        <button id="tabDealersBtn" onclick="switchAdminTab('dealers')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-slate-900 text-slate-900 cursor-pointer whitespace-nowrap">1. อนุมัติดีลเลอร์ LINE</button>
+        <button id="tabDealersBtn" onclick="switchAdminTab('dealers')" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 border-slate-900 text-slate-900 cursor-pointer whitespace-nowrap">
+          <span>1. อนุมัติดีลเลอร์ LINE</span>
+          <span id="adminDealerPendingBadge" class="hidden px-2 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-bold">0</span>
+        </button>
         <button id="tabExcelBtn" onclick="switchAdminTab('excel')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">2. อัปโหลด Excel</button>
         <button id="tabImagesBtn" onclick="switchAdminTab('images')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">3. จัดการรูปภาพ</button>
       </div>
 
-      <!-- TAB 1: DEALERS APPROVAL & API SETTINGS -->
+      <!-- TAB 1: DEALER APPROVALS -->
       <div id="adminDealersTab" class="flex-1 overflow-y-auto p-5 space-y-4">
-        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-          <div class="font-bold text-slate-800">Callback URL สำหรับใส่ใน LINE Developers Console (Channel ID: 2012656454):</div>
-          <div id="exactRedirectUriDisplay" class="font-mono text-emerald-700 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 break-all select-all"></div>
-          <div class="font-bold text-slate-800 pt-1">Google Apps Script Backend API URL:</div>
-          <div class="font-mono text-blue-700 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 break-all select-all" id="gasApiUrlDisplay"></div>
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">รายการคำขอลงทะเบียนดีลเลอร์</h3>
+            <p class="text-xs text-slate-500">ตรวจสอบโปรไฟล์ LINE, ชื่อร้านค้า และ User SG Finance+ ก่อนกดอนุมัติ</p>
+          </div>
+          <button onclick="loadAdminDealers()" class="btn-press h-9 px-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer">
+            รีเฟรชรายชื่อ
+          </button>
         </div>
 
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-900">รายการคำขอลงทะเบียน (LINE User ID)</h3>
-          <button onclick="loadDealerRegistrations()" class="text-xs font-semibold text-slate-600 hover:underline cursor-pointer">รีเฟรชรายชื่อ</button>
-        </div>
-        <div id="dealerApprovalsList" class="space-y-3"></div>
+        <div id="adminDealerList" class="space-y-3"></div>
       </div>
 
       <!-- TAB 2: EXCEL UPLOAD -->
       <div id="adminExcelTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
-        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50">
-          <input id="excelFileInput" type="file" accept=".xlsx,.xls" onchange="handleExcelSelect(event)" class="hidden">
-          <label for="excelFileInput" class="cursor-pointer block">
-            <p class="text-sm font-bold text-slate-900">คลิกเพื่อเลือกไฟล์ Excel (.xlsx)</p>
-            <p class="text-xs text-slate-500 mt-1">ระบบจะอ่านคอลัมน์ Brand, MODEL_DESC, ราคาส่ง, RRP และระยะเวลา เพื่ออัปเดตลงแท็บภาพรวม</p>
-          </label>
-        </div>
-
-        <div id="excelPreviewSection" class="hidden space-y-3">
-          <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
-            <span id="excelSummaryText" class="text-xs sm:text-sm font-bold text-emerald-900"></span>
-            <button id="btnConfirmExcel" onclick="confirmExcelUpload()" class="btn-press px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold cursor-pointer">
-              ยืนยันอัปเดตลงชีท
-            </button>
-          </div>
-          <div class="max-h-64 overflow-auto rounded-xl border border-slate-200">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-100 sticky top-0">
-                <tr>
                   <th class="p-2 font-bold">Brand</th>
                   <th class="p-2 font-bold">MODEL_DESC</th>
                   <th class="p-2 font-bold text-right">ราคาส่ง</th>
@@ -340,7 +328,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: IMAGES MANAGER -->
+      <!-- TAB 2: IMAGES MANAGER -->
       <div id="adminImagesTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
           <div class="text-sm font-bold text-slate-900">เพิ่ม / แก้ไขรูปรุ่นกลาง</div>
@@ -360,9 +348,9 @@
   <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium shadow-lg"></div>
 
   <script>
-    // URL ของ Google Apps Script Web App สำหรับเชื่อมต่อฐานข้อมูลและ LINE API
-    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
     var LINE_CHANNEL_ID = '2012656454';
+    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
+    var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v1';
 
     var STATE = {
       docTitle: 'Jaymart Wholesale - ใบราคา Volume Special',
@@ -375,10 +363,12 @@
       searchQuery: '',
       verifiedPin: '',
       staffName: '',
-      currentLineUser: null,
-      dealerStatus: 'unregistered',
       parsedExcelPayload: null,
-      fontCache: null
+      fontCache: null,
+      lineUser: null,
+      dealerStatus: 'unlogged',
+      dealerInfo: null,
+      dealersList: []
     };
 
     var BRAND_THEMES = {
@@ -399,15 +389,48 @@
       return BRAND_THEMES[key] || { hex: '#0F172A', rgb: [15, 23, 42], soft: '#F1F5F9' };
     }
 
-    // ตัวกลางเรียก API ไปยัง Google Apps Script (รองรับทั้งเปิดบน GitHub Pages และเปิดบน GAS โดยตรง)
-    function callBackendApi(action, payload) {
-      return new Promise(function(resolve, reject) {
-        var hasGas = (typeof google !== 'undefined' && google.script && google.script.run);
-        if (hasGas) {
-          var runner = google.script.run
-            .withSuccessHandler(function(res) { resolve(res); })
-            .withFailureHandler(function(err) { reject(err); });
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
+    function formatMoney(num) {
+      var n = Number(num);
+      if (isNaN(n) || n <= 0) return '-';
+      return n.toLocaleString('th-TH');
+    }
+
+    function openModal(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    function handleSearch() {
+      var val = document.getElementById('searchInput').value;
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', !val.trim());
+      renderProducts();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderProducts();
+    }
+
+    // Helper for calling Google Apps Script REST API from GitHub Pages
+    async function callBackendApi(action, payload) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        return new Promise(function(resolve, reject) {
+          var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
           if (action === 'getWholesaleData') runner.getWholesaleData();
           else if (action === 'exchangeLineAuthCode') runner.exchangeLineAuthCode(payload.code, payload.redirectUri);
           else if (action === 'checkDealerAccess') runner.checkDealerAccess(payload.lineUserId);
@@ -417,133 +440,99 @@
           else if (action === 'updateDealerStatus') runner.updateDealerStatus(payload.pin, payload.lineUserId, payload.newStatus);
           else if (action === 'updateOverviewSheet') runner.updateOverviewSheet(payload.pin, payload.excelPayload);
           else if (action === 'saveModelImage') runner.saveModelImage(payload.pin, payload.brand, payload.modelKey, payload.imageUrl);
+          else if (action === 'uploadModelImageFile') runner.uploadModelImageFile(payload.pin, payload.brand, payload.modelKey, payload.fileName, payload.base64DataUrl);
           else reject(new Error('Unknown action: ' + action));
-          return;
-        }
+        });
+      }
 
-        // กรณีรันบน GitHub Pages ยิงข้ามโดเมนไปที่ Google Apps Script Web App
-        fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: action, payload: payload || {} })
-        })
-          .then(function(resp) { return resp.json(); })
-          .then(function(data) { resolve(data); })
-          .catch(function(err) { reject(err); });
+      var response = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, payload: payload || {} })
       });
+      if (!response.ok) {
+        throw new Error('HTTP Error ' + response.status);
+      }
+      return await response.json();
     }
 
-    function resolveCurrentPageUrl() {
-      // หากรันอยู่บน GitHub Pages ให้ใช้ origin + pathname จริงเสมอ และตัด query params ออกเพื่อความสะอาด
-      if (window.location.hostname.indexOf('github.io') !== -1) {
-        return window.location.origin + window.location.pathname;
-      }
-      return window.location.origin + window.location.pathname;
+    // ================= LINE OAUTH2 & DEVICE MEMORY FLOW =================
+    function getOAuthRedirectUri() {
+      var loc = window.location;
+      return loc.origin + loc.pathname;
     }
 
     window.addEventListener('DOMContentLoaded', function() {
-      var cbDisplay = document.getElementById('exactRedirectUriDisplay');
-      var gasDisplay = document.getElementById('gasApiUrlDisplay');
-      var cleanCurrentUrl = resolveCurrentPageUrl();
-      if (cbDisplay) cbDisplay.textContent = cleanCurrentUrl;
-      if (gasDisplay) gasDisplay.textContent = GAS_API_URL;
+      initLineAuthFlow();
+    });
 
-      var urlParams = new URLSearchParams(window.location.search);
-      var code = urlParams.get('code');
+    function initLineAuthFlow() {
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('code');
 
-      // 1. กรณีเพิ่งกดยินยอมจากหน้า LINE Login แล้วเด้งกลับมาพร้อม ?code=...
       if (code) {
+        var cleanUrl = getOAuthRedirectUri();
+        try { window.history.replaceState({}, document.title, cleanUrl); } catch (e) {}
         document.getElementById('docDateBadge').textContent = 'กำลังยืนยันบัญชี LINE...';
-        showToast('กำลังเชื่อมต่อข้อมูลโปรไฟล์ LINE...');
-        callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanCurrentUrl })
+        showToast('กำลังตรวจสอบข้อมูลบัญชี LINE...');
+
+        callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanUrl })
           .then(function(res) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            if (res && res.ok && res.lineUser && res.lineUser.userId) {
-              STATE.currentLineUser = res.lineUser;
-              try { localStorage.setItem('jm_device_line_user_v2', JSON.stringify(res.lineUser)); } catch (e) {}
-              // แสดงฟอร์มลงทะเบียนทันทีระหว่างรอเช็กสิทธิ์ในชีท
-              STATE.dealerStatus = 'unregistered';
+            if (!res || !res.ok || !res.lineUser) {
+              var errMsg = (res && res.error) ? res.error : 'ไม่สามารถยืนยันตัวตน LINE ได้';
+              var errBox = document.getElementById('lineAuthErrorBox');
+              errBox.textContent = 'ยืนยันตัวตน LINE ไม่สำเร็จ: ' + errMsg;
+              errBox.classList.remove('hidden');
+              STATE.dealerStatus = 'unlogged';
               applyDealerGateUI();
-              verifyLineUserAccess(res.lineUser.userId);
-            } else {
-              var errDetail = (res && res.error) ? res.error : 'ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์';
-              alertBoxFallback('ยืนยันตัวตน LINE ไม่สำเร็จ: ' + errDetail);
-              document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
+              return;
             }
+            STATE.lineUser = res.lineUser;
+            try { localStorage.setItem(STORAGE_LINE_KEY, JSON.stringify(res.lineUser)); } catch (e) {}
+            verifyLineUserAccess(res.lineUser.userId);
           })
           .catch(function(err) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            alertBoxFallback('เชื่อมต่อหลังบ้าน GAS ไม่สำเร็จ: ' + (err.message || err));
-            document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
+            var errBox = document.getElementById('lineAuthErrorBox');
+            errBox.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + (err.message || err);
+            errBox.classList.remove('hidden');
+            STATE.dealerStatus = 'unlogged';
+            applyDealerGateUI();
           });
         return;
       }
 
-      // ตรวจสอบว่าอยู่ในหน้าพรีวิวจำลองหรือไม่ หากใช่ให้แสดงปุ่มจำลองแทนการพยายามเรียก LINE OAuth
-      var isInIframe = false;
-      try { isInIframe = (window.self !== window.top); } catch (e) { isInIframe = true; }
-      var isPreviewEnv = isInIframe ||
-                         window.location.protocol === 'blob:' ||
-                         cleanCurrentUrl.indexOf('scf.usercontent.goog') !== -1 ||
-                         cleanCurrentUrl.indexOf('googleusercontent.com') !== -1;
-
-      if (isPreviewEnv) {
-        var noticeEl = document.getElementById('previewSandboxNotice');
-        if (noticeEl) noticeEl.classList.remove('hidden');
-      }
-
-      // 2. ตรวจสอบหน่วยความจำอุปกรณ์ (Remember Device)
-      var savedUser = null;
       try {
-        var raw = localStorage.getItem('jm_device_line_user_v2');
-        if (raw) savedUser = JSON.parse(raw);
+        var saved = localStorage.getItem(STORAGE_LINE_KEY);
+        if (saved) {
+          var parsedUser = JSON.parse(saved);
+          if (parsedUser && parsedUser.userId) {
+            STATE.lineUser = parsedUser;
+            verifyLineUserAccess(parsedUser.userId);
+            return;
+          }
+        }
       } catch (e) {}
 
-      if (savedUser && savedUser.userId) {
-        STATE.currentLineUser = savedUser;
-        verifyLineUserAccess(savedUser.userId);
-        return;
-      }
-
+      STATE.dealerStatus = 'unlogged';
       document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
-    });
-
-    function triggerLineLoginConsent() {
-      var targetRedirectUri = resolveCurrentPageUrl();
-      var isInIframe = false;
-      try { isInIframe = (window.self !== window.top); } catch (e) { isInIframe = true; }
-
-      var isPreviewEnv = isInIframe ||
-                         window.location.protocol === 'blob:' ||
-                         targetRedirectUri.indexOf('scf.usercontent.goog') !== -1 ||
-                         targetRedirectUri.indexOf('googleusercontent.com') !== -1;
-
-      if (isPreviewEnv) {
-        var noticeEl = document.getElementById('previewSandboxNotice');
-        if (noticeEl) noticeEl.classList.remove('hidden');
-        showToast('หน้าพรีวิวไม่อนุญาตให้เปิดหน้า LINE Login จริง กรุณากดปุ่มจำลองด้านล่าง หรือเปิดผ่านลิงก์ GitHub Pages จริง');
-        return;
-      }
-
-      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=' +
-                    encodeURIComponent(LINE_CHANNEL_ID) +
-                    '&redirect_uri=' + encodeURIComponent(targetRedirectUri) +
-                    '&state=jm_github_oauth&scope=profile%20openid';
-
-      window.location.href = authUrl;
+      applyDealerGateUI();
     }
 
-    function simulatePreviewLineAuth() {
-      var demoUser = {
-        userId: 'U_DEMO_PREVIEW_8899',
-        displayName: 'ผู้ทดสอบระบบ (Preview)',
-        pictureUrl: 'https://placehold.co/80x80/06C755/ffffff?text=LINE'
-      };
-      STATE.currentLineUser = demoUser;
-      try { localStorage.setItem('jm_device_line_user_v2', JSON.stringify(demoUser)); } catch (e) {}
-      STATE.dealerStatus = 'unregistered';
-      applyDealerGateUI();
-      showToast('จำลองการเชื่อมต่อ LINE API สำเร็จแล้ว');
+    function startLineLogin() {
+      var btn = document.getElementById('btnLineLogin');
+      btn.disabled = true;
+      btn.textContent = 'กำลังเปิดหน้าขออนุญาต LINE...';
+
+      var redirectUri = getOAuthRedirectUri();
+      var stateToken = 'jm_' + Math.random().toString(36).substring(2, 12);
+      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize' +
+        '?response_type=code' +
+        '&client_id=' + encodeURIComponent(LINE_CHANNEL_ID) +
+        '&redirect_uri=' + encodeURIComponent(redirectUri) +
+        '&state=' + encodeURIComponent(stateToken) +
+        '&scope=' + encodeURIComponent('profile openid');
+
+      window.location.href = authUrl;
     }
 
     function verifyLineUserAccess(lineUserId) {
@@ -551,121 +540,204 @@
       callBackendApi('checkDealerAccess', { lineUserId: lineUserId })
         .then(function(res) {
           if (!res || !res.ok) {
-            showToast('ตรวจสอบสิทธิ์ไม่สำเร็จ: ' + ((res && res.error) ? res.error : ''));
+            STATE.dealerStatus = 'unregistered';
+            applyDealerGateUI();
             return;
           }
           STATE.dealerStatus = res.status || 'unregistered';
+          STATE.dealerInfo = res.dealer || null;
           applyDealerGateUI();
+
+          if (STATE.dealerStatus === 'Approved') {
+            loadCatalogData();
+          } else {
+            document.getElementById('docDateBadge').textContent = STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์';
+          }
         })
-        .catch(function(err) {
-          showToast('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์: ' + (err.message || err));
+        .catch(function() {
+          STATE.dealerStatus = 'unregistered';
+          applyDealerGateUI();
         });
     }
 
-    function recheckLineUidStatus() {
-      if (STATE.currentLineUser && STATE.currentLineUser.userId) {
-        verifyLineUserAccess(STATE.currentLineUser.userId);
-      }
-    }
-
     function applyDealerGateUI() {
-      var status = STATE.dealerStatus;
-      var lineConnectBox = document.getElementById('lineConnectBox');
-      var regBox = document.getElementById('dealerRegistrationView');
-      var pendBox = document.getElementById('dealerPendingView');
+      var loginGate = document.getElementById('lineLoginGate');
+      var regView = document.getElementById('dealerRegistrationView');
+      var pendingView = document.getElementById('dealerPendingView');
       var catalogArea = document.getElementById('catalogContentArea');
       var filterBar = document.getElementById('catalogFilterBar');
-      var headerPdfBtn = document.getElementById('headerPdfBtn');
+      var pdfBtn = document.getElementById('headerPdfBtn');
+      var activeBadge = document.getElementById('dealerActiveBadge');
 
-      lineConnectBox.classList.add('hidden');
-      regBox.classList.add('hidden');
-      pendBox.classList.add('hidden');
+      loginGate.classList.add('hidden');
+      regView.classList.add('hidden');
+      pendingView.classList.add('hidden');
+      catalogArea.classList.add('hidden');
+      filterBar.classList.add('hidden');
+      pdfBtn.classList.add('hidden');
+      activeBadge.classList.add('hidden');
 
-      if (status === 'Approved') {
-        if (STATE.currentLineUser) {
-          try { localStorage.setItem('jm_device_line_user_v2', JSON.stringify(STATE.currentLineUser)); } catch (e) {}
-        }
-        document.getElementById('dealerGateView').classList.add('hidden');
+      if (STATE.dealerStatus === 'Approved') {
         catalogArea.classList.remove('hidden');
         filterBar.classList.remove('hidden');
-        headerPdfBtn.classList.remove('hidden');
-        loadCatalogData();
-      } else if (status === 'Pending') {
-        pendBox.classList.remove('hidden');
-        document.getElementById('docDateBadge').textContent = 'รอแอดมินอนุมัติสิทธิ์';
-      } else {
-        regBox.classList.remove('hidden');
-        document.getElementById('docDateBadge').textContent = 'ลงทะเบียนดีลเลอร์';
-        if (STATE.currentLineUser) {
-          document.getElementById('regLineUid').value = STATE.currentLineUser.userId || '';
-          document.getElementById('regLineDisplayName').textContent = STATE.currentLineUser.displayName || 'ลงทะเบียนข้อมูลร้านค้า';
-          if (STATE.currentLineUser.pictureUrl) {
-            document.getElementById('regLineAvatar').src = STATE.currentLineUser.pictureUrl;
-          }
+        pdfBtn.classList.remove('hidden');
+        if (STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
+          activeBadge.textContent = '✓ ' + STATE.dealerInfo.typedShopName;
+          activeBadge.classList.remove('hidden');
         }
+        return;
       }
+
+      if (STATE.dealerStatus === 'unlogged' || !STATE.lineUser) {
+        loginGate.classList.remove('hidden');
+        return;
+      }
+
+      if (STATE.dealerStatus === 'Pending' || STATE.dealerStatus === 'Rejected') {
+        pendingView.classList.remove('hidden');
+        var isRejected = STATE.dealerStatus === 'Rejected';
+        document.getElementById('pendingTitleText').textContent = isRejected ? 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ' : 'อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์';
+        document.getElementById('pendingSubText').textContent = isRejected
+          ? 'กรุณาตรวจสอบข้อมูลร้านค้าและ User SG Finance+ อีกครั้ง หรือกดแก้ไขข้อมูลเพื่อส่งใหม่'
+          : 'ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา';
+
+        if (STATE.dealerInfo) {
+          document.getElementById('pendingSummaryCard').innerHTML =
+            '<div><strong>บัญชี LINE:</strong> ' + escapeHtml(STATE.dealerInfo.lineName || STATE.lineUser.displayName) + '</div>' +
+            '<div><strong>ชื่อร้านค้า:</strong> ' + escapeHtml(STATE.dealerInfo.typedShopName) + '</div>' +
+            '<div><strong>User SG Finance+:</strong> ' + escapeHtml(STATE.dealerInfo.sgFinanceUser) + '</div>' +
+            '<div><strong>เบอร์โทร:</strong> ' + escapeHtml(STATE.dealerInfo.phone) + '</div>' +
+            '<div><strong>อีเมล:</strong> ' + escapeHtml(STATE.dealerInfo.email || '-') + '</div>' +
+            '<div><strong>สถานะผู้ลงทะเบียน:</strong> ' + escapeHtml(STATE.dealerInfo.roleType) + '</div>';
+        }
+        return;
+      }
+
+      regView.classList.remove('hidden');
+      document.getElementById('regLineAvatar').src = STATE.lineUser.pictureUrl || 'https://placehold.co/100x100/e2e8f0/475569?text=LINE';
+      document.getElementById('regLineName').textContent = STATE.lineUser.displayName || 'ผู้ใช้งาน LINE';
+      document.getElementById('regLineUidText').textContent = 'LINE ID: ' + STATE.lineUser.userId;
+      toggleStaffConsentBox();
     }
 
     function toggleStaffConsentBox() {
-      var role = document.getElementById('regRoleType').value;
-      document.getElementById('staffConsentBox').classList.toggle('hidden', role !== 'พนักงานร้าน');
+      var roleRadio = document.querySelector('input[name="regRoleType"]:checked');
+      var isStaff = roleRadio && roleRadio.value === 'พนักงานร้าน';
+      var box = document.getElementById('staffConsentBox');
+      var cb = document.getElementById('regStaffConsent');
+      if (box) box.classList.toggle('hidden', !isStaff);
+      if (cb && !isStaff) cb.checked = false;
     }
 
-    function submitDealerRegistration() {
-      var shopName = document.getElementById('regShopName').value.trim();
-      var sgUser = document.getElementById('regSgUser').value.trim();
-      var phone = document.getElementById('regPhone').value.trim();
-      var email = document.getElementById('regEmail').value.trim();
-      var roleType = document.getElementById('regRoleType').value;
-      var errEl = document.getElementById('regError');
+    var EMAIL_DOMAINS = ['@gmail.com', '@hotmail.com', '@hotmail.co.th', '@yahoo.com', '@yahoo.co.th', '@outlook.com', '@outlook.co.th', '@icloud.com'];
 
-      if (!shopName || !sgUser || !phone) {
-        errEl.textContent = 'กรุณากรอกชื่อร้านค้า, User SG Finance+ และเบอร์โทรศัพท์ให้ครบถ้วน';
-        errEl.classList.remove('hidden');
+    function handleEmailSuggest(val) {
+      var listEl = document.getElementById('emailSuggestList');
+      if (!listEl) return;
+      var text = String(val || '').trim();
+      if (!text) { listEl.classList.add('hidden'); return; }
+
+      var atIdx = text.indexOf('@');
+      var localPart = atIdx !== -1 ? text.slice(0, atIdx) : text;
+      var domainTyped = atIdx !== -1 ? text.slice(atIdx).toLowerCase() : '';
+      if (!localPart) { listEl.classList.add('hidden'); return; }
+
+      var matches = EMAIL_DOMAINS.filter(function(d) {
+        if (!domainTyped) return true;
+        return d.indexOf(domainTyped) === 0 && d !== domainTyped;
+      });
+
+      if (!matches.length) { listEl.classList.add('hidden'); return; }
+
+      listEl.innerHTML = matches.map(function(domain) {
+        var fullEmail = localPart + domain;
+        var safeEmail = escapeHtml(fullEmail).replace(/'/g, "\\'");
+        return '<button type="button" onmousedown="applyEmailSuggestion(\'' + safeEmail + '\')" class="w-full text-left px-3.5 py-2 text-xs sm:text-sm hover:bg-slate-100 flex items-center justify-between gap-2 cursor-pointer">' +
+          '<span class="font-semibold text-slate-800 truncate">' + escapeHtml(localPart) + '<strong class="text-[#C8102E]">' + escapeHtml(domain) + '</strong></span>' +
+          '<span class="text-[10px] text-slate-400 shrink-0">เลือก</span>' +
+        '</button>';
+      }).join('');
+      listEl.classList.remove('hidden');
+    }
+
+    function applyEmailSuggestion(fullEmail) {
+      var input = document.getElementById('regEmail');
+      var listEl = document.getElementById('emailSuggestList');
+      if (input) input.value = fullEmail;
+      if (listEl) listEl.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      var input = document.getElementById('regEmail');
+      var listEl = document.getElementById('emailSuggestList');
+      if (input && listEl && e.target !== input && !listEl.contains(e.target)) {
+        listEl.classList.add('hidden');
+      }
+    });
+
+    function editDealerRegistration() {
+      if (STATE.dealerInfo) {
+        document.getElementById('regShopName').value = STATE.dealerInfo.typedShopName || '';
+        document.getElementById('regSgUser').value = STATE.dealerInfo.sgFinanceUser || '';
+        document.getElementById('regPhone').value = STATE.dealerInfo.phone || '';
+        document.getElementById('regEmail').value = STATE.dealerInfo.email || '';
+      }
+      STATE.dealerStatus = 'unregistered';
+      applyDealerGateUI();
+    }
+
+    function submitDealerRegistration(e) {
+      e.preventDefault();
+      if (!STATE.lineUser) return;
+
+      var roleRadio = document.querySelector('input[name="regRoleType"]:checked');
+      var roleType = roleRadio ? roleRadio.value : 'เจ้าของร้าน';
+      var staffConsentChecked = document.getElementById('regStaffConsent').checked;
+
+      if (roleType === 'พนักงานร้าน' && !staffConsentChecked) {
+        showToast('กรุณาติ๊กยืนยันว่าได้รับความยินยอมจากเจ้าของร้านก่อนส่งข้อมูล');
         return;
       }
 
-      if (roleType === 'พนักงานร้าน' && !document.getElementById('staffConsentCheckbox').checked) {
-        errEl.textContent = 'กรุณาติ๊กถูกยืนยันความยินยอมจากเจ้าของร้าน';
-        errEl.classList.remove('hidden');
-        return;
-      }
+      var payload = {
+        lineUserId: STATE.lineUser.userId,
+        lineName: STATE.lineUser.displayName,
+        linePicture: STATE.lineUser.pictureUrl,
+        roleType: roleType,
+        typedShopName: document.getElementById('regShopName').value.trim(),
+        sgFinanceUser: document.getElementById('regSgUser').value.trim(),
+        phone: document.getElementById('regPhone').value.trim(),
+        email: document.getElementById('regEmail').value.trim()
+      };
 
-      errEl.classList.add('hidden');
       var btn = document.getElementById('btnSubmitDealerReg');
       btn.disabled = true;
       btn.textContent = 'กำลังส่งข้อมูล...';
 
-      var payload = {
-        lineUserId: STATE.currentLineUser ? STATE.currentLineUser.userId : '',
-        lineName: STATE.currentLineUser ? STATE.currentLineUser.displayName : '',
-        linePicture: STATE.currentLineUser ? STATE.currentLineUser.pictureUrl : '',
-        typedShopName: shopName,
-        sgFinanceUser: sgUser,
-        phone: phone,
-        email: email,
-        roleType: roleType
-      };
-
       callBackendApi('registerDealerRequest', payload)
         .then(function(res) {
           btn.disabled = false;
-          btn.textContent = 'ส่งคำขอลงทะเบียน';
+          btn.textContent = 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
           if (!res || !res.ok) {
-            errEl.textContent = (res && res.error) ? res.error : 'ลงทะเบียนไม่สำเร็จ';
-            errEl.classList.remove('hidden');
+            showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
             return;
           }
+          STATE.dealerInfo = payload;
           STATE.dealerStatus = 'Pending';
           applyDealerGateUI();
-          showToast('ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติ');
+          showToast('ส่งข้อมูลลงทะเบียนเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติ');
         })
         .catch(function(err) {
           btn.disabled = false;
-          btn.textContent = 'ส่งคำขอลงทะเบียน';
-          errEl.textContent = 'เกิดข้อผิดพลาด: ' + (err.message || err);
-          errEl.classList.remove('hidden');
+          btn.textContent = 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
+    }
+
+    function recheckDealerStatus() {
+      if (!STATE.lineUser) return;
+      showToast('กำลังตรวจสอบสถานะล่าสุด...');
+      verifyLineUserAccess(STATE.lineUser.userId);
     }
 
     function showToast(msg) {
@@ -674,21 +746,6 @@
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(function() { el.classList.add('hidden'); }, 4500);
-    }
-
-    function alertBoxFallback(msg) {
-      showToast(msg);
-      var box = document.getElementById('lineConnectBox');
-      if (box) {
-        var existing = document.getElementById('lineErrorDetailBox');
-        if (!existing) {
-          existing = document.createElement('div');
-          existing.id = 'lineErrorDetailBox';
-          existing.className = 'mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-medium break-words';
-          box.appendChild(existing);
-        }
-        existing.textContent = msg;
-      }
     }
 
     // ================= ADMIN WORKSPACE =================
@@ -733,7 +790,9 @@
 
     function openAdminWorkspace() {
       document.getElementById('adminStaffBadge').textContent = STATE.staffName;
-      loadDealerRegistrations();
+      populateAdminBrandSelect();
+      switchAdminTab('dealers');
+      loadAdminDealers();
       openModal('adminModal');
     }
 
@@ -746,66 +805,94 @@
       document.getElementById('adminExcelTab').classList.toggle('hidden', !isExcel);
       document.getElementById('adminImagesTab').classList.toggle('hidden', !isImages);
 
-      document.getElementById('tabDealersBtn').className = 'px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isDealers ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
+      document.getElementById('tabDealersBtn').className = 'inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isDealers ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
       document.getElementById('tabExcelBtn').className = 'px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isExcel ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
       document.getElementById('tabImagesBtn').className = 'px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isImages ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
-
-      if (isDealers) loadDealerRegistrations();
     }
 
-    function loadDealerRegistrations() {
+    function loadAdminDealers() {
       if (!STATE.verifiedPin) return;
+      var listEl = document.getElementById('adminDealerList');
+      listEl.innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายชื่อดีลเลอร์...</div>';
+
       callBackendApi('getDealerRegistrations', { pin: STATE.verifiedPin })
         .then(function(res) {
-          if (!res || !res.ok) { showToast('โหลดรายชื่อไม่สำเร็จ'); return; }
-          renderDealerApprovals(res.dealers || []);
+          if (!res || !res.ok) {
+            listEl.innerHTML = '<div class="text-center py-8 text-sm text-rose-600">โหลดรายชื่อไม่สำเร็จ</div>';
+            return;
+          }
+          STATE.dealersList = res.dealers || [];
+          renderAdminDealers();
         });
     }
 
-    function renderDealerApprovals(dealers) {
-      var container = document.getElementById('dealerApprovalsList');
-      if (!dealers.length) {
-        container.innerHTML = '<div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">ยังไม่มีคำขอลงทะเบียน</div>';
+    function renderAdminDealers() {
+      var listEl = document.getElementById('adminDealerList');
+      var pendingCount = STATE.dealersList.filter(function(d) { return d.status === 'Pending'; }).length;
+
+      var badge = document.getElementById('adminDealerPendingBadge');
+      var dot = document.getElementById('headerPendingDot');
+      if (pendingCount > 0) {
+        badge.textContent = String(pendingCount);
+        badge.classList.remove('hidden');
+        dot.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+        dot.classList.add('hidden');
+      }
+
+      if (!STATE.dealersList.length) {
+        listEl.innerHTML = '<div class="text-center py-10 text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ยังไม่มีรายการลงทะเบียนดีลเลอร์</div>';
         return;
       }
 
-      var html = '';
-      dealers.forEach(function(d) {
-        var badgeColor = d.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : (d.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800');
-        html += '<div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">';
-        html += '<div class="flex items-center justify-between gap-2">';
-        html += '<div class="flex items-center gap-2.5 min-w-0">';
-        if (d.linePicture) {
-          html += '<img src="' + escapeHtml(d.linePicture) + '" referrerpolicy="no-referrer" class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0">';
-        }
-        html += '<div class="min-w-0"><div class="text-sm font-bold text-slate-900 truncate">' + escapeHtml(d.lineName || 'ผู้ใช้งาน LINE') + '</div>';
-        html += '<div class="text-[11px] text-slate-500 font-num truncate">' + escapeHtml(d.lineUserId) + '</div></div></div>';
-        html += '<span class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ' + badgeColor + '">' + escapeHtml(d.status) + '</span></div>';
+      listEl.innerHTML = STATE.dealersList.map(function(d) {
+        var uidSafe = escapeHtml(d.lineUserId).replace(/'/g, "\\'");
+        var statusBadge = d.status === 'Approved'
+          ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">อนุมัติแล้ว</span>'
+          : (d.status === 'Rejected'
+            ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">ไม่อนุมัติ</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">รออนุมัติ</span>');
 
-        html += '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">';
-        html += '<div><span class="text-slate-400 block">ร้านค้า:</span><strong class="text-slate-800">' + escapeHtml(d.typedShopName) + '</strong></div>';
-        html += '<div><span class="text-slate-400 block">SG Finance+:</span><strong class="text-slate-800 font-num">' + escapeHtml(d.sgFinanceUser) + '</strong></div>';
-        html += '<div><span class="text-slate-400 block">เบอร์โทร:</span><strong class="text-slate-800 font-num">' + escapeHtml(d.phone) + '</strong></div>';
-        html += '</div>';
-
-        html += '<div class="flex items-center justify-end gap-2 pt-1">';
-        if (d.status !== 'Approved') {
-          html += '<button onclick="updateDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Approved\')" class="btn-press h-9 px-4 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-pointer">อนุมัติสิทธิ์</button>';
-        }
-        if (d.status !== 'Rejected') {
-          html += '<button onclick="updateDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-4 rounded-xl bg-red-100 text-red-700 text-xs font-semibold cursor-pointer">ปฏิเสธ</button>';
-        }
-        html += '</div></div>';
-      });
-      container.innerHTML = html;
+        return '<div class="p-4 rounded-2xl border border-slate-200 bg-white space-y-3">' +
+          '<div class="flex items-start justify-between gap-3">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+              '<img src="' + escapeHtml(d.linePicture || 'https://placehold.co/80x80/e2e8f0/475569?text=LINE') + '" referrerpolicy="no-referrer" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0">' +
+              '<div class="min-w-0">' +
+                '<div class="flex items-center gap-2 flex-wrap">' +
+                  '<span class="text-sm font-bold text-slate-900 truncate">' + escapeHtml(d.lineName || 'ไม่ระบุชื่อ LINE') + '</span>' +
+                  '<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">' + escapeHtml(d.roleType || 'เจ้าของร้าน') + '</span>' +
+                '</div>' +
+                '<div class="text-[11px] text-slate-500 mt-0.5">ส่งเมื่อ: ' + escapeHtml(d.createdAt || '-') + '</div>' +
+              '</div>' +
+            '</div>' +
+            statusBadge +
+          '</div>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">' +
+            '<div><span class="text-slate-500 block">ชื่อร้านค้า</span><strong class="text-slate-900">' + escapeHtml(d.typedShopName) + '</strong></div>' +
+            '<div><span class="text-slate-500 block">User SG Finance+</span><strong class="text-blue-700 font-num">' + escapeHtml(d.sgFinanceUser) + '</strong></div>' +
+            '<div><span class="text-slate-500 block">เบอร์โทร</span><strong class="text-slate-900 font-num">' + escapeHtml(d.phone) + '</strong></div>' +
+            '<div><span class="text-slate-500 block">อีเมล</span><strong class="text-slate-900">' + escapeHtml(d.email || '-') + '</strong></div>' +
+          '</div>' +
+          '<div class="flex items-center justify-end gap-2">' +
+            '<button onclick="changeDealerStatus(\'' + uidSafe + '\', \'Rejected\')" class="h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ / ระงับ</button>' +
+            '<button onclick="changeDealerStatus(\'' + uidSafe + '\', \'Approved\')" class="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติสิทธิ์</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
     }
 
-    function updateDealerStatus(lineUserId, newStatus) {
+    function changeDealerStatus(lineUserId, newStatus) {
+      if (!STATE.verifiedPin) return;
+      showToast('กำลังอัปเดตสถานะ...');
       callBackendApi('updateDealerStatus', { pin: STATE.verifiedPin, lineUserId: lineUserId, newStatus: newStatus })
         .then(function(res) {
           if (!res || !res.ok) { showToast('อัปเดตสถานะไม่สำเร็จ'); return; }
-          showToast('อัปเดตสถานะเรียบร้อยแล้ว');
-          loadDealerRegistrations();
+          showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'ระงับสิทธิ์เรียบร้อยแล้ว');
+          loadAdminDealers();
+          if (STATE.lineUser && STATE.lineUser.userId === lineUserId) {
+            verifyLineUserAccess(lineUserId);
+          }
         });
     }
 
@@ -913,6 +1000,155 @@
           document.getElementById('imgUrlInput').value = '';
           loadCatalogData();
         });
+    }
+
+    // ================= CATALOG & PDF FUNCTIONS =================
+    function loadCatalogData() {
+      callBackendApi('getWholesaleData', {})
+        .then(function(res) {
+          document.getElementById('loadingGrid').classList.add('hidden');
+          if (!res || !res.ok) {
+            showToast('โหลดข้อมูลสินค้าไม่สำเร็จ: ' + ((res && res.error) ? res.error : ''));
+            return;
+          }
+          STATE.docTitle = res.docTitle || STATE.docTitle;
+          STATE.docDate = res.docDate || '';
+          STATE.warningText = res.warningText || STATE.warningText;
+          STATE.brands = res.brands || [];
+          STATE.products = res.products || [];
+          STATE.modelImages = res.modelImages || [];
+
+          document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'พร้อมใช้งาน';
+          document.getElementById('warningBanner').textContent = STATE.warningText;
+          renderBrandTabs();
+          renderProducts();
+        })
+        .catch(function(err) {
+          document.getElementById('loadingGrid').classList.add('hidden');
+          showToast('เกิดข้อผิดพลาดในการโหลดรายการสินค้า: ' + (err.message || err));
+        });
+    }
+
+    function renderBrandTabs() {
+      var container = document.getElementById('brandTabsContainer');
+      if (!container) return;
+      var counts = {};
+      STATE.products.forEach(function(p) { counts[p.brand] = (counts[p.brand] || 0) + 1; });
+
+      var html = '<button type="button" onclick="selectBrand(\'ALL\')" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer whitespace-nowrap ' +
+        (STATE.activeBrand === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50') +
+        '">ทั้งหมด (' + STATE.products.length + ')</button>';
+
+      STATE.brands.forEach(function(b) {
+        var active = STATE.activeBrand === b;
+        var theme = getBrandTheme(b);
+        var styleStr = active ? 'background-color:' + theme.hex + ';color:#fff;border-color:' + theme.hex + ';' : 'background-color:#fff;color:#334155;border-color:#e2e8f0;';
+        html += '<button type="button" onclick="selectBrand(\'' + escapeHtml(b).replace(/'/g, "\\'") + '\')" style="' + styleStr + '" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer whitespace-nowrap">' +
+          escapeHtml(b) + ' (' + (counts[b] || 0) + ')</button>';
+      });
+      container.innerHTML = html;
+    }
+
+    function selectBrand(brand) {
+      STATE.activeBrand = brand;
+      renderBrandTabs();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      var list = STATE.products.filter(function(p) {
+        if (STATE.activeBrand !== 'ALL' && p.brand !== STATE.activeBrand) return false;
+        if (q && (p.brand + ' ' + p.modelDesc + ' ' + p.wholesale + ' ' + p.rrp).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+
+      document.getElementById('resultCount').textContent = list.length + ' รุ่น';
+      var grid = document.getElementById('productGrid');
+      var empty = document.getElementById('emptyState');
+
+      if (!list.length) {
+        grid.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      grid.classList.remove('hidden');
+
+      grid.innerHTML = list.map(function(p) {
+        var theme = getBrandTheme(p.brand);
+        var profit = (p.rrp > 0 && p.wholesale > 0) ? (p.rrp - p.wholesale) : 0;
+        var imgHtml = p.imageUrl
+          ? '<img src="' + escapeHtml(p.imageUrl) + '" referrerpolicy="no-referrer" loading="lazy" class="w-full h-full object-contain">'
+          : '<div class="w-full h-full flex flex-col items-center justify-center p-2 text-center rounded-xl" style="background-color:' + theme.soft + '"><span class="text-xs font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span><span class="text-[10px] text-slate-500 mt-1">ยังไม่มีรูปภาพ</span></div>';
+
+        return '<article class="product-card flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden">' +
+          '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3">' +
+            imgHtml +
+            (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
+          '</div>' +
+          '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2">' +
+            '<div><span class="text-[11px] font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
+            '<h3 class="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mt-0.5">' + escapeHtml(p.modelDesc) + '</h3></div>' +
+            '<div class="pt-2 border-t border-slate-100">' +
+              '<div class="flex items-baseline justify-between gap-1">' +
+                '<span class="text-xs text-slate-400 line-through font-num">' + (p.rrp > 0 ? '฿' + formatMoney(p.rrp) : '') + '</span>' +
+                '<span class="text-xl font-black text-slate-900 font-num">฿' + formatMoney(p.wholesale) + '</span>' +
+              '</div>' +
+              (p.period ? '<div class="text-[11px] text-slate-500 mt-1 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+    }
+
+    function openPdfModal() {
+      var container = document.getElementById('pdfBrandChecklist');
+      container.innerHTML = STATE.brands.map(function(b) {
+        var checked = (STATE.activeBrand === 'ALL' || STATE.activeBrand === b) ? 'checked' : '';
+        return '<label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold cursor-pointer"><input type="checkbox" name="pdfBrandChoice" value="' + escapeHtml(b) + '" ' + checked + ' class="w-4 h-4 rounded"><span>' + escapeHtml(b) + '</span></label>';
+      }).join('');
+      openModal('pdfModal');
+    }
+
+    function togglePdfBrands(checked) {
+      document.querySelectorAll('input[name="pdfBrandChoice"]').forEach(function(cb) { cb.checked = checked; });
+    }
+
+    async function generatePdfCatalog() {
+      var selected = [];
+      document.querySelectorAll('input[name="pdfBrandChoice"]:checked').forEach(function(cb) { selected.push(cb.value); });
+      if (!selected.length) { showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์'); return; }
+
+      var btn = document.getElementById('generatePdfBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้าง PDF...';
+      try {
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        var first = true;
+        selected.forEach(function(brand) {
+          var items = STATE.products.filter(function(p) { return p.brand === brand; });
+          if (!items.length) return;
+          if (!first) doc.addPage();
+          first = false;
+          doc.setFontSize(14);
+          doc.text('JAYMART WHOLESALE - ' + brand.toUpperCase(), 14, 16);
+          doc.autoTable({
+            startY: 22,
+            head: [['#', 'Model', 'RRP', 'Wholesale', 'Period']],
+            body: items.map(function(p, i) { return [i + 1, p.modelDesc, formatMoney(p.rrp), formatMoney(p.wholesale), p.period || '-']; })
+          });
+        });
+        doc.save('Jaymart_Wholesale_Catalog.pdf');
+        closeModal('pdfModal');
+        showToast('ดาวน์โหลด PDF เรียบร้อยแล้ว');
+      } catch (e) {
+        showToast('สร้าง PDF ไม่สำเร็จ: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'สร้างและดาวน์โหลด PDF';
+      }
     }
   </script>
 </body>
