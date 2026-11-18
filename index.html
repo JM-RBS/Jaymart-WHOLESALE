@@ -532,6 +532,7 @@
     var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
     var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v1';
     var STORAGE_ADMIN_KEY = 'jm_wholesale_admin_session_v1';
+    var STORAGE_FAST_CACHE_KEY = 'jm_wholesale_fast_cache_v1';
 
     var STATE = {
       docTitle: 'Jaymart Wholesale — ใบราคาขายส่ง',
@@ -589,6 +590,7 @@
       try {
         localStorage.removeItem(STORAGE_LINE_KEY);
         localStorage.removeItem(STORAGE_ADMIN_KEY);
+        localStorage.removeItem(STORAGE_FAST_CACHE_KEY);
         localStorage.removeItem('jm_bind_admin_after_line');
       } catch (e) {}
       STATE.lineUser = null;
@@ -776,7 +778,23 @@
       try { savedLine = JSON.parse(localStorage.getItem(STORAGE_LINE_KEY) || 'null'); } catch (e) {}
       if (savedLine && savedLine.userId) {
         STATE.lineUser = savedLine;
-        verifyLineUserAccess(savedLine.userId);
+        var fastCache = null;
+        try { fastCache = JSON.parse(localStorage.getItem(STORAGE_FAST_CACHE_KEY) || 'null'); } catch (e) {}
+        if (fastCache && fastCache.lineUserId === savedLine.userId && fastCache.status === 'Approved' && fastCache.wholesaleData) {
+          STATE.dealerStatus = 'Approved';
+          STATE.dealerInfo = fastCache.dealer || STATE.dealerInfo;
+          if (fastCache.isAdmin) {
+            STATE.isAdmin = true;
+            STATE.verifiedPin = fastCache.adminPin || STATE.verifiedPin;
+            STATE.staffName = fastCache.adminName || STATE.staffName;
+            updateAdminHeaderUI();
+          }
+          applyDealerGateUI();
+          applyWholesaleData_(fastCache.wholesaleData);
+          verifyLineUserAccess(savedLine.userId, true);
+          return;
+        }
+        verifyLineUserAccess(savedLine.userId, false);
         return;
       }
 
@@ -838,8 +856,28 @@
       return true;
     }
 
-    function verifyLineUserAccess(lineUserId) {
-      setDocDateText('กำลังตรวจสอบสิทธิ์...');
+    function saveFastCache_(lineUserId, res) {
+      try {
+        if (res && res.status === 'Approved' && res.wholesaleData) {
+          localStorage.setItem(STORAGE_FAST_CACHE_KEY, JSON.stringify({
+            lineUserId: lineUserId,
+            status: 'Approved',
+            isAdmin: Boolean(res.isAdmin),
+            adminPin: res.adminPin || '',
+            adminName: res.adminName || '',
+            dealer: res.dealer || null,
+            wholesaleData: res.wholesaleData
+          }));
+        } else {
+          localStorage.removeItem(STORAGE_FAST_CACHE_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function verifyLineUserAccess(lineUserId, isBackground) {
+      if (!isBackground) {
+        setDocDateText('กำลังตรวจสอบสิทธิ์...');
+      }
 
       var pendingBind = false;
       try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
@@ -882,10 +920,11 @@
             STATE.dealerStatus = 'Approved';
             STATE.dealerInfo = res.dealer || { typedShopName: 'Admin: ' + STATE.staffName };
             try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: STATE.verifiedPin, name: STATE.staffName, lineUserId: lineUserId })); } catch (e) {}
+            saveFastCache_(lineUserId, res);
             updateAdminHeaderUI();
             applyDealerGateUI();
             if (!applyWholesaleData_(res.wholesaleData)) {
-              loadCatalogData();
+              loadCatalogData(isBackground);
             }
             return;
           }
@@ -901,17 +940,21 @@
 
           STATE.dealerStatus = res.status || 'unregistered';
           STATE.dealerInfo = res.dealer || null;
+          saveFastCache_(lineUserId, res);
           applyDealerGateUI();
 
           if (STATE.dealerStatus === 'Approved') {
             if (!applyWholesaleData_(res.wholesaleData)) {
-              loadCatalogData();
+              loadCatalogData(isBackground);
             }
           } else {
             setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
           }
         })
         .catch(function(err) {
+          if (isBackground && STATE.dealerStatus === 'Approved') {
+            return;
+          }
           if (STATE.isAdmin) {
             STATE.dealerStatus = 'Approved';
             applyDealerGateUI();
