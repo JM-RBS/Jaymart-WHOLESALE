@@ -746,13 +746,21 @@
                       showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
                       return;
                     }
-                    verifyLineUserAccess(res.lineUser.userId);
+                    if (res.access) {
+                      handleAccessResult_(res.lineUser.userId, res.access, false);
+                    } else {
+                      verifyLineUserAccess(res.lineUser.userId, false);
+                    }
                   });
                 return;
               }
             }
 
-            verifyLineUserAccess(res.lineUser.userId);
+            if (res.access) {
+              handleAccessResult_(res.lineUser.userId, res.access, false);
+            } else {
+              verifyLineUserAccess(res.lineUser.userId, false);
+            }
           })
           .catch(function(err) {
             var errBox = document.getElementById('lineAuthErrorBox');
@@ -874,31 +882,7 @@
       } catch (e) {}
     }
 
-    function verifyLineUserAccess(lineUserId, isBackground) {
-      if (!isBackground) {
-        setDocDateText('กำลังตรวจสอบสิทธิ์...');
-      }
-
-      var pendingBind = false;
-      try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
-      if (pendingBind && STATE.isAdmin && STATE.verifiedPin) {
-        try { localStorage.removeItem('jm_bind_admin_after_line'); } catch (e) {}
-        callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: lineUserId })
-          .then(function() {
-            showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
-            applyDealerGateUI();
-            loadCatalogData();
-            openAdminWorkspace();
-          })
-          .catch(function(err) {
-            setDocDateText('เชื่อมต่อผิดพลาด');
-            showToast('ผูกบัญชี LINE ไม่สำเร็จ: ' + (err.message || err));
-          });
-        return;
-      }
-
-      callBackendApi('checkDealerAccess', { lineUserId: lineUserId })
-        .then(function(res) {
+    function handleAccessResult_(lineUserId, res, isBackground) {
           if (!res || !res.ok) {
             if (STATE.isAdmin) {
               STATE.dealerStatus = 'Approved';
@@ -950,6 +934,34 @@
           } else {
             setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
           }
+    }
+
+    function verifyLineUserAccess(lineUserId, isBackground) {
+      if (!isBackground) {
+        setDocDateText('กำลังตรวจสอบสิทธิ์...');
+      }
+
+      var pendingBind = false;
+      try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
+      if (pendingBind && STATE.isAdmin && STATE.verifiedPin) {
+        try { localStorage.removeItem('jm_bind_admin_after_line'); } catch (e) {}
+        callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: lineUserId })
+          .then(function() {
+            showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
+            applyDealerGateUI();
+            loadCatalogData();
+            openAdminWorkspace();
+          })
+          .catch(function(err) {
+            setDocDateText('เชื่อมต่อผิดพลาด');
+            showToast('ผูกบัญชี LINE ไม่สำเร็จ: ' + (err.message || err));
+          });
+        return;
+      }
+
+      callBackendApi('checkDealerAccess', { lineUserId: lineUserId })
+        .then(function(res) {
+          handleAccessResult_(lineUserId, res, isBackground);
         })
         .catch(function(err) {
           if (isBackground && STATE.dealerStatus === 'Approved') {
