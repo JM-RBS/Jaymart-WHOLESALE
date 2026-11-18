@@ -142,50 +142,70 @@
       <form onsubmit="submitDealerRegistration(event)" class="p-5 sm:p-6 space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1.5">สถานะผู้ลงทะเบียน <span class="text-rose-600">*</span></label>
-          <div class="grid grid-cols-2 gap-2.5">
+          <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
-              <input type="radio" name="regRoleType" value="เจ้าของร้าน" checked onchange="toggleStaffConsentBox()" class="peer sr-only">
-              <div class="py-2.5 px-3 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-sm font-bold text-slate-700 transition">
+              <input type="radio" name="regRoleType" value="เจ้าของร้าน" checked onchange="toggleRoleFields()" class="peer sr-only">
+              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
                 เจ้าของร้าน
               </div>
             </label>
             <label class="cursor-pointer">
-              <input type="radio" name="regRoleType" value="พนักงานร้าน" onchange="toggleStaffConsentBox()" class="peer sr-only">
-              <div class="py-2.5 px-3 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-sm font-bold text-slate-700 transition">
+              <input type="radio" name="regRoleType" value="พนักงานร้าน" onchange="toggleRoleFields()" class="peer sr-only">
+              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
                 พนักงานร้าน
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="regRoleType" value="AM (สำหรับสาขา)" onchange="toggleRoleFields()" class="peer sr-only">
+              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
+                AM (สำหรับสาขา)
               </div>
             </label>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
-          <input id="regShopName" type="text" required placeholder="เช่น เจแปนโมบาย, เคโฟน..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+        <!-- ช่องกรอกเฉพาะสำหรับ AM (สำหรับสาขา) -->
+        <div id="amFieldsGroup" class="hidden space-y-3">
+          <div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed">
+            <strong>สำหรับ AM สาขา:</strong> กรอกเฉพาะรหัสพนักงานที่มีรายชื่อในระบบ ระบบจะจดจำบัญชี LINE นี้เพียง 1 บัญชีเท่านั้น (หากเปลี่ยนเครื่อง/บัญชีใหม่ต้องรอแอดมินอนุมัติ)
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">รหัสพนักงาน <span class="text-rose-600">*</span></label>
+            <input id="regAmEmpId" type="text" inputmode="numeric" placeholder="กรอกรหัสพนักงานของท่าน" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:border-slate-900 font-num">
+          </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-rose-600">*</span></label>
-          <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-        </div>
+        <!-- ช่องกรอกสำหรับดีลเลอร์ (เจ้าของร้าน / พนักงานร้าน) -->
+        <div id="dealerFieldsGroup" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
+            <input id="regShopName" type="text" required placeholder="เช่น เจแปนโมบาย, เคโฟน..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+          </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
-          <input id="regPhone" type="tel" required inputmode="tel" placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900 font-num">
-        </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-rose-600">*</span></label>
+            <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+          </div>
 
-        <div class="relative">
-          <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email) <span class="text-rose-600">*</span></label>
-          <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" onfocus="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-          <div id="emailSuggestList" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-44 overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg divide-y divide-slate-100"></div>
-        </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
+            <input id="regPhone" type="tel" required inputmode="tel" placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900 font-num">
+          </div>
 
-        <div id="staffConsentBox" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
-          <label class="flex items-start gap-2.5 cursor-pointer select-none">
-            <input type="checkbox" id="regStaffConsent" class="mt-0.5 w-4 h-4 rounded border-amber-400 text-[#C8102E] shrink-0">
-            <span class="text-xs font-semibold text-amber-950 leading-relaxed">
-              ข้าพเจ้ายืนยันว่าได้รับความยินยอมและได้รับอนุญาตจากเจ้าของร้านในการเข้าถึงข้อมูลใบราคาขายส่งนี้เรียบร้อยแล้ว <span class="text-rose-600">*</span>
-            </span>
-          </label>
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email) <span class="text-rose-600">*</span></label>
+            <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" onfocus="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+            <div id="emailSuggestList" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-44 overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg divide-y divide-slate-100"></div>
+          </div>
+
+          <div id="staffConsentBox" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+            <label class="flex items-start gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="regStaffConsent" class="mt-0.5 w-4 h-4 rounded border-amber-400 text-[#C8102E] shrink-0">
+              <span class="text-xs font-semibold text-amber-950 leading-relaxed">
+                ข้าพเจ้ายืนยันว่าได้รับความยินยอมและได้รับอนุญาตจากเจ้าของร้านในการเข้าถึงข้อมูลใบราคาขายส่งนี้เรียบร้อยแล้ว <span class="text-rose-600">*</span>
+              </span>
+            </label>
+          </div>
         </div>
 
         <button id="btnSubmitDealerReg" type="submit" class="btn-press w-full h-12 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white font-bold text-sm shadow-sm cursor-pointer">
@@ -788,148 +808,187 @@
       var catalogArea = document.getElementById('catalogContentArea');
       var filterBar = document.getElementById('catalogFilterBar');
       var pdfBtn = document.getElementById('headerPdfBtn');
-      var activeBadge = document.getElementById('dealerActiveBadge');
+      var dealerBadge = document.getElementById('dealerActiveBadge');
 
-      loginGate.classList.add('hidden');
-      regView.classList.add('hidden');
-      pendingView.classList.add('hidden');
-      catalogArea.classList.add('hidden');
-      filterBar.classList.add('hidden');
-      pdfBtn.classList.add('hidden');
-      activeBadge.classList.add('hidden');
+      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn].forEach(function(el) {
+        if (el) el.classList.add('hidden');
+      });
+      if (dealerBadge) dealerBadge.classList.add('hidden');
 
-      if (STATE.dealerStatus === 'Approved') {
-        catalogArea.classList.remove('hidden');
-        filterBar.classList.remove('hidden');
-        pdfBtn.classList.remove('hidden');
-        if (STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
-          activeBadge.textContent = '✓ ' + STATE.dealerInfo.typedShopName;
-          activeBadge.classList.remove('hidden');
+      if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
+        if (catalogArea) catalogArea.classList.remove('hidden');
+        if (filterBar) filterBar.classList.remove('hidden');
+        if (pdfBtn) pdfBtn.classList.remove('hidden');
+        if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
+          dealerBadge.textContent = STATE.dealerInfo.typedShopName;
+          dealerBadge.classList.remove('hidden');
         }
         return;
       }
 
-      if (STATE.dealerStatus === 'unlogged' || !STATE.lineUser) {
-        loginGate.classList.remove('hidden');
+      if (!STATE.lineUser || STATE.dealerStatus === 'unlogged') {
+        if (loginGate) loginGate.classList.remove('hidden');
         return;
       }
 
-      if (STATE.dealerStatus === 'Pending' || STATE.dealerStatus === 'Rejected') {
+      if (STATE.dealerStatus === 'Pending' || STATE.dealerStatus === 'Rejected' || STATE.dealerStatus === 'Replaced') {
         pendingView.classList.remove('hidden');
-        var isRejected = STATE.dealerStatus === 'Rejected';
-        document.getElementById('pendingTitleText').textContent = isRejected ? 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ' : 'อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์';
-        document.getElementById('pendingSubText').textContent = isRejected
-          ? 'กรุณาตรวจสอบข้อมูลร้านค้าและ User SG Finance+ อีกครั้ง หรือกดแก้ไขข้อมูลเพื่อส่งใหม่'
-          : 'ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา';
+        var iconBox = document.getElementById('pendingIconBox');
+        var titleEl = document.getElementById('pendingTitleText');
+        var subEl = document.getElementById('pendingSubText');
 
-        if (STATE.dealerInfo) {
-          document.getElementById('pendingSummaryCard').innerHTML =
-            '<div><strong>บัญชี LINE:</strong> ' + escapeHtml(STATE.dealerInfo.lineName || STATE.lineUser.displayName) + '</div>' +
-            '<div><strong>ชื่อร้านค้า:</strong> ' + escapeHtml(STATE.dealerInfo.typedShopName) + '</div>' +
-            '<div><strong>User SG Finance+:</strong> ' + escapeHtml(STATE.dealerInfo.sgFinanceUser) + '</div>' +
-            '<div><strong>เบอร์โทร:</strong> ' + escapeHtml(STATE.dealerInfo.phone) + '</div>' +
-            '<div><strong>อีเมล:</strong> ' + escapeHtml(STATE.dealerInfo.email || '-') + '</div>' +
-            '<div><strong>สถานะผู้ลงทะเบียน:</strong> ' + escapeHtml(STATE.dealerInfo.roleType) + '</div>';
+        if (STATE.dealerStatus === 'Rejected') {
+          iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center';
+          titleEl.textContent = 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ';
+          subEl.textContent = 'กรุณาตรวจสอบข้อมูลของท่าน หรือกดแก้ไขข้อมูลเพื่อส่งคำขอใหม่อีกครั้ง';
+        } else if (STATE.dealerStatus === 'Replaced') {
+          iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center';
+          titleEl.textContent = 'บัญชีนี้ถูกยกเลิกสิทธิ์เนื่องจากเปลี่ยนเครื่อง';
+          subEl.textContent = 'รหัสพนักงานของท่านถูกย้ายไปใช้งานบนบัญชี LINE / อุปกรณ์เครื่องใหม่เรียบร้อยแล้ว';
+        } else {
+          iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center';
+          titleEl.textContent = 'อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์';
+          subEl.textContent = 'ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา';
         }
+
+        var d = STATE.dealerInfo || {};
+        var isAm = d.roleType === 'AM (สำหรับสาขา)';
+        document.getElementById('pendingSummaryCard').innerHTML =
+          '<div><span class="text-slate-400">บัญชี LINE:</span> <strong>' + escapeHtml((STATE.lineUser && STATE.lineUser.displayName) || d.lineName || '-') + '</strong></div>' +
+          '<div><span class="text-slate-400">สถานะผู้ลงทะเบียน:</span> <strong>' + escapeHtml(d.roleType || '-') + '</strong></div>' +
+          (isAm
+            ? '<div><span class="text-slate-400">รหัสพนักงาน:</span> <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong></div>'
+            : '<div><span class="text-slate-400">ชื่อร้านค้า:</span> <strong>' + escapeHtml(d.typedShopName || '-') + '</strong></div>' +
+              '<div><span class="text-slate-400">User SG Finance+:</span> <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong></div>' +
+              '<div><span class="text-slate-400">เบอร์โทร:</span> <strong>' + escapeHtml(d.phone || '-') + '</strong></div>'
+          );
         return;
       }
 
+      // Unregistered -> Show Dealer Registration Form
       regView.classList.remove('hidden');
-      document.getElementById('regLineAvatar').src = STATE.lineUser.pictureUrl || 'https://placehold.co/100x100/e2e8f0/475569?text=LINE';
+      document.getElementById('regLineAvatar').src = STATE.lineUser.pictureUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(STATE.lineUser.displayName || 'U') + '&background=06C755&color=fff';
       document.getElementById('regLineName').textContent = STATE.lineUser.displayName || 'ผู้ใช้งาน LINE';
-      document.getElementById('regLineUidText').textContent = 'LINE ID: ' + STATE.lineUser.userId;
-      toggleStaffConsentBox();
+      document.getElementById('regLineUidText').textContent = 'ID: ' + STATE.lineUser.userId.slice(0, 10) + '...';
+      toggleRoleFields();
     }
 
-    function toggleStaffConsentBox() {
-      var roleRadio = document.querySelector('input[name="regRoleType"]:checked');
-      var isStaff = roleRadio && roleRadio.value === 'พนักงานร้าน';
-      var box = document.getElementById('staffConsentBox');
-      var cb = document.getElementById('regStaffConsent');
-      if (box) box.classList.toggle('hidden', !isStaff);
-      if (cb && !isStaff) cb.checked = false;
+    function toggleRoleFields() {
+      var checked = document.querySelector('input[name="regRoleType"]:checked');
+      var role = checked ? checked.value : 'เจ้าของร้าน';
+      var isAm = role === 'AM (สำหรับสาขา)';
+      var isStaff = role === 'พนักงานร้าน';
+
+      var amGroup = document.getElementById('amFieldsGroup');
+      var dealerGroup = document.getElementById('dealerFieldsGroup');
+      var consentBox = document.getElementById('staffConsentBox');
+
+      if (amGroup) amGroup.classList.toggle('hidden', !isAm);
+      if (dealerGroup) dealerGroup.classList.toggle('hidden', isAm);
+      if (consentBox) consentBox.classList.toggle('hidden', !isStaff);
+
+      var amInput = document.getElementById('regAmEmpId');
+      var shopInput = document.getElementById('regShopName');
+      var sgInput = document.getElementById('regSgUser');
+      var phoneInput = document.getElementById('regPhone');
+      var emailInput = document.getElementById('regEmail');
+
+      if (amInput) amInput.required = isAm;
+      if (shopInput) shopInput.required = !isAm;
+      if (sgInput) sgInput.required = !isAm;
+      if (phoneInput) phoneInput.required = !isAm;
+      if (emailInput) emailInput.required = !isAm;
     }
 
-    var EMAIL_DOMAINS = ['@gmail.com', '@hotmail.com', '@hotmail.co.th', '@yahoo.com', '@yahoo.co.th', '@outlook.com', '@outlook.co.th', '@icloud.com'];
-
+    var EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'jaymart.co.th'];
     function handleEmailSuggest(val) {
       var listEl = document.getElementById('emailSuggestList');
       if (!listEl) return;
-      var text = String(val || '').trim();
-      if (!text) { listEl.classList.add('hidden'); return; }
+      var trimmed = String(val || '').trim();
+      if (!trimmed) {
+        listEl.classList.add('hidden');
+        return;
+      }
 
-      var atIdx = text.indexOf('@');
-      var localPart = atIdx !== -1 ? text.slice(0, atIdx) : text;
-      var domainTyped = atIdx !== -1 ? text.slice(atIdx).toLowerCase() : '';
-      if (!localPart) { listEl.classList.add('hidden'); return; }
+      var atIdx = trimmed.indexOf('@');
+      var localPart = atIdx === -1 ? trimmed : trimmed.slice(0, atIdx);
+      var typedDomain = atIdx === -1 ? '' : trimmed.slice(atIdx + 1).toLowerCase();
+
+      if (!localPart) {
+        listEl.classList.add('hidden');
+        return;
+      }
 
       var matches = EMAIL_DOMAINS.filter(function(d) {
-        if (!domainTyped) return true;
-        return d.indexOf(domainTyped) === 0 && d !== domainTyped;
+        return !typedDomain || (d.indexOf(typedDomain) === 0 && d !== typedDomain);
       });
 
-      if (!matches.length) { listEl.classList.add('hidden'); return; }
+      if (!matches.length) {
+        listEl.classList.add('hidden');
+        return;
+      }
 
-      listEl.innerHTML = matches.map(function(domain) {
-        var fullEmail = localPart + domain;
-        var safeEmail = escapeHtml(fullEmail).replace(/'/g, "\\'");
-        return '<button type="button" onmousedown="applyEmailSuggestion(\'' + safeEmail + '\')" class="w-full text-left px-3.5 py-2 text-xs sm:text-sm hover:bg-slate-100 flex items-center justify-between gap-2 cursor-pointer">' +
-          '<span class="font-semibold text-slate-800 truncate">' + escapeHtml(localPart) + '<strong class="text-[#C8102E]">' + escapeHtml(domain) + '</strong></span>' +
-          '<span class="text-[10px] text-slate-400 shrink-0">เลือก</span>' +
+      listEl.innerHTML = matches.map(function(d) {
+        var fullEmail = localPart + '@' + d;
+        return '<button type="button" onmousedown="selectEmailSuggest(\'' + escapeHtml(fullEmail) + '\')" class="w-full px-3.5 py-2 text-left text-xs sm:text-sm text-slate-700 hover:bg-slate-50 flex items-center justify-between cursor-pointer">' +
+          '<span class="font-medium">' + escapeHtml(fullEmail) + '</span>' +
+          '<span class="text-[11px] text-slate-400">เลือก</span>' +
         '</button>';
       }).join('');
       listEl.classList.remove('hidden');
     }
 
-    function applyEmailSuggestion(fullEmail) {
+    function selectEmailSuggest(email) {
       var input = document.getElementById('regEmail');
       var listEl = document.getElementById('emailSuggestList');
-      if (input) input.value = fullEmail;
+      if (input) input.value = email;
       if (listEl) listEl.classList.add('hidden');
     }
 
     document.addEventListener('click', function(e) {
-      var input = document.getElementById('regEmail');
       var listEl = document.getElementById('emailSuggestList');
-      if (input && listEl && e.target !== input && !listEl.contains(e.target)) {
+      var inputEl = document.getElementById('regEmail');
+      if (listEl && e.target !== inputEl && !listEl.contains(e.target)) {
         listEl.classList.add('hidden');
       }
     });
-
-    function editDealerRegistration() {
-      if (STATE.dealerInfo) {
-        document.getElementById('regShopName').value = STATE.dealerInfo.typedShopName || '';
-        document.getElementById('regSgUser').value = STATE.dealerInfo.sgFinanceUser || '';
-        document.getElementById('regPhone').value = STATE.dealerInfo.phone || '';
-        document.getElementById('regEmail').value = STATE.dealerInfo.email || '';
-      }
-      STATE.dealerStatus = 'unregistered';
-      applyDealerGateUI();
-    }
 
     function submitDealerRegistration(e) {
       e.preventDefault();
       if (!STATE.lineUser) return;
 
-      var roleRadio = document.querySelector('input[name="regRoleType"]:checked');
-      var roleType = roleRadio ? roleRadio.value : 'เจ้าของร้าน';
-      var staffConsentChecked = document.getElementById('regStaffConsent').checked;
+      var roleEl = document.querySelector('input[name="regRoleType"]:checked');
+      var roleType = roleEl ? roleEl.value : 'เจ้าของร้าน';
+      var isAm = roleType === 'AM (สำหรับสาขา)';
 
-      if (roleType === 'พนักงานร้าน' && !staffConsentChecked) {
-        showToast('กรุณาติ๊กยืนยันว่าได้รับความยินยอมจากเจ้าของร้านก่อนส่งข้อมูล');
-        return;
+      if (roleType === 'พนักงานร้าน') {
+        var consentChecked = document.getElementById('regStaffConsent').checked;
+        if (!consentChecked) {
+          showToast('กรุณาติ๊กยืนยันว่าได้รับความยินยอมจากเจ้าของร้านก่อนส่งข้อมูล');
+          return;
+        }
       }
 
       var payload = {
         lineUserId: STATE.lineUser.userId,
         lineName: STATE.lineUser.displayName,
         linePicture: STATE.lineUser.pictureUrl,
-        roleType: roleType,
-        typedShopName: document.getElementById('regShopName').value.trim(),
-        sgFinanceUser: document.getElementById('regSgUser').value.trim(),
-        phone: document.getElementById('regPhone').value.trim(),
-        email: document.getElementById('regEmail').value.trim()
+        roleType: roleType
       };
+
+      if (isAm) {
+        var empId = document.getElementById('regAmEmpId').value.trim();
+        if (!empId) {
+          showToast('กรุณากรอกรหัสพนักงาน');
+          return;
+        }
+        payload.employeeId = empId;
+      } else {
+        payload.typedShopName = document.getElementById('regShopName').value.trim();
+        payload.sgFinanceUser = document.getElementById('regSgUser').value.trim();
+        payload.phone = document.getElementById('regPhone').value.trim();
+        payload.email = document.getElementById('regEmail').value.trim();
+      }
 
       var btn = document.getElementById('btnSubmitDealerReg');
       btn.disabled = true;
@@ -943,10 +1002,17 @@
             showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
             return;
           }
-          STATE.dealerInfo = payload;
-          STATE.dealerStatus = 'Pending';
+          STATE.dealerStatus = res.status || 'Pending';
+          STATE.dealerInfo = res.dealer || {
+            lineUserId: STATE.lineUser.userId,
+            lineName: STATE.lineUser.displayName,
+            typedShopName: isAm ? ('AM: ' + payload.employeeId) : payload.typedShopName,
+            sgFinanceUser: isAm ? payload.employeeId : payload.sgFinanceUser,
+            phone: payload.phone || '-',
+            roleType: roleType
+          };
           applyDealerGateUI();
-          showToast('ส่งข้อมูลลงทะเบียนเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติ');
+          showToast(res.isDeviceSwitch ? 'ส่งคำขอเปลี่ยนเครื่องเข้าคิวรออนุมัติเรียบร้อยแล้ว' : 'ส่งข้อมูลลงทะเบียนเรียบร้อย กรุณารอแอดมินอนุมัติ');
         })
         .catch(function(err) {
           btn.disabled = false;
@@ -961,35 +1027,401 @@
       verifyLineUserAccess(STATE.lineUser.userId);
     }
 
-    function showToast(msg) {
-      var el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(function() { el.classList.add('hidden'); }, 4500);
+    function editDealerRegistration() {
+      if (STATE.dealerInfo && STATE.dealerInfo.roleType === 'AM (สำหรับสาขา)') {
+        showToast('บัญชี AM ที่ลงทะเบียนแล้วไม่สามารถแก้ไขหรือลงซ้ำได้');
+        return;
+      }
+      STATE.dealerStatus = 'unregistered';
+      applyDealerGateUI();
+      if (STATE.dealerInfo) {
+        if (document.getElementById('regShopName')) document.getElementById('regShopName').value = STATE.dealerInfo.typedShopName || '';
+        if (document.getElementById('regSgUser')) document.getElementById('regSgUser').value = STATE.dealerInfo.sgFinanceUser || '';
+        if (document.getElementById('regPhone')) document.getElementById('regPhone').value = STATE.dealerInfo.phone || '';
+        if (document.getElementById('regEmail')) document.getElementById('regEmail').value = STATE.dealerInfo.email || '';
+      }
     }
 
-    // ================= ADMIN WORKSPACE =================
+    // ================= PROMOTION PERIOD & CATALOG =================
+    function parsePromoPeriod(periodStr) {
+      if (!periodStr) return null;
+      var s = String(periodStr).trim();
+      var months = {
+        jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+        jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+      };
+      var now = new Date();
+      var year = now.getFullYear();
+
+      var m1 = s.match(/(\d{1,2})\s*[-–]\s*(\d{1,2})\s*([a-zA-Z]{3})/);
+      if (m1) {
+        var mon = months[m1[3].toLowerCase()];
+        if (mon !== undefined) {
+          return {
+            start: new Date(year, mon, Number(m1[1]), 0, 0, 0),
+            end: new Date(year, mon, Number(m1[2]), 23, 59, 59)
+          };
+        }
+      }
+
+      var m2 = s.match(/(\d{1,2})\s*([a-zA-Z]{3})\s*[-–]\s*(\d{1,2})\s*([a-zA-Z]{3})/);
+      if (m2) {
+        var monStart = months[m2[2].toLowerCase()];
+        var monEnd = months[m2[4].toLowerCase()];
+        if (monStart !== undefined && monEnd !== undefined) {
+          var endYear = monEnd < monStart ? year + 1 : year;
+          return {
+            start: new Date(year, monStart, Number(m2[1]), 0, 0, 0),
+            end: new Date(endYear, monEnd, Number(m2[3]), 23, 59, 59)
+          };
+        }
+      }
+
+      var m3 = s.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*[-–]\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+      if (m3) {
+        var y1 = m3[3] ? (Number(m3[3]) > 2400 ? Number(m3[3]) - 543 : (Number(m3[3]) < 100 ? 2000 + Number(m3[3]) : Number(m3[3]))) : year;
+        var y2 = m3[6] ? (Number(m3[6]) > 2400 ? Number(m3[6]) - 543 : (Number(m3[6]) < 100 ? 2000 + Number(m3[6]) : Number(m3[6]))) : y1;
+        return {
+          start: new Date(y1, Number(m3[2]) - 1, Number(m3[1]), 0, 0, 0),
+          end: new Date(y2, Number(m3[5]) - 1, Number(m3[4]), 23, 59, 59)
+        };
+      }
+      return null;
+    }
+
+    function getPromoInfo(periodStr) {
+      var parsed = parsePromoPeriod(periodStr);
+      if (!parsed) return { state: 'active', label: '' };
+      var now = new Date();
+      if (now < parsed.start) {
+        var diffDays = Math.ceil((parsed.start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return { state: 'upcoming', label: 'เริ่มในอีก ' + diffDays + ' วัน' };
+      }
+      if (now > parsed.end) {
+        return { state: 'expired', label: 'หมดโปรโมชั่น' };
+      }
+      return { state: 'active', label: '' };
+    }
+
+    function loadCatalogData(silent) {
+      var loadingEl = document.getElementById('loadingGrid');
+      if (!silent && loadingEl && !STATE.products.length) {
+        loadingEl.classList.remove('hidden');
+      }
+
+      return callBackendApi('getWholesaleData', {})
+        .then(function(res) {
+          if (loadingEl) loadingEl.classList.add('hidden');
+          if (!res || !res.ok) {
+            if (!silent) showToast((res && res.error) ? res.error : 'ไม่สามารถโหลดข้อมูลสินค้าได้');
+            return;
+          }
+
+          STATE.docTitle = res.docTitle || STATE.docTitle;
+          STATE.docDate = res.docDate || '';
+          STATE.warningText = res.warningText || STATE.warningText;
+          STATE.brands = res.brands || [];
+          STATE.products = res.products || [];
+          STATE.modelImages = res.modelImages || [];
+
+          document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'อัปเดตล่าสุด';
+          document.getElementById('warningBanner').textContent = STATE.warningText;
+
+          renderBrandTabs();
+          renderProducts();
+          populateBrandFilters();
+        })
+        .catch(function(err) {
+          if (loadingEl) loadingEl.classList.add('hidden');
+          if (!silent) showToast('โหลดข้อมูลผิดพลาด: ' + (err.message || err));
+        });
+    }
+
+    function renderBrandTabs() {
+      var container = document.getElementById('brandTabsContainer');
+      if (!container) return;
+
+      var allBrands = ['ALL'].concat(STATE.brands);
+      container.innerHTML = allBrands.map(function(b) {
+        var isActive = STATE.activeBrand === b;
+        var count = b === 'ALL'
+          ? STATE.products.length
+          : STATE.products.filter(function(p) { return p.brand === b; }).length;
+        var label = b === 'ALL' ? 'ทั้งหมด' : b;
+        var activeClass = isActive
+          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
+        return '<button type="button" onclick="selectBrandTab(\'' + escapeHtml(b) + '\')" class="btn-press inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer ' + activeClass + '">' +
+          '<span>' + escapeHtml(label) + '</span>' +
+          '<span class="px-1.5 py-0.5 rounded-md text-[11px] font-num ' + (isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500') + '">' + count + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
+    function selectBrandTab(brand) {
+      STATE.activeBrand = brand;
+      renderBrandTabs();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      var grid = document.getElementById('productGrid');
+      var emptyState = document.getElementById('emptyState');
+      var countEl = document.getElementById('resultCount');
+      if (!grid) return;
+
+      var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      var hideInactive = document.getElementById('hideExpiredToggle').checked;
+
+      var filtered = STATE.products.filter(function(item) {
+        if (STATE.activeBrand !== 'ALL' && item.brand !== STATE.activeBrand) return false;
+        if (q) {
+          var hay = (item.brand + ' ' + item.modelDesc + ' ' + item.period).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        if (hideInactive) {
+          var promo = getPromoInfo(item.period);
+          if (promo.state !== 'active') return false;
+        }
+        return true;
+      });
+
+      if (countEl) countEl.textContent = filtered.length + ' รุ่น';
+
+      if (!filtered.length) {
+        grid.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyState) emptyState.classList.add('hidden');
+
+      grid.innerHTML = filtered.map(function(item) {
+        var theme = getBrandTheme(item.brand);
+        var promo = getPromoInfo(item.period);
+        var isInactive = promo.state !== 'active';
+        var profit = (item.rrp > 0 && item.wholesale > 0 && item.rrp > item.wholesale) ? (item.rrp - item.wholesale) : 0;
+
+        var badgeHtml = '';
+        if (promo.state === 'expired') {
+          badgeHtml = '<span class="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-lg bg-slate-800/90 text-white text-[10px] font-bold">หมดโปรโมชั่น</span>';
+        } else if (promo.state === 'upcoming') {
+          badgeHtml = '<span class="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-lg bg-amber-500 text-white text-[10px] font-bold">' + escapeHtml(promo.label) + '</span>';
+        }
+
+        var profitBadgeHtml = profit > 0
+          ? '<span class="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full bg-[#E11D48] text-white text-[11px] font-bold shadow-xs font-num">กำไร +' + formatMoney(profit) + '฿</span>'
+          : '';
+
+        var imgHtml = item.imageUrl
+          ? '<img src="' + escapeHtml(item.imageUrl) + '" alt="' + escapeHtml(item.modelDesc) + '" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-contain p-3 transition duration-300">'
+          : '<div class="w-full h-full flex flex-col items-center justify-center text-slate-300 p-4">' +
+              '<svg class="w-10 h-10 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>' +
+              '<span class="text-[11px] font-medium text-slate-400">ไม่มีรูปภาพ</span>' +
+            '</div>';
+
+        var rrpHtml = item.rrp > 0
+          ? '<div class="flex items-center justify-between text-xs text-slate-500">' +
+              '<span>ราคาปกติ (RRP)</span>' +
+              '<span class="font-semibold text-slate-600 font-num">฿' + formatMoney(item.rrp) + '</span>' +
+            '</div>'
+          : '';
+
+        var periodHtml = item.period
+          ? '<div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">' +
+              '<span>ระยะเวลา</span>' +
+              '<span class="font-medium text-slate-700 font-num">' + escapeHtml(item.period) + '</span>' +
+            '</div>'
+          : '';
+
+        return '<article class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col ' + (isInactive ? 'expired-card' : '') + '">' +
+          '<div class="relative aspect-square bg-slate-50/70 border-b border-slate-100 overflow-hidden">' +
+            badgeHtml +
+            profitBadgeHtml +
+            imgHtml +
+          '</div>' +
+          '<div class="p-3.5 flex-1 flex flex-col justify-between space-y-2.5">' +
+            '<div>' +
+              '<span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:' + theme.hex + '">' + escapeHtml(item.brand) + '</span>' +
+              '<h3 class="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 leading-snug line-clamp-2">' + escapeHtml(item.modelDesc) + '</h3>' +
+            '</div>' +
+            '<div class="space-y-1.5 pt-2 border-t border-slate-100">' +
+              rrpHtml +
+              '<div class="flex items-baseline justify-between">' +
+                '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
+                '<span class="text-lg sm:text-xl font-extrabold text-slate-900 font-num">฿' + formatMoney(item.wholesale) + '</span>' +
+              '</div>' +
+              periodHtml +
+            '</div>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+    }
+
+    // ================= PDF EXPORT =================
+    function openPdfModal() {
+      var listEl = document.getElementById('pdfBrandChecklist');
+      if (!listEl) return;
+      listEl.innerHTML = STATE.brands.map(function(b) {
+        return '<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm font-semibold text-slate-800">' +
+          '<input type="checkbox" name="pdfBrandCheck" value="' + escapeHtml(b) + '" checked class="w-4 h-4 rounded border-slate-300 text-[#C8102E]">' +
+          '<span class="truncate">' + escapeHtml(b) + '</span>' +
+        '</label>';
+      }).join('');
+      openModal('pdfModal');
+    }
+
+    function togglePdfBrands(checked) {
+      document.querySelectorAll('input[name="pdfBrandCheck"]').forEach(function(cb) {
+        cb.checked = checked;
+      });
+    }
+
+    async function loadThaiFontBase64() {
+      if (STATE.fontCache) return STATE.fontCache;
+      var url = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf';
+      var resp = await fetch(url);
+      var buf = await resp.arrayBuffer();
+      var bytes = new Uint8Array(buf);
+      var binary = '';
+      for (var i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      STATE.fontCache = btoa(binary);
+      return STATE.fontCache;
+    }
+
+    async function generatePdfCatalog() {
+      var selectedBrands = Array.from(document.querySelectorAll('input[name="pdfBrandCheck"]:checked')).map(function(cb) {
+        return cb.value;
+      });
+      if (!selectedBrands.length) {
+        showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์');
+        return;
+      }
+
+      var hideInactive = document.getElementById('pdfHideInactive').checked;
+      var btn = document.getElementById('generatePdfBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้างไฟล์ PDF...';
+
+      try {
+        var fontBase64 = await loadThaiFontBase64();
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
+        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.setFont('Sarabun', 'normal');
+
+        var pageAdded = false;
+
+        selectedBrands.forEach(function(brand) {
+          var items = STATE.products.filter(function(p) {
+            if (p.brand !== brand) return false;
+            if (hideInactive && getPromoInfo(p.period).state !== 'active') return false;
+            return true;
+          });
+          if (!items.length) return;
+
+          if (pageAdded) doc.addPage();
+          pageAdded = true;
+
+          var theme = getBrandTheme(brand);
+          doc.setFillColor(200, 16, 46);
+          doc.rect(14, 12, 182, 14, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(13);
+          doc.text('JAYMART WHOLESALE — ' + brand.toUpperCase(), 18, 21);
+
+          doc.setTextColor(71, 85, 105);
+          doc.setFontSize(9.5);
+          doc.text('อัปเดต: ' + (STATE.docDate || '-') + '   |   ' + STATE.warningText, 14, 32);
+
+          var rows = items.map(function(item, idx) {
+            var promo = getPromoInfo(item.period);
+            var statusTag = promo.state === 'expired' ? ' [หมดโปรฯ]' : (promo.state === 'upcoming' ? ' [' + promo.label + ']' : '');
+            var profit = (item.rrp > item.wholesale) ? (item.rrp - item.wholesale) : 0;
+            return [
+              String(idx + 1),
+              item.modelDesc + statusTag,
+              item.rrp > 0 ? formatMoney(item.rrp) : '-',
+              formatMoney(item.wholesale),
+              profit > 0 ? '+' + formatMoney(profit) : '-',
+              item.period || '-'
+            ];
+          });
+
+          doc.autoTable({
+            startY: 36,
+            head: [['#', 'รุ่นสินค้า (MODEL_DESC)', 'ราคาปกติ', 'ราคาส่ง', 'กำไร', 'ระยะเวลา']],
+            body: rows,
+            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.5 },
+            headStyles: { fillColor: theme.rgb, textColor: [255, 255, 255], fontStyle: 'normal' },
+            columnStyles: {
+              0: { halign: 'center', cellWidth: 10 },
+              1: { cellWidth: 78 },
+              2: { halign: 'right', cellWidth: 22 },
+              3: { halign: 'right', cellWidth: 24 },
+              4: { halign: 'right', cellWidth: 20 },
+              5: { halign: 'center', cellWidth: 28 }
+            },
+            didParseCell: function(data) {
+              if (data.section === 'body') {
+                var item = items[data.row.index];
+                if (item && getPromoInfo(item.period).state !== 'active') {
+                  data.cell.styles.textColor = [148, 163, 184];
+                }
+              }
+            }
+          });
+        });
+
+        if (!pageAdded) {
+          showToast('ไม่มีรายการสินค้าตามเงื่อนไขที่เลือก');
+        } else {
+          doc.save('Jaymart-Wholesale-' + (STATE.docDate || 'PriceList').replace(/\//g, '-') + '.pdf');
+          closeModal('pdfModal');
+          showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+        }
+      } catch (err) {
+        showToast('สร้าง PDF ไม่สำเร็จ: ' + (err.message || err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'สร้างและดาวน์โหลด PDF';
+      }
+    }
+
+    // ================= ADMIN WORKSPACE & TABS =================
     function openAdminAuth() {
-      if (STATE.verifiedPin) { openAdminWorkspace(); return; }
-      document.getElementById('staffPinInput').value = '';
+      if (STATE.isAdmin && STATE.verifiedPin) {
+        openAdminWorkspace();
+        return;
+      }
       document.getElementById('pinError').classList.add('hidden');
+      document.getElementById('staffPinInput').value = '';
       openModal('pinModal');
-      setTimeout(function() { document.getElementById('staffPinInput').focus(); }, 100);
+      setTimeout(function() {
+        var inp = document.getElementById('staffPinInput');
+        if (inp) inp.focus();
+      }, 100);
     }
 
     function submitPin() {
-      var pin = document.getElementById('staffPinInput').value.trim();
+      var pin = (document.getElementById('staffPinInput').value || '').trim();
       var errEl = document.getElementById('pinError');
-      if (!pin) { errEl.textContent = 'กรุณากรอกรหัสพนักงาน'; errEl.classList.remove('hidden'); return; }
+      if (!pin) {
+        errEl.textContent = 'กรุณากรอกรหัสพนักงาน';
+        errEl.classList.remove('hidden');
+        return;
+      }
 
       var btn = document.getElementById('pinSubmitBtn');
       btn.disabled = true;
       btn.textContent = 'กำลังตรวจสอบ...';
 
-      var currentLineUid = (STATE.lineUser && STATE.lineUser.userId) ? STATE.lineUser.userId : '';
-
-      callBackendApi('verifyStaffPin', { pin: pin, lineUserId: currentLineUid })
+      var uid = STATE.lineUser ? STATE.lineUser.userId : '';
+      callBackendApi('verifyStaffPin', { pin: pin, lineUserId: uid })
         .then(function(res) {
           btn.disabled = false;
           btn.textContent = 'เข้าสู่ระบบ';
@@ -998,42 +1430,38 @@
             errEl.classList.remove('hidden');
             return;
           }
+
           STATE.isAdmin = true;
-          STATE.verifiedPin = pin;
-          STATE.staffName = res.name || 'พนักงาน';
+          STATE.verifiedPin = res.pin || pin;
+          STATE.staffName = res.name || 'Admin';
           STATE.dealerStatus = 'Approved';
-          if (!STATE.dealerInfo) {
-            STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-          }
+          STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
+
           try {
             localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
-              pin: pin,
+              pin: STATE.verifiedPin,
               name: STATE.staffName,
-              lineUserId: currentLineUid
+              lineUserId: uid
             }));
           } catch (e) {}
 
+          closeModal('pinModal');
           updateAdminHeaderUI();
           applyDealerGateUI();
-          loadCatalogData();
-          closeModal('pinModal');
+          loadCatalogData(true);
           openAdminWorkspace();
-          if (currentLineUid) {
-            showToast('เข้าสู่ระบบแอดมินสำเร็จ และผูกบัญชี LINE นี้เรียบร้อยแล้ว');
-          } else {
-            showToast('เข้าสู่ระบบแอดมินสำเร็จ สามารถดูและจัดการได้ทุกเมนู');
-          }
+          showToast('เข้าสู่ระบบแอดมินสำเร็จ (' + STATE.staffName + ')');
         })
         .catch(function(err) {
           btn.disabled = false;
           btn.textContent = 'เข้าสู่ระบบ';
-          errEl.textContent = 'เกิดข้อผิดพลาด: ' + (err.message || err);
+          errEl.textContent = 'เชื่อมต่อผิดพลาด: ' + (err.message || err);
           errEl.classList.remove('hidden');
         });
     }
 
     function openAdminWorkspace() {
-      document.getElementById('adminStaffBadge').textContent = STATE.staffName;
+      document.getElementById('adminStaffBadge').textContent = STATE.staffName || 'Admin';
       var boundBadge = document.getElementById('adminLineBoundBadge');
       var bindBtn = document.getElementById('btnBindAdminLine');
       if (STATE.lineUser && STATE.lineUser.userId) {
@@ -1044,15 +1472,16 @@
         if (bindBtn) bindBtn.classList.remove('hidden');
       }
 
-      populateAdminBrandSelect();
+      openModal('adminModal');
       switchAdminTab('dealers');
       loadAdminDealers();
-      openModal('adminModal');
-
       if (!STATE.products.length) {
-        document.getElementById('adminImageList').innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายการรุ่นสินค้าจากชีท...</div>';
-        loadCatalogData(true);
+        loadCatalogData(true).then(function() {
+          populateBrandFilters();
+          renderAdminImageList();
+        });
       } else {
+        populateBrandFilters();
         renderAdminImageList();
       }
     }
@@ -1060,58 +1489,44 @@
     function switchAdminTab(tab) {
       var tabs = {
         dealers: { btn: 'tabDealersBtn', panel: 'adminDealersTab' },
-        excel: { btn: 'tabExcelBtn', panel: 'adminExcelTab' },
-        images: { btn: 'tabImagesBtn', panel: 'adminImagesTab' }
+        excel:   { btn: 'tabExcelBtn',   panel: 'adminExcelTab' },
+        images:  { btn: 'tabImagesBtn',  panel: 'adminImagesTab' }
       };
+
       Object.keys(tabs).forEach(function(k) {
-        var isActive = (k === tab);
-        var btnEl = document.getElementById(tabs[k].btn);
-        var panelEl = document.getElementById(tabs[k].panel);
-        if (btnEl) {
-          btnEl.classList.toggle('border-slate-900', isActive);
-          btnEl.classList.toggle('text-slate-900', isActive);
-          btnEl.classList.toggle('border-transparent', !isActive);
-          btnEl.classList.toggle('text-slate-500', !isActive);
+        var isSel = k === tab;
+        var bEl = document.getElementById(tabs[k].btn);
+        var pEl = document.getElementById(tabs[k].panel);
+        if (bEl) {
+          bEl.className = isSel
+            ? 'inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 border-slate-900 text-slate-900 cursor-pointer whitespace-nowrap'
+            : 'inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap';
         }
-        if (panelEl) panelEl.classList.toggle('hidden', !isActive);
+        if (pEl) pEl.classList.toggle('hidden', !isSel);
       });
-      if (tab === 'images') renderAdminImageList();
+
+      if (tab === 'images') {
+        populateBrandFilters();
+        renderAdminImageList();
+      }
     }
 
-    function setExcelStep(stepNum) {
-      [1, 2, 3].forEach(function(n) {
-        var el = document.getElementById('excelStep' + n);
-        if (!el) return;
-        var badge = el.querySelector('span');
-        if (n === stepNum) {
-          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition';
-          if (badge) badge.className = 'w-5 h-5 rounded-full bg-white text-slate-900 flex items-center justify-center text-[11px] font-black shrink-0';
-        } else if (n < stepNum) {
-          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-100 text-emerald-900 font-bold transition';
-          if (badge) badge.className = 'w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black shrink-0';
-        } else {
-          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition';
-          if (badge) badge.className = 'w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0';
-        }
-      });
-    }
-
+    // --- TAB 1: DEALER APPROVALS ---
     function loadAdminDealers() {
       var listEl = document.getElementById('adminDealerList');
-      if (!listEl) return;
-      listEl.innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายชื่อผู้ลงทะเบียน...</div>';
+      if (listEl) listEl.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">กำลังโหลดรายชื่อ...</div>';
 
       callBackendApi('getDealerRegistrations', { pin: STATE.verifiedPin })
         .then(function(res) {
           if (!res || !res.ok) {
-            listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml((res && res.error) ? res.error : 'โหลดข้อมูลไม่สำเร็จ') + '</div>';
+            if (listEl) listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml((res && res.error) || 'โหลดข้อมูลไม่สำเร็จ') + '</div>';
             return;
           }
           STATE.dealersList = res.dealers || [];
           renderAdminDealers();
         })
         .catch(function(err) {
-          listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">เกิดข้อผิดพลาด: ' + escapeHtml(err.message || err) + '</div>';
+          if (listEl) listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml(err.message || err) + '</div>';
         });
     }
 
@@ -1119,196 +1534,221 @@
       var listEl = document.getElementById('adminDealerList');
       var badgeEl = document.getElementById('adminDealerPendingBadge');
       var dotEl = document.getElementById('headerPendingDot');
-      if (!listEl) return;
 
       var pendingCount = STATE.dealersList.filter(function(d) { return d.status === 'Pending'; }).length;
       if (badgeEl) {
         badgeEl.textContent = pendingCount;
         badgeEl.classList.toggle('hidden', pendingCount === 0);
       }
-      if (dotEl) dotEl.classList.toggle('hidden', pendingCount === 0);
+      if (dotEl) {
+        dotEl.classList.toggle('hidden', pendingCount === 0);
+      }
 
+      if (!listEl) return;
       if (!STATE.dealersList.length) {
-        listEl.innerHTML = '<div class="text-center py-10 text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ยังไม่มีรายการลงทะเบียนดีลเลอร์</div>';
+        listEl.innerHTML = '<div class="p-8 text-center text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ยังไม่มีรายการลงทะเบียน</div>';
         return;
       }
 
       listEl.innerHTML = STATE.dealersList.map(function(d) {
         var isPending = d.status === 'Pending';
         var isApproved = d.status === 'Approved';
-        var badgeCls = isApproved ? 'bg-emerald-100 text-emerald-800' : (isPending ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800');
-        var statusLabel = isApproved ? 'อนุมัติแล้ว' : (isPending ? 'รออนุมัติ' : 'ปฏิเสธ');
-        var safeUid = escapeHtml(d.lineUserId).replace(/'/g, "\\'");
+        var isAm = d.roleType === 'AM (สำหรับสาขา)';
+        var statusBadge = isApproved
+          ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">อนุมัติแล้ว</span>'
+          : (d.status === 'Rejected'
+            ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-bold">ไม่อนุมัติ</span>'
+            : (d.status === 'Replaced'
+              ? '<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-bold">ย้ายเครื่องแล้ว</span>'
+              : '<span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold">รออนุมัติ</span>'));
 
-        return '<div class="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+        var avatar = d.linePicture || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(d.lineName || 'U') + '&background=E2E8F0&color=334155');
+
+        return '<div class="p-4 rounded-2xl border ' + (isPending ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200 bg-white') + ' flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
           '<div class="flex items-start gap-3 min-w-0">' +
-            '<img src="' + escapeHtml(d.linePicture || 'https://placehold.co/80x80/e2e8f0/475569?text=LINE') + '" referrerpolicy="no-referrer" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0 bg-slate-100">' +
+            '<img src="' + escapeHtml(avatar) + '" referrerpolicy="no-referrer" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0">' +
             '<div class="min-w-0 space-y-0.5 text-xs">' +
               '<div class="flex items-center gap-2 flex-wrap">' +
-                '<span class="font-bold text-sm text-slate-900">' + escapeHtml(d.typedShopName) + '</span>' +
-                '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ' + badgeCls + '">' + statusLabel + '</span>' +
-                '<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold">' + escapeHtml(d.roleType) + '</span>' +
+                '<span class="font-bold text-sm text-slate-900">' + escapeHtml(d.typedShopName || '-') + '</span>' +
+                statusBadge +
+                '<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">' + escapeHtml(d.roleType || '-') + '</span>' +
               '</div>' +
-              '<div class="text-slate-600">LINE: <strong>' + escapeHtml(d.lineName) + '</strong> | SG Finance+: <strong class="text-slate-900">' + escapeHtml(d.sgFinanceUser) + '</strong></div>' +
-              '<div class="text-slate-500">โทร: ' + escapeHtml(d.phone) + (d.email ? (' | อีเมล: ' + escapeHtml(d.email)) : '') + '</div>' +
+              '<div class="text-slate-600">LINE: <strong>' + escapeHtml(d.lineName || '-') + '</strong> • ' +
+                (isAm ? ('รหัสพนักงาน: <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong>') : ('SG User: <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong> • โทร: ' + escapeHtml(d.phone || '-'))) +
+              '</div>' +
+              '<div class="text-[11px] text-slate-400 font-num">ลงทะเบียน: ' + escapeHtml(d.createdAt || '-') + (d.updatedAt ? ' • อัปเดต: ' + escapeHtml(d.updatedAt) : '') + '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="flex items-center gap-2 shrink-0">' +
-            (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + safeUid + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
-            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + safeUid + '\', \'Rejected\')" class="btn-press h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ปฏิเสธ</button>' : '') +
+          '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
+            (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
+            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ระงับ/ไม่อนุมัติ</button>' : '') +
           '</div>' +
         '</div>';
       }).join('');
     }
 
     function changeDealerStatus(lineUserId, newStatus) {
-      showToast('กำลังอัปเดตสถานะ...');
-      callBackendApi('updateDealerStatus', { pin: STATE.verifiedPin, lineUserId: lineUserId, newStatus: newStatus })
-        .then(function(res) {
-          if (!res || !res.ok) {
-            showToast((res && res.error) ? res.error : 'อัปเดตสถานะไม่สำเร็จ');
-            return;
-          }
-          showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'บันทึกสถานะเรียบร้อยแล้ว');
-          loadAdminDealers();
-        })
-        .catch(function(err) {
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
+      showToast('กำลังบันทึกสถานะ...');
+      callBackendApi('updateDealerStatus', {
+        pin: STATE.verifiedPin,
+        lineUserId: lineUserId,
+        newStatus: newStatus
+      }).then(function(res) {
+        if (!res || !res.ok) {
+          showToast((res && res.error) || 'อัปเดตสถานะไม่สำเร็จ');
+          return;
+        }
+        showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'อัปเดตสถานะเรียบร้อยแล้ว');
+        loadAdminDealers();
+      });
     }
 
-    function formatExcelDateCell(val) {
-      if (!val) return '';
-      if (val instanceof Date && !isNaN(val.getTime())) {
-        var d = val.getDate(), m = val.getMonth() + 1, y = val.getFullYear();
-        if (y > 2400) y -= 543;
-        return (d < 10 ? '0' + d : d) + '/' + (m < 10 ? '0' + m : m) + '/' + y;
-      }
-      return String(val).trim();
+    // --- TAB 2: EXCEL UPLOAD ---
+    function setExcelStep(step) {
+      [1, 2, 3].forEach(function(n) {
+        var el = document.getElementById('excelStep' + n);
+        if (!el) return;
+        if (n === step) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition';
+        } else if (n < step) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold transition';
+        } else {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition';
+        }
+      });
     }
 
-    function formatExcelPeriodCell(val) {
-      if (!val) return '';
-      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      if (val instanceof Date && !isNaN(val.getTime())) {
-        return val.getDate() + '-' + months[val.getMonth()];
-      }
-      return String(val).trim();
-    }
-
-    function handleExcelSelect(evt) {
-      var inputEl = evt.target;
-      var file = inputEl.files[0];
+    function handleExcelSelect(e) {
+      var file = e.target.files && e.target.files[0];
       if (!file) return;
-      setExcelStep(1);
       document.getElementById('excelSelectedFileName').textContent = 'ไฟล์ที่เลือก: ' + file.name;
-      showToast('กำลังอ่านไฟล์ Excel: ' + file.name);
 
       var reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function(evt) {
         try {
-          var data = new Uint8Array(e.target.result);
-          var wb = XLSX.read(data, { type: 'array', cellDates: true });
-          var ws = wb.Sheets[wb.SheetNames[0]];
-          var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          var wb = XLSX.read(evt.target.result, { type: 'array' });
+          var sheetName = wb.SheetNames.indexOf('ภาพรวม') !== -1 ? 'ภาพรวม' : wb.SheetNames[0];
+          var rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
 
-          var extractedDate = (rows[0] && rows[0][3]) ? formatExcelDateCell(rows[0][3]) : '';
-          var headerIdx = 4;
-          var colMap = { brand: 1, model: 2, wholesale: 3, rrp: 4, start: 11, end: 12 };
+          var headerIdx = -1;
+          var colMap = { brand: 0, model: 1, wholesale: 2, rrp: 3, period: 4 };
+
           for (var r = 0; r < Math.min(rows.length, 15); r++) {
-            var bCol = -1, mCol = -1;
-            for (var c = 0; c < rows[r].length; c++) {
-              var h = String(rows[r][c] || '').trim().toLowerCase();
-              if (h === 'brand') bCol = c;
-              if (h.indexOf('model') !== -1) mCol = c;
-            }
-            if (bCol !== -1 && mCol !== -1) {
+            var rowLower = rows[r].map(function(c) { return String(c || '').trim().toLowerCase(); });
+            var bIdx = rowLower.findIndex(function(c) { return c === 'brand' || c === 'แบรนด์'; });
+            var mIdx = rowLower.findIndex(function(c) { return c.indexOf('model') !== -1 || c.indexOf('รุ่น') !== -1; });
+            if (bIdx !== -1 && mIdx !== -1) {
               headerIdx = r;
-              colMap.brand = bCol;
-              colMap.model = mCol;
-              for (var c2 = 0; c2 < rows[r].length; c2++) {
-                var h2 = String(rows[r][c2] || '').trim().toLowerCase();
-                if (h2 === 'ราคาส่ง') colMap.wholesale = c2;
-                else if (h2.indexOf('rrp') !== -1 || h2.indexOf('ราคาปกติ') !== -1) colMap.rrp = c2;
-                else if (h2.indexOf('ระยะเวลา') !== -1) { colMap.start = c2; colMap.end = c2 + 1; }
-              }
+              colMap.brand = bIdx;
+              colMap.model = mIdx;
+              var wIdx = rowLower.findIndex(function(c) { return c.indexOf('ส่ง') !== -1 || c.indexOf('wholesale') !== -1; });
+              var rIdx = rowLower.findIndex(function(c) { return c.indexOf('rrp') !== -1 || c.indexOf('ปกติ') !== -1; });
+              var pIdx = rowLower.findIndex(function(c) { return c.indexOf('ระยะ') !== -1 || c.indexOf('period') !== -1; });
+              if (wIdx !== -1) colMap.wholesale = wIdx;
+              if (rIdx !== -1) colMap.rrp = rIdx;
+              if (pIdx !== -1) colMap.period = pIdx;
               break;
             }
           }
 
-          var existingMap = {};
-          STATE.products.forEach(function(p) { existingMap[p.modelDesc.toLowerCase()] = p; });
+          var startRow = headerIdx !== -1 ? headerIdx + 1 : 4;
+          var parsedItems = [];
 
-          var items = [];
-          var newCount = 0, changedCount = 0;
-          for (var i = headerIdx + 1; i < rows.length; i++) {
-            var brand = String(rows[i][colMap.brand] || '').trim();
-            var model = String(rows[i][colMap.model] || '').trim();
-            var wholesale = Number(String(rows[i][colMap.wholesale] || '').replace(/,/g, '').trim());
-            var rrp = Number(String(rows[i][colMap.rrp] || '').replace(/,/g, '').trim());
-            if (!brand || !model || isNaN(wholesale) || wholesale <= 0) continue;
-            if (brand.charAt(0) === '*' || brand.indexOf('หมายเหตุ') === 0) continue;
+          for (var i = startRow; i < rows.length; i++) {
+            var row = rows[i];
+            var brand = String(row[colMap.brand] || '').trim();
+            var modelDesc = String(row[colMap.model] || '').trim();
+            var wholesale = Number(String(row[colMap.wholesale] || '').replace(/,/g, '').trim());
+            var rrp = Number(String(row[colMap.rrp] || '').replace(/,/g, '').trim());
+            var period = String(row[colMap.period] || '').trim();
+
+            if (!brand || !modelDesc || isNaN(wholesale) || wholesale <= 0) continue;
             if (isNaN(rrp)) rrp = 0;
 
-            var p1 = formatExcelPeriodCell(rows[i][colMap.start]);
-            var p2 = formatExcelPeriodCell(rows[i][colMap.end]);
-            var period = (p1 && p2) ? (p1 + ' - ' + p2) : (p1 || p2);
-
-            var prev = existingMap[model.toLowerCase()];
-            var status = 'เดิม';
-            if (!prev) { status = 'ใหม่'; newCount++; }
-            else if (prev.wholesale !== wholesale || prev.rrp !== rrp || prev.period !== period) { status = 'อัปเดต'; changedCount++; }
-
-            items.push({ brand: brand, modelDesc: model, wholesale: wholesale, rrp: rrp, period: period, status: status });
+            parsedItems.push({
+              brand: brand,
+              modelDesc: modelDesc,
+              wholesale: wholesale,
+              rrp: rrp,
+              period: period
+            });
           }
 
-          inputEl.value = '';
-          if (!items.length) { showToast('ไม่พบรายการสินค้าในไฟล์ Excel'); return; }
+          if (!parsedItems.length) {
+            showToast('ไม่พบรายการสินค้าในไฟล์ Excel กรุณาตรวจสอบหัวตาราง');
+            return;
+          }
 
+          var now = new Date();
+          var docDate = ('0' + now.getDate()).slice(-2) + '/' + ('0' + (now.getMonth() + 1)).slice(-2) + '/' + now.getFullYear();
+
+          STATE.parsedExcelPayload = { docDate: docDate, items: parsedItems };
           setExcelStep(2);
-          STATE.parsedExcelPayload = { docDate: extractedDate || STATE.docDate, items: items };
-          document.getElementById('excelSummaryText').textContent = 'พบ ' + items.length + ' รุ่น (ใหม่ ' + newCount + ' | เปลี่ยนแปลง ' + changedCount + ')';
-          document.getElementById('excelPreviewBody').innerHTML = items.slice(0, 150).map(function(it) {
-            var badgeClass = it.status === 'ใหม่' ? 'bg-emerald-100 text-emerald-700' : (it.status === 'อัปเดต' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600');
-            return '<tr><td class="p-2"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ' + badgeClass + '">' + it.status + '</span></td>' +
-              '<td class="p-2 font-semibold">' + escapeHtml(it.brand) + '</td><td class="p-2">' + escapeHtml(it.modelDesc) + '</td>' +
-              '<td class="p-2 text-right font-bold text-rose-600">' + formatMoney(it.wholesale) + '</td><td class="p-2 text-right text-slate-500">' + formatMoney(it.rrp) + '</td>' +
-              '<td class="p-2 whitespace-nowrap">' + escapeHtml(it.period) + '</td></tr>';
-          }).join('');
+
+          document.getElementById('excelSummaryText').textContent = parsedItems.length + ' รายการ (วันที่อัปเดต ' + docDate + ')';
           document.getElementById('excelPreviewSection').classList.remove('hidden');
-          showToast('อ่านไฟล์ Excel สำเร็จ (' + items.length + ' รุ่น)');
+
+          var bodyEl = document.getElementById('excelPreviewBody');
+          bodyEl.innerHTML = parsedItems.slice(0, 100).map(function(item) {
+            return '<tr>' +
+              '<td class="p-2 text-emerald-600 font-bold">✓ พร้อม</td>' +
+              '<td class="p-2 font-semibold">' + escapeHtml(item.brand) + '</td>' +
+              '<td class="p-2">' + escapeHtml(item.modelDesc) + '</td>' +
+              '<td class="p-2 text-right font-bold font-num">' + formatMoney(item.wholesale) + '</td>' +
+              '<td class="p-2 text-right text-slate-500 font-num">' + formatMoney(item.rrp) + '</td>' +
+              '<td class="p-2 text-slate-600 font-num">' + escapeHtml(item.period || '-') + '</td>' +
+            '</tr>';
+          }).join('');
         } catch (err) {
-          inputEl.value = '';
-          showToast('อ่านไฟล์ไม่สำเร็จ: ' + err.message);
+          showToast('อ่านไฟล์ Excel ไม่สำเร็จ: ' + (err.message || err));
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
     function confirmExcelUpload() {
-      if (!STATE.parsedExcelPayload || !STATE.verifiedPin) return;
+      if (!STATE.parsedExcelPayload) return;
       var btn = document.getElementById('btnConfirmExcel');
       btn.disabled = true;
-      btn.textContent = 'กำลังบันทึก...';
+      btn.textContent = 'กำลังบันทึกข้อมูล...';
 
-      callBackendApi('updateOverviewSheet', { pin: STATE.verifiedPin, excelPayload: STATE.parsedExcelPayload })
-        .then(function(res) {
-          btn.disabled = false;
-          btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
-          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกไม่สำเร็จ'); return; }
-          setExcelStep(3);
-          showToast('อัปเดตชีทเรียบร้อยแล้ว (' + res.count + ' รุ่น)');
-          setTimeout(function() {
-            document.getElementById('excelPreviewSection').classList.add('hidden');
-            setExcelStep(1);
-            loadCatalogData();
-          }, 600);
-        })
-        .catch(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
+      callBackendApi('updateOverviewSheet', {
+        pin: STATE.verifiedPin,
+        excelPayload: STATE.parsedExcelPayload
+      }).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
+        if (!res || !res.ok) {
+          showToast((res && res.error) || 'อัปเดตข้อมูลไม่สำเร็จ');
+          return;
+        }
+        setExcelStep(3);
+        showToast('อัปเดตใบราคาจำนวน ' + res.count + ' รายการเรียบร้อยแล้ว!');
+        loadCatalogData(true);
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+      });
+    }
+
+    // --- TAB 3: IMAGES MANAGER ---
+    function populateBrandFilters() {
+      var filterEl = document.getElementById('adminBrandFilter');
+      var dataListEl = document.getElementById('brandDataList');
+      if (filterEl) {
+        var current = filterEl.value || 'ALL';
+        filterEl.innerHTML = '<option value="ALL">ทุกแบรนด์ (' + STATE.brands.length + ')</option>' +
+          STATE.brands.map(function(b) {
+            return '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>';
+          }).join('');
+        filterEl.value = current;
+      }
+      if (dataListEl) {
+        dataListEl.innerHTML = STATE.brands.map(function(b) {
+          return '<option value="' + escapeHtml(b) + '">';
+        }).join('');
+      }
     }
 
     function renderAdminImageList() {
@@ -1316,450 +1756,176 @@
       var countEl = document.getElementById('adminImageCount');
       if (!listEl) return;
 
-      var brandFilter = (document.getElementById('adminBrandFilter') && document.getElementById('adminBrandFilter').value) || 'ALL';
-      var q = ((document.getElementById('adminImageSearch') && document.getElementById('adminImageSearch').value) || '').trim().toLowerCase();
-      var onlyMissing = document.getElementById('adminOnlyMissingImg') && document.getElementById('adminOnlyMissingImg').checked;
+      var brandFilter = (document.getElementById('adminBrandFilter').value || 'ALL');
+      var q = (document.getElementById('adminImageSearch').value || '').trim().toLowerCase();
+      var onlyMissing = document.getElementById('adminOnlyMissingImg').checked;
 
-      var uniqueMap = {};
-      var items = [];
+      var seen = {};
+      var uniqueModels = [];
       STATE.products.forEach(function(p) {
         var key = p.brand + '||' + p.modelDesc;
-        if (!uniqueMap[key]) {
-          uniqueMap[key] = true;
-          items.push(p);
+        if (!seen[key]) {
+          seen[key] = true;
+          uniqueModels.push(p);
         }
       });
 
-      var filtered = items.filter(function(p) {
-        if (brandFilter !== 'ALL' && p.brand !== brandFilter) return false;
-        if (onlyMissing && p.imageUrl) return false;
-        if (q && (p.brand + ' ' + p.modelDesc).toLowerCase().indexOf(q) === -1) return false;
+      var filtered = uniqueModels.filter(function(item) {
+        if (brandFilter !== 'ALL' && item.brand !== brandFilter) return false;
+        if (onlyMissing && item.imageUrl) return false;
+        if (q && (item.brand + ' ' + item.modelDesc).toLowerCase().indexOf(q) === -1) return false;
         return true;
       });
 
       if (countEl) countEl.textContent = 'แสดง ' + filtered.length + ' รุ่น';
 
       if (!filtered.length) {
-        listEl.innerHTML = '<div class="text-center py-10 text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ไม่มีรายการตามตัวกรองที่เลือก</div>';
+        listEl.innerHTML = '<div class="p-6 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ไม่พบรายการรุ่นตามตัวกรองที่เลือก</div>';
         return;
       }
 
-      listEl.innerHTML = filtered.map(function(p, idx) {
-        var inputId = 'imgUrlInput_' + idx;
-        var fileId = 'imgFileInput_' + idx;
-        var btnId = 'imgSaveBtn_' + idx;
-        var safeBrand = escapeHtml(p.brand).replace(/'/g, "\\'");
-        var safeModel = escapeHtml(p.modelDesc).replace(/'/g, "\\'");
-        var thumbHtml = p.imageUrl
-          ? '<img src="' + escapeHtml(p.imageUrl) + '" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain border border-slate-200 bg-white p-1 shrink-0">'
-          : '<div class="w-12 h-12 rounded-xl border border-dashed border-slate-300 bg-slate-100 flex items-center justify-center text-[10px] text-slate-400 shrink-0">ไม่มีรูป</div>';
+      listEl.innerHTML = filtered.map(function(item, idx) {
+        var thumb = item.imageUrl
+          ? '<img src="' + escapeHtml(item.imageUrl) + '" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain border border-slate-200 bg-white p-1 shrink-0">'
+          : '<div class="w-12 h-12 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 shrink-0">ไม่มีรูป</div>';
 
-        return '<div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
-          '<div class="flex items-center gap-3 min-w-0 flex-1">' +
-            thumbHtml +
+        return '<div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">' +
+          '<div class="flex items-center gap-3 min-w-0">' +
+            thumb +
             '<div class="min-w-0">' +
-              '<span class="text-[11px] font-extrabold text-slate-500 uppercase">' + escapeHtml(p.brand) + '</span>' +
-              '<div class="text-xs sm:text-sm font-bold text-slate-900 truncate">' + escapeHtml(p.modelDesc) + '</div>' +
+              '<span class="text-[10px] font-extrabold uppercase text-slate-500">' + escapeHtml(item.brand) + '</span>' +
+              '<p class="text-xs sm:text-sm font-bold text-slate-900 truncate">' + escapeHtml(item.modelDesc) + '</p>' +
             '</div>' +
           '</div>' +
-          '<div class="flex items-center gap-1.5 sm:w-96 shrink-0">' +
-            '<input type="file" id="' + fileId + '" accept="image/*" class="hidden" onchange="handleRowModelImageFile(event, \'' + safeBrand + '\', \'' + safeModel + '\')">' +
-            '<label for="' + fileId + '" class="inline-flex items-center justify-center h-9 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shrink-0 whitespace-nowrap">อัปโหลด</label>' +
-            '<input type="url" id="' + inputId + '" value="' + escapeHtml(p.imageUrl || '') + '" placeholder="หรือวางลิงก์รูปภาพ..." class="w-full h-9 px-2.5 rounded-xl border border-slate-300 text-xs bg-slate-50 focus:bg-white">' +
-            '<button type="button" id="' + btnId + '" onclick="saveModelImageUrl(\'' + safeBrand + '\', \'' + safeModel + '\', \'' + inputId + '\', \'' + btnId + '\')" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer shrink-0">บันทึก</button>' +
+          '<div class="flex items-center gap-1.5 shrink-0">' +
+            '<input type="file" id="rowImgFile_' + idx + '" accept="image/*" class="hidden" onchange="handleRowModelImageFile(event, \'' + escapeHtml(item.brand) + '\', \'' + escapeHtml(item.modelDesc) + '\')">' +
+            '<label for="rowImgFile_' + idx + '" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer whitespace-nowrap">อัปโหลดรูป</label>' +
+            '<input type="url" id="rowImgUrl_' + idx + '" value="' + escapeHtml(item.imageUrl || '') + '" placeholder="วางลิงก์รูป..." class="w-36 sm:w-48 h-9 px-2.5 rounded-xl border border-slate-300 text-xs">' +
+            '<button type="button" onclick="saveRowModelImage(\'' + escapeHtml(item.brand) + '\', \'' + escapeHtml(item.modelDesc) + '\', \'rowImgUrl_' + idx + '\')" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer whitespace-nowrap">บันทึก</button>' +
           '</div>' +
         '</div>';
       }).join('');
     }
 
-    function handleRowModelImageFile(e, brand, modelDesc) {
-      var inputEl = e.target;
-      var file = inputEl.files[0];
+    function handleNewModelImageFile(e) {
+      var file = e.target.files && e.target.files[0];
       if (!file) return;
-
-      var progressBanner = document.getElementById('imageUploadProgressBanner');
-      var progressText = document.getElementById('imageUploadProgressText');
-      progressText.textContent = 'กำลังอัปโหลดรูป "' + file.name + '" สำหรับรุ่น ' + modelDesc + '...';
-      progressBanner.classList.remove('hidden');
-
-      var reader = new FileReader();
-      reader.onload = function(evt) {
-        callBackendApi('uploadModelImageFile', {
-          pin: STATE.verifiedPin, brand: brand, modelKey: modelDesc, fileName: file.name, base64DataUrl: evt.target.result
-        }).then(function(res) {
-          inputEl.value = '';
-          progressBanner.classList.add('hidden');
-          if (res && res.ok) {
-            STATE.products.forEach(function(p) { if (p.modelDesc === modelDesc) p.imageUrl = res.imageUrl; });
-            renderProducts();
-            renderAdminImageList();
-            showToast('อัปโหลดและบันทึกรูป "' + modelDesc + '" เรียบร้อย');
-          } else {
-            showToast((res && res.error) ? res.error : 'อัปโหลดรูปไม่สำเร็จ');
-          }
-        }).catch(function(err) {
-          inputEl.value = '';
-          progressBanner.classList.add('hidden');
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function populateAdminBrandSelect() {
-      var sel = document.getElementById('adminBrandFilter');
-      var dl = document.getElementById('brandDataList');
-      if (sel) {
-        var html = '<option value="ALL">ทุกแบรนด์</option>';
-        STATE.brands.forEach(function(b) { html += '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>'; });
-        sel.innerHTML = html;
+      var brand = (document.getElementById('newImgBrand').value || '').trim();
+      var modelKey = (document.getElementById('newImgModelKey').value || '').trim();
+      if (!modelKey) {
+        showToast('กรุณากรอกชื่อรุ่นก่อนเลือกไฟล์รูปภาพ');
+        e.target.value = '';
+        return;
       }
-      if (dl) {
-        dl.innerHTML = STATE.brands.map(function(b) { return '<option value="' + escapeHtml(b) + '">'; }).join('');
-      }
+      uploadImageToDrive(brand, modelKey, file, function(url) {
+        document.getElementById('newImgUrlInput').value = url;
+        e.target.value = '';
+      });
     }
 
     function submitNewModelImage() {
-      var brand = document.getElementById('newImgBrand').value.trim();
-      var modelKey = document.getElementById('newImgModelKey').value.trim();
-      var url = document.getElementById('newImgUrlInput').value.trim();
-      if (!modelKey) { showToast('กรุณากรอกชื่อรุ่นสินค้าก่อนบันทึก'); return; }
-      if (!url) { showToast('กรุณาเลือกไฟล์รูปภาพหรือวางลิงก์รูปภาพ'); return; }
-
+      var brand = (document.getElementById('newImgBrand').value || '').trim();
+      var modelKey = (document.getElementById('newImgModelKey').value || '').trim();
+      var url = (document.getElementById('newImgUrlInput').value || '').trim();
+      if (!modelKey || !url) {
+        showToast('กรุณากรอกชื่อรุ่นและลิงก์รูปภาพ');
+        return;
+      }
       var btn = document.getElementById('btnSaveNewImg');
       btn.disabled = true;
       btn.textContent = 'กำลังบันทึก...';
 
-      callBackendApi('saveModelImage', { pin: STATE.verifiedPin, brand: brand, modelKey: modelKey, imageUrl: url })
-        .then(function(res) {
-          btn.disabled = false;
-          btn.textContent = 'บันทึก';
-          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกไม่สำเร็จ'); return; }
-          document.getElementById('newImgModelKey').value = '';
-          document.getElementById('newImgUrlInput').value = '';
-          showToast('บันทึกรูปภาพเรียบร้อยแล้ว');
-          loadCatalogData(true);
-        })
-        .catch(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'บันทึก';
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
+      callBackendApi('saveModelImage', {
+        pin: STATE.verifiedPin,
+        brand: brand,
+        modelKey: modelKey,
+        imageUrl: url
+      }).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'บันทึก';
+        if (!res || !res.ok) {
+          showToast((res && res.error) || 'บันทึกรูปภาพไม่สำเร็จ');
+          return;
+        }
+        document.getElementById('newImgModelKey').value = '';
+        document.getElementById('newImgUrlInput').value = '';
+        showToast('บันทึกรูปภาพรุ่น ' + modelKey + ' เรียบร้อยแล้ว');
+        loadCatalogData(true).then(renderAdminImageList);
+      });
     }
 
-    function handleNewModelImageFile(e) {
-      var inputEl = e.target;
-      var file = inputEl.files[0];
+    function handleRowModelImageFile(e, brand, modelDesc) {
+      var file = e.target.files && e.target.files[0];
       if (!file) return;
+      uploadImageToDrive(brand, modelDesc, file, function() {
+        e.target.value = '';
+      });
+    }
 
-      var brand = document.getElementById('newImgBrand').value.trim();
-      var modelKey = document.getElementById('newImgModelKey').value.trim();
-      if (!modelKey) {
-        inputEl.value = '';
-        showToast('กรุณากรอกช่อง "ชื่อรุ่น / คำค้น (Model)" ก่อนเลือกไฟล์รูป');
-        document.getElementById('newImgModelKey').focus();
+    function saveRowModelImage(brand, modelDesc, inputId) {
+      var inp = document.getElementById(inputId);
+      var url = inp ? inp.value.trim() : '';
+      if (!url) {
+        showToast('กรุณาวางลิงก์รูปภาพก่อนบันทึก');
         return;
       }
+      showToast('กำลังบันทึกลิงก์รูปภาพ...');
+      callBackendApi('saveModelImage', {
+        pin: STATE.verifiedPin,
+        brand: brand,
+        modelKey: modelDesc,
+        imageUrl: url
+      }).then(function(res) {
+        if (!res || !res.ok) {
+          showToast((res && res.error) || 'บันทึกไม่สำเร็จ');
+          return;
+        }
+        showToast('บันทึกรูปภาพเรียบร้อยแล้ว');
+        loadCatalogData(true).then(renderAdminImageList);
+      });
+    }
 
-      var labelEl = document.getElementById('newImgFileLabel');
-      var progressBanner = document.getElementById('imageUploadProgressBanner');
-      var progressText = document.getElementById('imageUploadProgressText');
-
-      labelEl.classList.add('opacity-70', 'pointer-events-none');
-      labelEl.textContent = 'กำลังอัปโหลด...';
-      progressText.textContent = 'กำลังอัปโหลดรูป "' + file.name + '" สำหรับรุ่น ' + modelKey + '...';
-      progressBanner.classList.remove('hidden');
+    function uploadImageToDrive(brand, modelKey, file, onDone) {
+      var banner = document.getElementById('imageUploadProgressBanner');
+      var textEl = document.getElementById('imageUploadProgressText');
+      if (banner) banner.classList.remove('hidden');
+      if (textEl) textEl.textContent = 'กำลังอัปโหลดรูป ' + modelKey + ' ขึ้น Google Drive...';
 
       var reader = new FileReader();
       reader.onload = function(evt) {
         callBackendApi('uploadModelImageFile', {
-          pin: STATE.verifiedPin, brand: brand, modelKey: modelKey, fileName: file.name, base64DataUrl: evt.target.result
+          pin: STATE.verifiedPin,
+          brand: brand,
+          modelKey: modelKey,
+          fileName: file.name,
+          base64DataUrl: evt.target.result
         }).then(function(res) {
-          inputEl.value = '';
-          progressBanner.classList.add('hidden');
-          labelEl.classList.remove('opacity-70', 'pointer-events-none');
-          labelEl.textContent = 'เลือกไฟล์รูป';
-          if (res && res.ok) {
-            document.getElementById('newImgModelKey').value = '';
-            document.getElementById('newImgUrlInput').value = '';
-            showToast('อัปโหลดและบันทึกรูป "' + modelKey + '" เรียบร้อย');
-            loadCatalogData(true);
-          } else {
-            showToast((res && res.error) ? res.error : 'อัปโหลดรูปไม่สำเร็จ');
+          if (banner) banner.classList.add('hidden');
+          if (!res || !res.ok) {
+            showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
+            return;
           }
+          showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
+          if (onDone) onDone(res.imageUrl);
+          loadCatalogData(true).then(renderAdminImageList);
         }).catch(function(err) {
-          inputEl.value = '';
-          progressBanner.classList.add('hidden');
-          labelEl.classList.remove('opacity-70', 'pointer-events-none');
-          labelEl.textContent = 'เลือกไฟล์รูป';
+          if (banner) banner.classList.add('hidden');
           showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
       };
       reader.readAsDataURL(file);
     }
 
-    function saveModelImageUrl(brand, modelDesc, inputId, btnId) {
-      var url = document.getElementById(inputId).value.trim();
-      if (!url) { showToast('กรุณาวางลิงก์รูปภาพก่อนกดบันทึก'); return; }
-      var btn = document.getElementById(btnId);
-      if (btn) { btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; }
-
-      callBackendApi('saveModelImage', { pin: STATE.verifiedPin, brand: brand, modelKey: modelDesc, imageUrl: url })
-        .then(function(res) {
-          if (btn) { btn.disabled = false; btn.textContent = 'บันทึก'; }
-          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกรูปไม่สำเร็จ'); return; }
-          STATE.products.forEach(function(p) { if (p.modelDesc === modelDesc) p.imageUrl = url; });
-          renderProducts();
-          renderAdminImageList();
-          showToast('บันทึกลิงก์รูปภาพเรียบร้อย');
-        })
-        .catch(function(err) {
-          if (btn) { btn.disabled = false; btn.textContent = 'บันทึก'; }
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
-    }
-
-    // ================= CATALOG, PROMO STATUS & PDF FUNCTIONS =================
-    function getDocYear() {
-      if (STATE.docDate) {
-        var m = STATE.docDate.match(/(\d{4})/);
-        if (m) {
-          var y = parseInt(m[1], 10);
-          return y > 2400 ? y - 543 : y;
-        }
-      }
-      return new Date().getFullYear();
-    }
-
-    function parseMonthIndex(monStr) {
-      var months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
-      return months[String(monStr || '').toLowerCase().slice(0, 3)];
-    }
-
-    function parseDateToken(tokenStr, baseYear) {
-      var s = String(tokenStr || '').trim();
-      var m1 = s.match(/^(\d{1,2})[-\/\s]([A-Za-z]{3,})(?:[-\/\s](\d{2,4}))?$/);
-      if (m1) {
-        var day = parseInt(m1[1], 10), mon = parseMonthIndex(m1[2]), yr = m1[3] ? parseInt(m1[3], 10) : baseYear;
-        if (yr < 100) yr += 2000;
-        if (yr > 2400) yr -= 543;
-        if (mon !== undefined) return { date: new Date(yr, mon, day), hasExplicitYear: !!m1[3], day: day, monName: m1[2] };
-      }
-      var m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
-      if (m2) {
-        var d2 = parseInt(m2[1], 10), mo2 = parseInt(m2[2], 10) - 1, y2 = parseInt(m2[3], 10);
-        if (y2 < 100) y2 += 2000;
-        if (y2 > 2400) y2 -= 543;
-        var monNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return { date: new Date(y2, mo2, d2), hasExplicitYear: true, day: d2, monName: monNames[mo2] || '' };
-      }
-      return null;
-    }
-
-    function getPromoInfo(periodStr) {
-      if (!periodStr) return { status: 'active', label: '', pdfTag: '' };
-      var baseYear = getDocYear();
-      var today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      var parts = String(periodStr).split(/\s*-\s*/);
-      if (parts.length >= 2) {
-        var startParsed = parseDateToken(parts[0], baseYear);
-        var endParsed = parseDateToken(parts[parts.length - 1], baseYear);
-        if (startParsed && endParsed) {
-          var startDate = new Date(startParsed.date.getTime());
-          var endDate = new Date(endParsed.date.getTime());
-          if (!endParsed.hasExplicitYear && endDate.getMonth() < startDate.getMonth()) endDate.setFullYear(endDate.getFullYear() + 1);
-          startDate.setHours(0, 0, 0, 0);
-          endDate.setHours(23, 59, 59, 999);
-
-          if (today < startDate) {
-            var diffDays = Math.ceil((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            var ddStr = ('0' + startParsed.day).slice(-2) + '/' + startParsed.monName;
-            var labelText = diffDays === 1 ? ('โปรโมชั่นเริ่มพรุ่งนี้ (' + ddStr + ')') : (diffDays <= 7 ? ('โปรโมชั่นเริ่มในอีก ' + diffDays + ' วัน (' + ddStr + ')') : ('โปรโมชั่นเริ่ม ' + ddStr));
-            var pdfTagText = diffDays <= 7 ? ('[เริ่มใน ' + diffDays + ' วัน ' + ddStr + ']') : ('[เริ่ม ' + ddStr + ']');
-            return { status: 'upcoming', label: labelText, pdfTag: pdfTagText };
-          }
-          if (today > endDate) {
-            return { status: 'expired', label: 'หมดโปรโมชั่น', pdfTag: '[หมดโปรฯ]' };
-          }
-        }
-      }
-      return { status: 'active', label: '', pdfTag: '' };
-    }
-
-    function loadCatalogData(isAdminBackground) {
-      callBackendApi('getWholesaleData', {})
-        .then(function(res) {
-          var loadingEl = document.getElementById('loadingGrid');
-          if (loadingEl) loadingEl.classList.add('hidden');
-          if (!res || !res.ok) {
-            showToast('โหลดข้อมูลสินค้าไม่สำเร็จ: ' + ((res && res.error) ? res.error : ''));
-            return;
-          }
-          STATE.docTitle = res.docTitle || STATE.docTitle;
-          STATE.docDate = res.docDate || '';
-          STATE.warningText = res.warningText || STATE.warningText;
-          STATE.brands = res.brands || [];
-          STATE.products = (res.products || []).map(function(p) {
-            var copy = Object.assign({}, p);
-            copy.promo = getPromoInfo(copy.period);
-            return copy;
-          });
-          STATE.modelImages = res.modelImages || [];
-
-          if (!isAdminBackground || STATE.dealerStatus === 'Approved') {
-            document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'พร้อมใช้งาน';
-            document.getElementById('warningBanner').textContent = STATE.warningText;
-            renderBrandTabs();
-            renderProducts();
-          }
-          populateAdminBrandSelect();
-          renderAdminImageList();
-        })
-        .catch(function(err) {
-          var loadingEl = document.getElementById('loadingGrid');
-          if (loadingEl) loadingEl.classList.add('hidden');
-          showToast('เกิดข้อผิดพลาดในการโหลดรายการสินค้า: ' + (err.message || err));
-        });
-    }
-
-    function renderBrandTabs() {
-      var container = document.getElementById('brandTabsContainer');
-      if (!container) return;
-      var counts = {};
-      STATE.products.forEach(function(p) { counts[p.brand] = (counts[p.brand] || 0) + 1; });
-
-      var html = '<button type="button" onclick="selectBrand(\'ALL\')" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer whitespace-nowrap ' +
-        (STATE.activeBrand === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50') +
-        '">ทั้งหมด (' + STATE.products.length + ')</button>';
-
-      STATE.brands.forEach(function(b) {
-        var active = STATE.activeBrand === b;
-        var theme = getBrandTheme(b);
-        var styleStr = active ? 'background-color:' + theme.hex + ';color:#fff;border-color:' + theme.hex + ';' : 'background-color:#fff;color:#334155;border-color:#e2e8f0;';
-        html += '<button type="button" onclick="selectBrand(\'' + escapeHtml(b).replace(/'/g, "\\'") + '\')" style="' + styleStr + '" class="shrink-0 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer whitespace-nowrap">' +
-          escapeHtml(b) + ' (' + (counts[b] || 0) + ')</button>';
-      });
-      container.innerHTML = html;
-    }
-
-    function selectBrand(brand) {
-      STATE.activeBrand = brand;
-      renderBrandTabs();
-      renderProducts();
-    }
-
-    function renderProducts() {
-      var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-      var hideExpired = document.getElementById('hideExpiredToggle').checked;
-      var list = STATE.products.filter(function(p) {
-        if (STATE.activeBrand !== 'ALL' && p.brand !== STATE.activeBrand) return false;
-        var status = p.promo ? p.promo.status : 'active';
-        if (hideExpired && status !== 'active') return false;
-        if (q && (p.brand + ' ' + p.modelDesc + ' ' + p.wholesale + ' ' + p.rrp).toLowerCase().indexOf(q) === -1) return false;
-        return true;
-      });
-
-      document.getElementById('resultCount').textContent = list.length + ' รุ่น';
-      var grid = document.getElementById('productGrid');
-      var empty = document.getElementById('emptyState');
-
-      if (!list.length) {
-        grid.classList.add('hidden');
-        empty.classList.remove('hidden');
-        return;
-      }
-      empty.classList.add('hidden');
-      grid.classList.remove('hidden');
-
-      grid.innerHTML = list.map(function(p) {
-        var theme = getBrandTheme(p.brand);
-        var promo = p.promo || { status: 'active', label: '' };
-        var isInactive = promo.status !== 'active';
-        var profit = (p.rrp > 0 && p.wholesale > 0) ? (p.rrp - p.wholesale) : 0;
-        var imgHtml = p.imageUrl
-          ? '<img src="' + escapeHtml(p.imageUrl) + '" referrerpolicy="no-referrer" loading="lazy" class="w-full h-full object-contain">'
-          : '<div class="w-full h-full flex flex-col items-center justify-center p-2 text-center rounded-xl" style="background-color:' + theme.soft + '"><span class="text-xs font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span><span class="text-[10px] text-slate-500 mt-1">ยังไม่มีรูปภาพ</span></div>';
-
-        var ribbonHtml = '';
-        if (promo.status === 'expired') {
-          ribbonHtml = '<div class="pointer-events-none absolute inset-x-2 top-1/3 -translate-y-1/2 -rotate-6 bg-rose-600/95 text-white text-center py-1.5 px-2 rounded-xl shadow-md border border-rose-400"><span class="text-xs font-extrabold tracking-wide">' + escapeHtml(promo.label) + '</span></div>';
-        } else if (promo.status === 'upcoming') {
-          ribbonHtml = '<div class="pointer-events-none absolute inset-x-2 top-1/3 -translate-y-1/2 -rotate-3 bg-emerald-600/95 text-white text-center py-1.5 px-2 rounded-xl shadow-md border border-emerald-400"><span class="text-[11px] sm:text-xs font-extrabold tracking-wide">' + escapeHtml(promo.label) + '</span></div>';
-        }
-
-        return '<div class="relative">' +
-          '<article class="product-card h-full flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden ' + (isInactive ? 'expired-card' : '') + '">' +
-            '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3">' +
-              imgHtml +
-              (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num shadow-xs">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
-            '</div>' +
-            '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2">' +
-              '<div><span class="text-[11px] font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
-              '<h3 class="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mt-0.5">' + escapeHtml(p.modelDesc) + '</h3></div>' +
-              '<div class="pt-2.5 border-t border-slate-100 space-y-1">' +
-                (p.rrp > 0 ? '<div class="flex items-center justify-between text-xs text-slate-500"><span>ราคาปกติ (RRP)</span><span class="font-semibold font-num">฿' + formatMoney(p.rrp) + '</span></div>' : '') +
-                '<div class="flex items-baseline justify-between gap-1">' +
-                  '<span class="text-xs font-bold text-rose-600">ราคาส่ง</span>' +
-                  '<span class="text-xl font-black text-slate-900 font-num">฿' + formatMoney(p.wholesale) + '</span>' +
-                '</div>' +
-                (p.period ? '<div class="text-[11px] text-slate-500 pt-0.5 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
-              '</div>' +
-            '</div>' +
-          '</article>' +
-          ribbonHtml +
-        '</div>';
-      }).join('');
-    }
-
-    function openPdfModal() {
-      var container = document.getElementById('pdfBrandChecklist');
-      container.innerHTML = STATE.brands.map(function(b) {
-        var checked = (STATE.activeBrand === 'ALL' || STATE.activeBrand === b) ? 'checked' : '';
-        return '<label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold cursor-pointer"><input type="checkbox" name="pdfBrandChoice" value="' + escapeHtml(b) + '" ' + checked + ' class="w-4 h-4 rounded"><span>' + escapeHtml(b) + '</span></label>';
-      }).join('');
-      openModal('pdfModal');
-    }
-
-    function togglePdfBrands(checked) {
-      document.querySelectorAll('input[name="pdfBrandChoice"]').forEach(function(cb) { cb.checked = checked; });
-    }
-
-    async function generatePdfCatalog() {
-      var selected = [];
-      document.querySelectorAll('input[name="pdfBrandChoice"]:checked').forEach(function(cb) { selected.push(cb.value); });
-      if (!selected.length) { showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์'); return; }
-
-      var btn = document.getElementById('generatePdfBtn');
-      btn.disabled = true;
-      btn.textContent = 'กำลังสร้าง PDF...';
-      try {
-        var jsPDF = window.jspdf.jsPDF;
-        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        var first = true;
-        selected.forEach(function(brand) {
-          var items = STATE.products.filter(function(p) { return p.brand === brand; });
-          if (!items.length) return;
-          if (!first) doc.addPage();
-          first = false;
-          doc.setFontSize(14);
-          doc.text('JAYMART WHOLESALE - ' + brand.toUpperCase(), 14, 16);
-          doc.autoTable({
-            startY: 22,
-            head: [['#', 'Model', 'RRP', 'Wholesale', 'Period']],
-            body: items.map(function(p, i) { return [i + 1, p.modelDesc, formatMoney(p.rrp), formatMoney(p.wholesale), p.period || '-']; })
-          });
-        });
-        doc.save('Jaymart_Wholesale_Catalog.pdf');
-        closeModal('pdfModal');
-        showToast('ดาวน์โหลด PDF เรียบร้อยแล้ว');
-      } catch (e) {
-        showToast('สร้าง PDF ไม่สำเร็จ: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'สร้างและดาวน์โหลด PDF';
-      }
+    var toastTimer = null;
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        el.classList.add('hidden');
+      }, 3200);
     }
   </script>
 </body>
