@@ -92,10 +92,10 @@
         </div>
 
         <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4-5 บนมือถือ -->
-        <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
+        <div id="headerActionsWrapper" class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- บรรทัดที่ 4 (มือถือ): แอดมิน + สลับ LINE + ปุ่ม Admin เรียง 3 อันในแถวเดียวกัน -->
           <div id="headerStaffControlsRow" class="grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2">
-            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 px-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
+            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
 
             <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
               <span>สลับ LINE</span>
@@ -108,8 +108,8 @@
             </button>
           </div>
 
-          <!-- บรรทัดที่ 5 (มือถือ): ปุ่มดาวน์โหลด PDF อยู่ขวาล่างต่อจาก 3 ปุ่มด้านบน -->
-          <div class="flex justify-end lg:order-first">
+          <!-- บรรทัดที่ 5 (มือถือสำหรับแอดมิน/AM) หรือบรรทัดเดียวกับชื่อร้าน (สำหรับดีลเลอร์) -->
+          <div id="headerPdfRow" class="flex justify-end lg:order-first">
             <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
               <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               <span>ดาวน์โหลด PDF</span>
@@ -886,7 +886,9 @@
       var pdfBtn = document.getElementById('headerPdfBtn');
       var switchBtn = document.getElementById('headerSwitchLineBtn');
       var adminBtn = document.getElementById('headerAdminBtn');
+      var actionsWrapper = document.getElementById('headerActionsWrapper');
       var controlsRow = document.getElementById('headerStaffControlsRow');
+      var pdfRow = document.getElementById('headerPdfRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
       [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
@@ -894,7 +896,9 @@
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
       if (adminBtn) adminBtn.classList.remove('hidden');
+      if (actionsWrapper) actionsWrapper.className = 'flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0';
       if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
+      if (pdfRow) pdfRow.className = 'flex justify-end lg:order-first';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
         if (catalogArea) catalogArea.classList.remove('hidden');
@@ -906,10 +910,12 @@
           if (switchBtn) switchBtn.classList.remove('hidden');
           if (adminBtn) adminBtn.classList.remove('hidden');
         } else {
-          // ดีลเลอร์ทั่วไป: แสดงเฉพาะชื่อที่ลงทะเบียน และปุ่มดาวน์โหลด PDF เท่านั้น (ซ่อนสลับ LINE และ Workspace/Admin)
+          // ดีลเลอร์ทั่วไป: จัดชื่อร้านค้าและปุ่มดาวน์โหลด PDF ให้อยู่บรรทัดเดียวกัน
           if (switchBtn) switchBtn.classList.add('hidden');
           if (adminBtn) adminBtn.classList.add('hidden');
-          if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
+          if (actionsWrapper) actionsWrapper.className = 'flex flex-row items-center justify-between lg:justify-end gap-2 shrink-0';
+          if (controlsRow) controlsRow.className = 'flex items-center min-w-0';
+          if (pdfRow) pdfRow.className = 'flex items-center shrink-0 lg:order-first';
         }
 
         if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
