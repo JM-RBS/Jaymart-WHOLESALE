@@ -91,27 +91,25 @@
           </div>
         </div>
 
-        <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4 บนมือถือ (Dealer: ชื่อร้าน + ดาวน์โหลด PDF อยู่บรรทัดเดียวกัน) -->
+        <!-- ฝั่งขวาบนคอม / มือถือ (AM: แถว 4 = ชื่อ + สลับ LINE + Workspace, แถว 5 = โหลด PDF | Dealer: แถวเดียว = ชื่อ + โหลด PDF) -->
         <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
-          <div id="headerStaffControlsRow" class="flex flex-wrap items-center justify-between lg:justify-end gap-1.5 sm:gap-2">
-            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 sm:h-10 px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate max-w-[52vw] sm:max-w-xs"></span>
+          <div id="headerStaffControlsRow" class="flex items-center justify-end gap-1.5 sm:gap-2">
+            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
 
-            <div class="flex items-center gap-1.5 sm:gap-2 ml-auto">
-              <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
-                <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span>ดาวน์โหลด PDF</span>
-              </button>
+            <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
+              <span>สลับ LINE</span>
+            </button>
 
-              <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
-                <span>สลับ LINE</span>
-              </button>
+            <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
+              <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span id="headerAdminBtnText" class="truncate">Login Admin</span>
+              <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
+            </button>
 
-              <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
-                <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                <span id="headerAdminBtnText" class="truncate">Login Admin</span>
-                <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
-              </button>
-            </div>
+            <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden col-span-3 justify-self-end lg:col-auto btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap shrink-0">
+              <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>ดาวน์โหลด PDF</span>
+            </button>
           </div>
         </div>
 
@@ -936,6 +934,7 @@
       var pdfBtn = document.getElementById('headerPdfBtn');
       var switchBtn = document.getElementById('headerSwitchLineBtn');
       var adminBtn = document.getElementById('headerAdminBtn');
+      var controlsRow = document.getElementById('headerStaffControlsRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
       [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
@@ -943,6 +942,7 @@
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
       if (adminBtn) adminBtn.classList.remove('hidden');
+      if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
         if (catalogArea) catalogArea.classList.remove('hidden');
@@ -953,10 +953,12 @@
         if (isStaffOrManager) {
           if (switchBtn) switchBtn.classList.remove('hidden');
           if (adminBtn) adminBtn.classList.remove('hidden');
+          if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
         } else {
           // ดีลเลอร์ทั่วไป: แสดงชื่อร้านและปุ่มดาวน์โหลด PDF ในบรรทัดเดียวกัน
           if (switchBtn) switchBtn.classList.add('hidden');
           if (adminBtn) adminBtn.classList.add('hidden');
+          if (controlsRow) controlsRow.className = 'flex items-center justify-between lg:justify-end gap-2';
         }
 
         if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
