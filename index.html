@@ -38,51 +38,89 @@
     .btn-press:active { transform: scale(0.97); }
     @keyframes pulseSoft { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
     .skeleton { animation: pulseSoft 1.5s ease-in-out infinite; background-color: #E2E8F0; }
+    @keyframes marqueeSlide {
+      0% { transform: translateX(0%); }
+      50% { transform: translateX(-18%); }
+      100% { transform: translateX(0%); }
+    }
+    @media (max-width: 639px) {
+      .mobile-marquee {
+        display: inline-block;
+        white-space: nowrap;
+        animation: marqueeSlide 7s ease-in-out infinite;
+      }
+    }
   </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col bg-[#F8FAFC] text-slate-900">
 
-  <!-- Top Sticky Header -->
+  <!-- Top Sticky Header (Responsive Mobile-First Layout) -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between gap-3 py-3.5">
-        <div class="flex items-center gap-3 min-w-0 flex-1">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C8102E] shadow-xs shrink-0 select-none">
-            <span class="px-2 py-0.5 rounded-full bg-white text-[#C8102E] font-extrabold text-xs tracking-tight leading-none">Jaymart</span>
-            <span class="text-white font-extrabold text-xs tracking-wide leading-none">WHOLESALE</span>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <h1 class="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">ใบราคาขายส่ง</h1>
-              <span id="docDateBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-3 py-2.5 sm:py-3">
+
+        <!-- ฝั่งซ้ายบนคอม / เรียงบรรทัด 1-3 บนมือถือ -->
+        <div class="flex flex-col gap-1.5 min-w-0">
+          <!-- บรรทัดที่ 1 (มือถือ): โลโก้ Jaymart WHOLESALE อยู่กึ่งกลางข้างบน -->
+          <div class="flex items-center justify-center lg:justify-start gap-2.5">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C8102E] shadow-xs shrink-0 select-none">
+              <span class="px-2 py-0.5 rounded-full bg-white text-[#C8102E] font-extrabold text-xs tracking-tight leading-none">Jaymart</span>
+              <span class="text-white font-extrabold text-xs tracking-wide leading-none">WHOLESALE</span>
+            </div>
+
+            <!-- บนคอมแสดงชื่อเอกสารและวันที่ต่อท้ายโลโก้ -->
+            <div class="hidden lg:flex items-center gap-2 min-w-0">
+              <h1 class="text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">ใบราคาขายส่ง</h1>
+              <span id="docDateBadgeDesktop" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
                 กำลังตรวจสอบสิทธิ์...
               </span>
             </div>
-            <p id="warningBanner" class="text-xs text-red-600 font-medium mt-0.5 truncate">**สำคัญ!! ต้อง Activate ทุกเครื่องที่มี Sell Out**</p>
+          </div>
+
+          <!-- บรรทัดที่ 2 (มือถือ): ใบราคาขายส่ง อยู่ซ้าย / อัปเดต อยู่ขวา -->
+          <div class="flex lg:hidden items-center justify-between gap-2 pt-0.5">
+            <h1 class="text-sm font-bold tracking-tight text-slate-900 whitespace-nowrap">ใบราคาขายส่ง</h1>
+            <span id="docDateBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
+              กำลังตรวจสอบสิทธิ์...
+            </span>
+          </div>
+
+          <!-- บรรทัดที่ 3: ข้อความแจ้งเตือน Activate เต็มจอ / เลื่อนได้บนมือถือ -->
+          <div class="w-full overflow-hidden text-center lg:text-left bg-red-50/80 lg:bg-transparent border border-red-100 lg:border-0 rounded-lg py-1 px-2 lg:p-0">
+            <p id="warningBanner" class="mobile-marquee text-[11px] sm:text-xs text-red-600 font-semibold leading-snug">**สำคัญ!! ต้อง Activate ทุกเครื่องที่มี Sell Out**</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
-          <span id="dealerActiveBadge" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap"></span>
-          <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center gap-1 h-10 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer whitespace-nowrap">
-            <span>สลับ LINE</span>
-          </button>
-          <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer whitespace-nowrap">
-            <svg width="16" height="16" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <span class="hidden sm:inline">ดาวน์โหลด PDF</span>
-            <span class="sm:hidden">PDF</span>
-          </button>
+        <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4-5 บนมือถือ -->
+        <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
+          <!-- บรรทัดที่ 4 (มือถือ): แอดมิน + สลับ LINE + ปุ่ม Admin เรียง 3 อันในแถวเดียวกัน -->
+          <div id="headerStaffControlsRow" class="grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2">
+            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 px-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
 
-          <button onclick="openAdminAuth()" class="relative btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
-            <svg width="16" height="16" class="w-4 h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span id="headerAdminBtnText">Login Admin</span>
-            <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
-          </button>
+            <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
+              <span>สลับ LINE</span>
+            </button>
+
+            <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap col-start-3 lg:col-auto">
+              <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span id="headerAdminBtnText" class="truncate">Login Admin</span>
+              <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
+            </button>
+          </div>
+
+          <!-- บรรทัดที่ 5 (มือถือ): ปุ่มดาวน์โหลด PDF อยู่ขวาล่างต่อจาก 3 ปุ่มด้านบน -->
+          <div class="flex justify-end lg:order-first">
+            <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
+              <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>ดาวน์โหลด PDF</span>
+            </button>
+          </div>
         </div>
+
       </div>
 
       <!-- Search + Filter Controls -->
-      <div id="catalogFilterBar" class="hidden pb-3 space-y-2.5">
+      <div id="catalogFilterBar" class="hidden pb-3 space-y-2">
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="relative flex-1 min-w-0">
             <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -93,11 +131,11 @@
           </div>
 
           <div class="flex items-center justify-between sm:justify-end gap-2">
-            <label class="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none whitespace-nowrap">
+            <label class="inline-flex items-center gap-2 h-9 sm:h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none whitespace-nowrap">
               <input id="hideExpiredToggle" type="checkbox" onchange="renderProducts()" class="w-4 h-4 rounded border-slate-300 text-slate-900">
               <span>ซ่อนรุ่นหมดโปรฯ / รอเริ่มโปรฯ</span>
             </label>
-            <div id="resultCount" class="h-10 px-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold flex items-center whitespace-nowrap font-num">0 รุ่น</div>
+            <div id="resultCount" class="h-9 sm:h-10 px-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold flex items-center whitespace-nowrap font-num">0 รุ่น</div>
           </div>
         </div>
 
@@ -107,7 +145,7 @@
   </header>
 
   <!-- Main Content Area -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main class="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6">
 
     <!-- 1. LINE Login Consent Gate (ไม่มีกล่อง Callback URL) -->
     <div id="lineLoginGate" class="max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 sm:p-8 text-center">
@@ -249,7 +287,7 @@
 
     <!-- 4. Approved Catalog Grid Container -->
     <div id="catalogContentArea" class="hidden space-y-5">
-      <div id="loadingGrid" class="hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4">
+      <div id="loadingGrid" class="hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <div class="h-72 rounded-2xl skeleton"></div>
         <div class="h-72 rounded-2xl skeleton"></div>
         <div class="h-72 rounded-2xl skeleton"></div>
@@ -257,7 +295,7 @@
         <div class="h-72 rounded-2xl skeleton hidden xl:block"></div>
       </div>
 
-      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4"></div>
+      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"></div>
 
       <div id="emptyState" class="hidden py-16 text-center bg-white rounded-3xl border border-slate-200">
         <p class="text-base font-bold text-slate-700">ไม่พบรายการสินค้าตามเงื่อนไขที่ค้นหา</p>
@@ -591,7 +629,6 @@
       renderProducts();
     }
 
-    // Helper for calling Google Apps Script REST API from GitHub Pages
     async function callBackendApi(action, payload) {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         return new Promise(function(resolve, reject) {
@@ -621,7 +658,6 @@
       return await response.json();
     }
 
-    // ================= LINE OAUTH2 & DEVICE MEMORY FLOW =================
     function getOAuthRedirectUri() {
       var loc = window.location;
       return loc.origin + loc.pathname;
@@ -639,111 +675,110 @@
       if (code) {
         var cleanUrl = getOAuthRedirectUri();
         try { window.history.replaceState({}, document.title, cleanUrl); } catch (e) {}
-        document.getElementById('docDateBadge').textContent = 'กำลังยืนยันบัญชี LINE...';
+        setDocDateText('กำลังยืนยันบัญชี LINE...');
         showToast('กำลังตรวจสอบข้อมูลบัญชี LINE...');
-
-        // ตรวจสอบว่าเป็นการกดผูกบัญชี LINE ของแอดมินหรือไม่ (ส่งแนบมากับ state)
-        var bindPinFromState = '';
-        if (stateParam.indexOf('jm_admin_') === 0) {
-          bindPinFromState = stateParam.replace('jm_admin_', '').split('_')[0];
-        }
 
         callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanUrl })
           .then(function(res) {
             if (!res || !res.ok || !res.lineUser) {
-              var errMsg = (res && res.error) ? res.error : 'ไม่สามารถยืนยันตัวตน LINE ได้';
               var errBox = document.getElementById('lineAuthErrorBox');
-              errBox.textContent = 'ยืนยันตัวตน LINE ไม่สำเร็จ: ' + errMsg;
-              errBox.classList.remove('hidden');
-              STATE.dealerStatus = 'unlogged';
-              applyDealerGateUI();
+              if (errBox) {
+                errBox.textContent = 'ยืนยันตัวตน LINE ไม่สำเร็จ: ' + ((res && res.error) ? res.error : 'กรุณาลองใหม่อีกครั้ง');
+                errBox.classList.remove('hidden');
+              }
+              setDocDateText('ยืนยันตัวตนไม่สำเร็จ');
               return;
             }
+
             STATE.lineUser = res.lineUser;
             try { localStorage.setItem(STORAGE_LINE_KEY, JSON.stringify(res.lineUser)); } catch (e) {}
 
-            if (bindPinFromState) {
-              callBackendApi('verifyStaffPin', { pin: bindPinFromState, lineUserId: res.lineUser.userId })
-                .then(function(pinRes) {
-                  if (pinRes && pinRes.ok) {
-                    STATE.isAdmin = true;
-                    STATE.verifiedPin = bindPinFromState;
-                    STATE.staffName = pinRes.name || 'Admin';
-                    STATE.dealerStatus = 'Approved';
-                    STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-                    try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: bindPinFromState, name: STATE.staffName, lineUserId: res.lineUser.userId })); } catch (e) {}
-                    updateAdminHeaderUI();
-                    applyDealerGateUI();
-                    loadCatalogData();
-                    openAdminWorkspace();
-                    showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินสำเร็จเรียบร้อยแล้ว!');
-                  } else {
+            if (stateParam.indexOf('jm_admin_') === 0) {
+              var parts = stateParam.split('_');
+              var adminPin = parts[2] ? decodeURIComponent(parts[2]) : '';
+              if (adminPin) {
+                callBackendApi('verifyStaffPin', { pin: adminPin, lineUserId: res.lineUser.userId })
+                  .then(function(pinRes) {
+                    if (pinRes && pinRes.ok) {
+                      STATE.isAdmin = true;
+                      STATE.verifiedPin = pinRes.pin || adminPin;
+                      STATE.staffName = pinRes.name || 'Admin';
+                      STATE.dealerStatus = 'Approved';
+                      STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
+                      try {
+                        localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
+                          pin: STATE.verifiedPin,
+                          name: STATE.staffName,
+                          lineUserId: res.lineUser.userId
+                        }));
+                      } catch (e) {}
+                      updateAdminHeaderUI();
+                      applyDealerGateUI();
+                      loadCatalogData();
+                      openAdminWorkspace();
+                      showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
+                      return;
+                    }
                     verifyLineUserAccess(res.lineUser.userId);
-                  }
-                });
-              return;
+                  });
+                return;
+              }
             }
 
             verifyLineUserAccess(res.lineUser.userId);
           })
           .catch(function(err) {
             var errBox = document.getElementById('lineAuthErrorBox');
-            errBox.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + (err.message || err);
-            errBox.classList.remove('hidden');
-            STATE.dealerStatus = 'unlogged';
-            applyDealerGateUI();
+            if (errBox) {
+              errBox.textContent = 'เชื่อมต่อผิดพลาด: ' + (err.message || err);
+              errBox.classList.remove('hidden');
+            }
+            setDocDateText('เชื่อมต่อผิดพลาด');
           });
         return;
       }
 
-      try {
-        var savedAdmin = localStorage.getItem(STORAGE_ADMIN_KEY);
-        if (savedAdmin) {
-          var parsedAdmin = JSON.parse(savedAdmin);
-          if (parsedAdmin && parsedAdmin.pin) {
-            STATE.isAdmin = true;
-            STATE.verifiedPin = parsedAdmin.pin;
-            STATE.staffName = parsedAdmin.name || 'Admin';
-            STATE.dealerStatus = 'Approved';
-            STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-            updateAdminHeaderUI();
-          }
-        }
-      } catch (e) {}
+      var savedAdmin = null;
+      try { savedAdmin = JSON.parse(localStorage.getItem(STORAGE_ADMIN_KEY) || 'null'); } catch (e) {}
+      if (savedAdmin && savedAdmin.pin) {
+        STATE.isAdmin = true;
+        STATE.verifiedPin = savedAdmin.pin;
+        STATE.staffName = savedAdmin.name || 'Admin';
+        updateAdminHeaderUI();
+      }
 
-      try {
-        var saved = localStorage.getItem(STORAGE_LINE_KEY);
-        if (saved) {
-          var parsedUser = JSON.parse(saved);
-          if (parsedUser && parsedUser.userId) {
-            STATE.lineUser = parsedUser;
-            if (STATE.isAdmin && STATE.verifiedPin) {
-              callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: parsedUser.userId }).catch(function() {});
-              applyDealerGateUI();
-              loadCatalogData();
-              return;
-            }
-            verifyLineUserAccess(parsedUser.userId);
-            return;
-          }
-        }
-      } catch (e) {}
+      var savedLine = null;
+      try { savedLine = JSON.parse(localStorage.getItem(STORAGE_LINE_KEY) || 'null'); } catch (e) {}
+      if (savedLine && savedLine.userId) {
+        STATE.lineUser = savedLine;
+        verifyLineUserAccess(savedLine.userId);
+        return;
+      }
 
       if (STATE.isAdmin) {
+        STATE.dealerStatus = 'Approved';
+        STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
         applyDealerGateUI();
         loadCatalogData();
         return;
       }
 
       STATE.dealerStatus = 'unlogged';
-      document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
+      setDocDateText('กรุณายืนยันตัวตน');
       applyDealerGateUI();
+    }
+
+    function setDocDateText(txt) {
+      var mEl = document.getElementById('docDateBadge');
+      var dEl = document.getElementById('docDateBadgeDesktop');
+      if (mEl) mEl.textContent = txt;
+      if (dEl) dEl.textContent = txt;
     }
 
     function updateAdminHeaderUI() {
       var btnText = document.getElementById('headerAdminBtnText');
       if (btnText) {
-        btnText.textContent = STATE.isAdmin ? ('Admin (' + STATE.staffName + ')') : 'Login Admin';
+        btnText.textContent = STATE.isAdmin ? 'Workspace' : 'Login Admin';
       }
     }
 
@@ -761,7 +796,7 @@
     }
 
     function verifyLineUserAccess(lineUserId) {
-      document.getElementById('docDateBadge').textContent = 'กำลังตรวจสอบสิทธิ์...';
+      setDocDateText('กำลังตรวจสอบสิทธิ์...');
 
       var pendingBind = false;
       try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
@@ -818,7 +853,7 @@
           if (STATE.dealerStatus === 'Approved') {
             loadCatalogData();
           } else {
-            document.getElementById('docDateBadge').textContent = STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์';
+            setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
           }
         })
         .catch(function() {
@@ -835,18 +870,33 @@
       var filterBar = document.getElementById('catalogFilterBar');
       var pdfBtn = document.getElementById('headerPdfBtn');
       var switchBtn = document.getElementById('headerSwitchLineBtn');
+      var adminBtn = document.getElementById('headerAdminBtn');
+      var controlsRow = document.getElementById('headerStaffControlsRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
       [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
         if (el) el.classList.add('hidden');
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
+      if (adminBtn) adminBtn.classList.remove('hidden');
+      if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
         if (catalogArea) catalogArea.classList.remove('hidden');
         if (filterBar) filterBar.classList.remove('hidden');
         if (pdfBtn) pdfBtn.classList.remove('hidden');
-        if (switchBtn) switchBtn.classList.remove('hidden');
+
+        var isStaffOrManager = STATE.isAdmin || (STATE.dealerInfo && STATE.dealerInfo.roleType === 'AM (สำหรับสาขา)');
+        if (isStaffOrManager) {
+          if (switchBtn) switchBtn.classList.remove('hidden');
+          if (adminBtn) adminBtn.classList.remove('hidden');
+        } else {
+          // ดีลเลอร์ทั่วไป: แสดงเฉพาะชื่อที่ลงทะเบียน และปุ่มดาวน์โหลด PDF เท่านั้น (ซ่อนสลับ LINE และ Workspace/Admin)
+          if (switchBtn) switchBtn.classList.add('hidden');
+          if (adminBtn) adminBtn.classList.add('hidden');
+          if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
+        }
+
         if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
           dealerBadge.textContent = STATE.dealerInfo.typedShopName;
           dealerBadge.classList.remove('hidden');
@@ -893,7 +943,6 @@
         return;
       }
 
-      // Unregistered -> Show Dealer Registration Form
       regView.classList.remove('hidden');
       document.getElementById('regLineAvatar').src = STATE.lineUser.pictureUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(STATE.lineUser.displayName || 'U') + '&background=06C755&color=fff';
       document.getElementById('regLineName').textContent = STATE.lineUser.displayName || 'ผู้ใช้งาน LINE';
@@ -1152,7 +1201,7 @@
           STATE.products = res.products || [];
           STATE.modelImages = res.modelImages || [];
 
-          document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'อัปเดตล่าสุด';
+          setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'อัปเดตล่าสุด');
           document.getElementById('warningBanner').textContent = STATE.warningText;
 
           renderBrandTabs();
@@ -1229,6 +1278,7 @@
         var promo = getPromoInfo(item.period);
         var isInactive = promo.state !== 'active';
         var profit = (item.rrp > 0 && item.wholesale > 0 && item.rrp > item.wholesale) ? (item.rrp - item.wholesale) : 0;
+        var profitPercent = profit > 0 ? Math.round((profit / item.rrp) * 1000) / 10 : 0;
 
         var badgeHtml = '';
         if (promo.state === 'expired') {
@@ -1237,8 +1287,8 @@
           badgeHtml = '<span class="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-lg bg-amber-500 text-white text-[10px] font-bold">' + escapeHtml(promo.label) + '</span>';
         }
 
-        var profitBadgeHtml = profit > 0
-          ? '<span class="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full bg-[#E11D48] text-white text-[11px] font-bold shadow-xs font-num">กำไร +' + formatMoney(profit) + '฿</span>'
+        var profitBadgeHtml = profitPercent > 0
+          ? '<span class="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full bg-[#E11D48] text-white text-[11px] font-bold shadow-xs font-num">กำไร +' + profitPercent + '%</span>'
           : '';
 
         var imgHtml = item.imageUrl
@@ -1275,9 +1325,9 @@
             '</div>' +
             '<div class="space-y-1.5 pt-2 border-t border-slate-100">' +
               rrpHtml +
-              '<div class="flex items-baseline justify-between">' +
+              '<div class="flex items-baseline justify-between gap-1">' +
                 '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
-                '<span class="text-lg sm:text-xl font-extrabold text-slate-900 font-num">฿' + formatMoney(item.wholesale) + '</span>' +
+                '<span class="text-xl sm:text-2xl font-black text-[#C8102E] font-num tracking-tight">฿' + formatMoney(item.wholesale) + '</span>' +
               '</div>' +
               periodHtml +
             '</div>' +
@@ -1370,19 +1420,20 @@
             var promo = getPromoInfo(item.period);
             var statusTag = promo.state === 'expired' ? ' [หมดโปรฯ]' : (promo.state === 'upcoming' ? ' [' + promo.label + ']' : '');
             var profit = (item.rrp > item.wholesale) ? (item.rrp - item.wholesale) : 0;
+            var profitPct = profit > 0 ? Math.round((profit / item.rrp) * 1000) / 10 : 0;
             return [
               String(idx + 1),
               item.modelDesc + statusTag,
               item.rrp > 0 ? formatMoney(item.rrp) : '-',
               formatMoney(item.wholesale),
-              profit > 0 ? '+' + formatMoney(profit) : '-',
+              profitPct > 0 ? '+' + profitPct + '%' : '-',
               item.period || '-'
             ];
           });
 
           doc.autoTable({
             startY: 36,
-            head: [['#', 'รุ่นสินค้า (MODEL_DESC)', 'ราคาปกติ', 'ราคาส่ง', 'กำไร', 'ระยะเวลา']],
+            head: [['#', 'รุ่นสินค้า (MODEL_DESC)', 'ราคาปกติ', 'ราคาส่ง', 'กำไร (%)', 'ระยะเวลา']],
             body: rows,
             styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.5 },
             headStyles: { fillColor: theme.rgb, textColor: [255, 255, 255], fontStyle: 'normal' },
@@ -1390,7 +1441,7 @@
               0: { halign: 'center', cellWidth: 10 },
               1: { cellWidth: 78 },
               2: { halign: 'right', cellWidth: 22 },
-              3: { halign: 'right', cellWidth: 24 },
+              3: { halign: 'right', cellWidth: 24, textColor: [200, 16, 46] },
               4: { halign: 'right', cellWidth: 20 },
               5: { halign: 'center', cellWidth: 28 }
             },
@@ -1408,9 +1459,31 @@
         if (!pageAdded) {
           showToast('ไม่มีรายการสินค้าตามเงื่อนไขที่เลือก');
         } else {
-          doc.save('Jaymart-Wholesale-' + (STATE.docDate || 'PriceList').replace(/\//g, '-') + '.pdf');
+          var fileName = 'Jaymart-Wholesale-' + (STATE.docDate || 'PriceList').replace(/\//g, '-') + '.pdf';
+          var pdfBlob = doc.output('blob');
+          var pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
           closeModal('pdfModal');
-          showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+
+          // บนมือถือรองรับกดส่งไฟล์ PDF เข้าแชท LINE หรือบันทึกลงเครื่องผ่านหน้าต่าง Share ได้ทันที
+          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            try {
+              await navigator.share({
+                files: [pdfFile],
+                title: 'ใบราคาขายส่ง Jaymart Wholesale',
+                text: 'ใบราคาขายส่ง Jaymart Wholesale (' + (STATE.docDate || 'ล่าสุด') + ')'
+              });
+              showToast('ส่ง/บันทึกไฟล์ PDF เรียบร้อยแล้ว');
+            } catch (shareErr) {
+              if (shareErr && shareErr.name !== 'AbortError') {
+                doc.save(fileName);
+                showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+              }
+            }
+          } else {
+            doc.save(fileName);
+            showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+          }
         }
       } catch (err) {
         showToast('สร้าง PDF ไม่สำเร็จ: ' + (err.message || err));
