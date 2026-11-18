@@ -571,12 +571,19 @@
     function initLineAuthFlow() {
       var params = new URLSearchParams(window.location.search);
       var code = params.get('code');
+      var stateParam = params.get('state') || '';
 
       if (code) {
         var cleanUrl = getOAuthRedirectUri();
         try { window.history.replaceState({}, document.title, cleanUrl); } catch (e) {}
         document.getElementById('docDateBadge').textContent = 'กำลังยืนยันบัญชี LINE...';
         showToast('กำลังตรวจสอบข้อมูลบัญชี LINE...');
+
+        // ตรวจสอบว่าเป็นการกดผูกบัญชี LINE ของแอดมินหรือไม่ (ส่งแนบมากับ state)
+        var bindPinFromState = '';
+        if (stateParam.indexOf('jm_admin_') === 0) {
+          bindPinFromState = stateParam.replace('jm_admin_', '').split('_')[0];
+        }
 
         callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanUrl })
           .then(function(res) {
@@ -591,6 +598,29 @@
             }
             STATE.lineUser = res.lineUser;
             try { localStorage.setItem(STORAGE_LINE_KEY, JSON.stringify(res.lineUser)); } catch (e) {}
+
+            if (bindPinFromState) {
+              callBackendApi('verifyStaffPin', { pin: bindPinFromState, lineUserId: res.lineUser.userId })
+                .then(function(pinRes) {
+                  if (pinRes && pinRes.ok) {
+                    STATE.isAdmin = true;
+                    STATE.verifiedPin = bindPinFromState;
+                    STATE.staffName = pinRes.name || 'Admin';
+                    STATE.dealerStatus = 'Approved';
+                    STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
+                    try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: bindPinFromState, name: STATE.staffName, lineUserId: res.lineUser.userId })); } catch (e) {}
+                    updateAdminHeaderUI();
+                    applyDealerGateUI();
+                    loadCatalogData();
+                    openAdminWorkspace();
+                    showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินสำเร็จเรียบร้อยแล้ว!');
+                  } else {
+                    verifyLineUserAccess(res.lineUser.userId);
+                  }
+                });
+              return;
+            }
+
             verifyLineUserAccess(res.lineUser.userId);
           })
           .catch(function(err) {
@@ -655,8 +685,16 @@
     }
 
     function bindCurrentLineAsAdmin() {
-      try { localStorage.setItem('jm_bind_admin_after_line', '1'); } catch (e) {}
-      startLineLogin();
+      if (!STATE.verifiedPin) return;
+      var redirectUri = getOAuthRedirectUri();
+      var stateToken = 'jm_admin_' + encodeURIComponent(STATE.verifiedPin) + '_' + Math.random().toString(36).substring(2, 8);
+      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize' +
+        '?response_type=code' +
+        '&client_id=' + encodeURIComponent(LINE_CHANNEL_ID) +
+        '&redirect_uri=' + encodeURIComponent(redirectUri) +
+        '&state=' + encodeURIComponent(stateToken) +
+        '&scope=' + encodeURIComponent('profile openid');
+      window.location.href = authUrl;
     }
 
     function startLineLogin() {
