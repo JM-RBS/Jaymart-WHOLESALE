@@ -64,6 +64,9 @@
 
         <div class="flex items-center gap-2 shrink-0">
           <span id="dealerActiveBadge" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap"></span>
+          <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center gap-1 h-10 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer whitespace-nowrap">
+            <span>สลับ LINE</span>
+          </button>
           <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer whitespace-nowrap">
             <svg width="16" height="16" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span class="hidden sm:inline">ดาวน์โหลด PDF</span>
@@ -130,53 +133,58 @@
 
     <!-- 2. Dealer Registration Form -->
     <div id="dealerRegistrationView" class="hidden max-w-lg mx-auto mt-2 sm:mt-6 bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden">
-      <div class="bg-gradient-to-r from-[#06C755] to-emerald-600 p-5 text-white flex items-center gap-3.5">
-        <img id="regLineAvatar" src="" alt="LINE Profile" referrerpolicy="no-referrer" class="w-14 h-14 rounded-full border-2 border-white/80 object-cover bg-white shrink-0">
-        <div class="min-w-0 flex-1">
-          <span class="inline-block px-2 py-0.5 rounded-md bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">ยืนยันบัญชี LINE สำเร็จ</span>
-          <h2 id="regLineName" class="text-base sm:text-lg font-bold truncate mt-0.5">-</h2>
-          <p id="regLineUidText" class="text-xs text-emerald-100 truncate font-num"></p>
+      <div class="bg-gradient-to-r from-[#06C755] to-emerald-600 p-5 text-white flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+          <img id="regLineAvatar" src="" alt="LINE Profile" referrerpolicy="no-referrer" class="w-14 h-14 rounded-full border-2 border-white/80 object-cover bg-white shrink-0">
+          <div class="min-w-0 flex-1">
+            <span class="inline-block px-2 py-0.5 rounded-md bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">ยืนยันบัญชี LINE สำเร็จ</span>
+            <h2 id="regLineName" class="text-base sm:text-lg font-bold truncate mt-0.5">-</h2>
+            <p id="regLineUidText" class="text-xs text-emerald-100 truncate font-num"></p>
+          </div>
         </div>
+        <button type="button" onclick="switchLineAccount()" class="btn-press px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold shrink-0 cursor-pointer">
+          เปลี่ยนบัญชี LINE
+        </button>
       </div>
 
       <form onsubmit="submitDealerRegistration(event)" class="p-5 sm:p-6 space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">สถานะผู้ลงทะเบียน <span class="text-rose-600">*</span></label>
+          <label class="block text-xs font-bold text-slate-700 mb-2">สถานะผู้ลงทะเบียน <span class="text-rose-600">*</span></label>
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
-              <input type="radio" name="regRoleType" value="เจ้าของร้าน" checked onchange="toggleRoleFields()" class="peer sr-only">
-              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
+              <input type="radio" name="regRoleType" value="เจ้าของร้าน" checked onchange="toggleRoleFields()" class="peer hidden">
+              <div class="p-2.5 rounded-xl border border-slate-200 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white text-center text-xs font-bold transition">
                 เจ้าของร้าน
               </div>
             </label>
             <label class="cursor-pointer">
-              <input type="radio" name="regRoleType" value="พนักงานร้าน" onchange="toggleRoleFields()" class="peer sr-only">
-              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
+              <input type="radio" name="regRoleType" value="พนักงานร้าน" onchange="toggleRoleFields()" class="peer hidden">
+              <div class="p-2.5 rounded-xl border border-slate-200 peer-checked:border-slate-900 peer-checked:bg-slate-900 peer-checked:text-white text-center text-xs font-bold transition">
                 พนักงานร้าน
               </div>
             </label>
             <label class="cursor-pointer">
-              <input type="radio" name="regRoleType" value="AM (สำหรับสาขา)" onchange="toggleRoleFields()" class="peer sr-only">
-              <div class="py-2.5 px-2 rounded-xl border-2 border-slate-200 peer-checked:border-[#C8102E] peer-checked:bg-red-50 peer-checked:text-[#C8102E] text-center text-xs sm:text-sm font-bold text-slate-700 transition">
+              <input type="radio" name="regRoleType" value="AM (สำหรับสาขา)" onchange="toggleRoleFields()" class="peer hidden">
+              <div class="p-2.5 rounded-xl border border-slate-200 peer-checked:border-emerald-700 peer-checked:bg-emerald-700 peer-checked:text-white text-center text-xs font-bold transition">
                 AM (สำหรับสาขา)
               </div>
             </label>
           </div>
         </div>
 
-        <!-- ช่องกรอกเฉพาะสำหรับ AM (สำหรับสาขา) -->
-        <div id="amFieldsGroup" class="hidden space-y-3">
-          <div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed">
-            <strong>สำหรับ AM สาขา:</strong> กรอกเฉพาะรหัสพนักงานที่มีรายชื่อในระบบ ระบบจะจดจำบัญชี LINE นี้เพียง 1 บัญชีเท่านั้น (หากเปลี่ยนเครื่อง/บัญชีใหม่ต้องรอแอดมินอนุมัติ)
-          </div>
+        <!-- ช่องกรอกเฉพาะ AM (สำหรับสาขา) -->
+        <div id="amFieldsGroup" class="hidden space-y-3 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">รหัสพนักงาน <span class="text-rose-600">*</span></label>
-            <input id="regAmEmpId" type="text" inputmode="numeric" placeholder="กรอกรหัสพนักงานของท่าน" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:border-slate-900 font-num">
+            <label class="block text-xs font-bold text-slate-800 mb-1">รหัสพนักงาน (ตามรายชื่อในระบบ) <span class="text-rose-600">*</span></label>
+            <input id="regAmEmpId" type="text" placeholder="กรอกรหัสพนักงาน เช่น 14803" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
+            <p class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+              * ระบบจะผูกสิทธิ์กับบัญชี LINE นี้เพียง 1 บัญชีเท่านั้น หากเปลี่ยนเครื่องหรือบัญชี LINE จะต้องรอแอดมินอนุมัติใหม่
+            </p>
           </div>
         </div>
 
         <!-- ช่องกรอกสำหรับดีลเลอร์ (เจ้าของร้าน / พนักงานร้าน) -->
-        <div id="dealerFieldsGroup" class="space-y-4">
+        <div id="dealerFieldsGroup" class="space-y-3.5">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
             <input id="regShopName" type="text" required placeholder="เช่น เจแปนโมบาย, เคโฟน..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
@@ -184,44 +192,42 @@
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-rose-600">*</span></label>
-            <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+            <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
-            <input id="regPhone" type="tel" required inputmode="tel" placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900 font-num">
+            <input id="regPhone" type="tel" required placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
           </div>
 
           <div class="relative">
             <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email) <span class="text-rose-600">*</span></label>
-            <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" onfocus="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
-            <div id="emailSuggestList" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-44 overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-lg divide-y divide-slate-100"></div>
+            <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
+            <div id="emailSuggestList" class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden divide-y divide-slate-100"></div>
           </div>
 
-          <div id="staffConsentBox" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
-            <label class="flex items-start gap-2.5 cursor-pointer select-none">
-              <input type="checkbox" id="regStaffConsent" class="mt-0.5 w-4 h-4 rounded border-amber-400 text-[#C8102E] shrink-0">
-              <span class="text-xs font-semibold text-amber-950 leading-relaxed">
-                ข้าพเจ้ายืนยันว่าได้รับความยินยอมและได้รับอนุญาตจากเจ้าของร้านในการเข้าถึงข้อมูลใบราคาขายส่งนี้เรียบร้อยแล้ว <span class="text-rose-600">*</span>
-              </span>
+          <div id="staffConsentBox" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200">
+            <label class="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700">
+              <input id="regStaffConsent" type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 text-slate-900">
+              <span>ข้าพเจ้ายืนยันว่าเป็นพนักงานของร้านค้าดังกล่าวจริง และได้รับอนุญาตจากเจ้าของร้านให้เข้าถึงข้อมูลราคาขายส่ง</span>
             </label>
           </div>
         </div>
 
-        <button id="btnSubmitDealerReg" type="submit" class="btn-press w-full h-12 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white font-bold text-sm shadow-sm cursor-pointer">
+        <button id="btnSubmitDealerReg" type="submit" class="btn-press w-full h-12 rounded-2xl bg-[#C8102E] hover:bg-red-700 text-white font-bold text-sm shadow-md cursor-pointer">
           ส่งข้อมูลลงทะเบียนขออนุมัติ
         </button>
       </form>
     </div>
 
-    <!-- 3. Dealer Pending / Rejected Approval View -->
-    <div id="dealerPendingView" class="hidden max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 text-center space-y-4">
+    <!-- 3. Pending / Rejected Approval View -->
+    <div id="dealerPendingView" class="hidden max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 sm:p-8 text-center space-y-4">
       <div id="pendingIconBox" class="w-16 h-16 mx-auto rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
       <div>
-        <h2 id="pendingTitleText" class="text-lg font-bold text-slate-900">อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์</h2>
-        <p id="pendingSubText" class="text-sm text-slate-600 mt-1">ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา</p>
+        <h2 id="pendingTitleText" class="text-lg sm:text-xl font-bold text-slate-900">อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์</h2>
+        <p id="pendingSubText" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา</p>
       </div>
 
       <div id="pendingSummaryCard" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5 text-slate-700"></div>
@@ -234,22 +240,28 @@
           แก้ไขข้อมูลที่ส่ง
         </button>
       </div>
+      <div class="pt-1">
+        <button type="button" onclick="switchLineAccount()" class="text-xs text-slate-500 hover:text-rose-600 font-semibold underline cursor-pointer">
+          ออกจากระบบ / สลับไปใช้บัญชี LINE อื่น
+        </button>
+      </div>
     </div>
 
     <!-- 4. Approved Catalog Grid Container -->
     <div id="catalogContentArea" class="hidden space-y-5">
-      <div id="loadingGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-3 space-y-3"><div class="aspect-square rounded-xl skeleton"></div><div class="h-4 w-3/4 rounded skeleton"></div><div class="h-5 w-1/2 rounded skeleton"></div></div>
-        <div class="bg-white rounded-2xl border border-slate-200 p-3 space-y-3"><div class="aspect-square rounded-xl skeleton"></div><div class="h-4 w-3/4 rounded skeleton"></div><div class="h-5 w-1/2 rounded skeleton"></div></div>
-        <div class="bg-white rounded-2xl border border-slate-200 p-3 space-y-3"><div class="aspect-square rounded-xl skeleton"></div><div class="h-4 w-3/4 rounded skeleton"></div><div class="h-5 w-1/2 rounded skeleton"></div></div>
-        <div class="bg-white rounded-2xl border border-slate-200 p-3 space-y-3"><div class="aspect-square rounded-xl skeleton"></div><div class="h-4 w-3/4 rounded skeleton"></div><div class="h-5 w-1/2 rounded skeleton"></div></div>
+      <div id="loadingGrid" class="hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4">
+        <div class="h-72 rounded-2xl skeleton"></div>
+        <div class="h-72 rounded-2xl skeleton"></div>
+        <div class="h-72 rounded-2xl skeleton"></div>
+        <div class="h-72 rounded-2xl skeleton"></div>
+        <div class="h-72 rounded-2xl skeleton hidden xl:block"></div>
       </div>
-      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"></div>
-      <div id="emptyState" class="hidden py-16 text-center">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </div>
-        <p class="text-base font-semibold text-slate-800">ไม่พบสินค้ารุ่นที่ค้นหา</p>
+
+      <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4"></div>
+
+      <div id="emptyState" class="hidden py-16 text-center bg-white rounded-3xl border border-slate-200">
+        <p class="text-base font-bold text-slate-700">ไม่พบรายการสินค้าตามเงื่อนไขที่ค้นหา</p>
+        <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือยกเลิกตัวกรองซ่อนรุ่นหมดโปรฯ</p>
       </div>
     </div>
 
@@ -474,41 +486,72 @@
     var STORAGE_ADMIN_KEY = 'jm_wholesale_admin_session_v1';
 
     var STATE = {
-      docTitle: 'Jaymart Wholesale - ใบราคา Volume Special',
+      docTitle: 'Jaymart Wholesale — ใบราคาขายส่ง',
       docDate: '',
-      warningText: '**สำคัญ!! ต้องActivate ทุกเครื่องที่มี Sell Out**',
+      warningText: '**สำคัญ!! ต้อง Activate ทุกเครื่องที่มี Sell Out**',
       brands: [],
       products: [],
       modelImages: [],
       activeBrand: 'ALL',
-      searchQuery: '',
-      verifiedPin: '',
-      staffName: '',
-      parsedExcelPayload: null,
-      fontCache: null,
       lineUser: null,
-      isAdmin: false,
       dealerStatus: 'unlogged',
       dealerInfo: null,
-      dealersList: []
-    };
-
-    var BRAND_THEMES = {
-      'samsung': { hex: '#1428A0', rgb: [20, 40, 160], soft: '#EEF2FF' },
-      'oppo':    { hex: '#006B3D', rgb: [0, 107, 61], soft: '#ECFDF5' },
-      'vivo':    { hex: '#415FFF', rgb: [65, 95, 255], soft: '#EEF2FF' },
-      'xiaomi':  { hex: '#FF6900', rgb: [255, 105, 0], soft: '#FFF7ED' },
-      'honor':   { hex: '#007DFF', rgb: [0, 125, 255], soft: '#EFF6FF' },
-      'realme':  { hex: '#D97706', rgb: [217, 119, 6], soft: '#FFFBEB' },
-      'infinix': { hex: '#059669', rgb: [5, 150, 105], soft: '#ECFDF5' },
-      'iqoo':    { hex: '#EAB308', rgb: [202, 138, 4], soft: '#FEFCE8' },
-      'tecno':   { hex: '#0284C7', rgb: [2, 132, 199], soft: '#F0F9FF' },
-      'zte':     { hex: '#2563EB', rgb: [37, 99, 235], soft: '#EFF6FF' }
+      isAdmin: false,
+      verifiedPin: '',
+      staffName: '',
+      dealersList: [],
+      parsedExcelPayload: null,
+      fontCache: null
     };
 
     function getBrandTheme(brand) {
-      var key = String(brand || '').trim().toLowerCase();
-      return BRAND_THEMES[key] || { hex: '#0F172A', rgb: [15, 23, 42], soft: '#F1F5F9' };
+      var b = String(brand || '').toUpperCase();
+      if (b.indexOf('SAMSUNG') !== -1 || b.indexOf('SAM') !== -1) return { hex: '#1428A0', rgb: [20, 40, 160] };
+      if (b.indexOf('OPPO') !== -1) return { hex: '#008A50', rgb: [0, 138, 80] };
+      if (b.indexOf('VIVO') !== -1) return { hex: '#415FFF', rgb: [65, 95, 255] };
+      if (b.indexOf('XIAOMI') !== -1 || b.indexOf('REDMI') !== -1 || b.indexOf('POCO') !== -1) return { hex: '#FF6900', rgb: [255, 105, 0] };
+      if (b.indexOf('REALME') !== -1) return { hex: '#D97706', rgb: [217, 119, 6] };
+      if (b.indexOf('HONOR') !== -1) return { hex: '#0284C7', rgb: [2, 132, 199] };
+      if (b.indexOf('INFINIX') !== -1 || b.indexOf('TECNO') !== -1) return { hex: '#16A34A', rgb: [22, 163, 74] };
+      if (b.indexOf('APPLE') !== -1 || b.indexOf('IPHONE') !== -1) return { hex: '#1E293B', rgb: [30, 41, 59] };
+      return { hex: '#C8102E', rgb: [200, 16, 46] };
+    }
+
+    function startLineLogin(forceConsent) {
+      var btn = document.getElementById('btnLineLogin');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'กำลังเปิดหน้าขออนุญาต LINE...';
+      }
+
+      var redirectUri = getOAuthRedirectUri();
+      var stateToken = 'jm_' + Math.random().toString(36).substring(2, 12);
+      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize' +
+        '?response_type=code' +
+        '&client_id=' + encodeURIComponent(LINE_CHANNEL_ID) +
+        '&redirect_uri=' + encodeURIComponent(redirectUri) +
+        '&state=' + encodeURIComponent(stateToken) +
+        '&scope=' + encodeURIComponent('profile openid') +
+        (forceConsent ? '&prompt=consent' : '');
+
+      window.location.href = authUrl;
+    }
+
+    function switchLineAccount() {
+      try {
+        localStorage.removeItem(STORAGE_LINE_KEY);
+        localStorage.removeItem(STORAGE_ADMIN_KEY);
+        localStorage.removeItem('jm_bind_admin_after_line');
+      } catch (e) {}
+      STATE.lineUser = null;
+      STATE.isAdmin = false;
+      STATE.verifiedPin = '';
+      STATE.staffName = '';
+      STATE.dealerStatus = 'unlogged';
+      STATE.dealerInfo = null;
+      updateAdminHeaderUI();
+      applyDealerGateUI();
+      startLineLogin(true);
     }
 
     function escapeHtml(str) {
@@ -717,23 +760,6 @@
       window.location.href = authUrl;
     }
 
-    function startLineLogin() {
-      var btn = document.getElementById('btnLineLogin');
-      btn.disabled = true;
-      btn.textContent = 'กำลังเปิดหน้าขออนุญาต LINE...';
-
-      var redirectUri = getOAuthRedirectUri();
-      var stateToken = 'jm_' + Math.random().toString(36).substring(2, 12);
-      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize' +
-        '?response_type=code' +
-        '&client_id=' + encodeURIComponent(LINE_CHANNEL_ID) +
-        '&redirect_uri=' + encodeURIComponent(redirectUri) +
-        '&state=' + encodeURIComponent(stateToken) +
-        '&scope=' + encodeURIComponent('profile openid');
-
-      window.location.href = authUrl;
-    }
-
     function verifyLineUserAccess(lineUserId) {
       document.getElementById('docDateBadge').textContent = 'กำลังตรวจสอบสิทธิ์...';
 
@@ -808,9 +834,10 @@
       var catalogArea = document.getElementById('catalogContentArea');
       var filterBar = document.getElementById('catalogFilterBar');
       var pdfBtn = document.getElementById('headerPdfBtn');
+      var switchBtn = document.getElementById('headerSwitchLineBtn');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
-      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn].forEach(function(el) {
+      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
         if (el) el.classList.add('hidden');
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
@@ -819,6 +846,7 @@
         if (catalogArea) catalogArea.classList.remove('hidden');
         if (filterBar) filterBar.classList.remove('hidden');
         if (pdfBtn) pdfBtn.classList.remove('hidden');
+        if (switchBtn) switchBtn.classList.remove('hidden');
         if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
           dealerBadge.textContent = STATE.dealerInfo.typedShopName;
           dealerBadge.classList.remove('hidden');
