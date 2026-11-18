@@ -91,29 +91,27 @@
           </div>
         </div>
 
-        <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4-5 บนมือถือ -->
+        <!-- ฝั่งขวาบนคอม / บรรทัดที่ 4 บนมือถือ (Dealer: ชื่อร้าน + ดาวน์โหลด PDF อยู่บรรทัดเดียวกัน) -->
         <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
-          <!-- บรรทัดที่ 4 (มือถือ): แอดมิน + สลับ LINE + ปุ่ม Admin เรียง 3 อันในแถวเดียวกัน -->
-          <div id="headerStaffControlsRow" class="grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2">
-            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 px-2.5 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
+          <div id="headerStaffControlsRow" class="flex flex-wrap items-center justify-between lg:justify-end gap-1.5 sm:gap-2">
+            <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 sm:h-10 px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate max-w-[52vw] sm:max-w-xs"></span>
 
-            <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
-              <span>สลับ LINE</span>
-            </button>
+            <div class="flex items-center gap-1.5 sm:gap-2 ml-auto">
+              <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
+                <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>ดาวน์โหลด PDF</span>
+              </button>
 
-            <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap col-start-3 lg:col-auto">
-              <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-              <span id="headerAdminBtnText" class="truncate">Login Admin</span>
-              <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
-            </button>
-          </div>
+              <button id="headerSwitchLineBtn" onclick="switchLineAccount()" title="สลับบัญชี LINE / ออกจากระบบ" class="hidden btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-semibold cursor-pointer whitespace-nowrap">
+                <span>สลับ LINE</span>
+              </button>
 
-          <!-- บรรทัดที่ 5 (มือถือ): ปุ่มดาวน์โหลด PDF อยู่ขวาล่างต่อจาก 3 ปุ่มด้านบน -->
-          <div class="flex justify-end lg:order-first">
-            <button id="headerPdfBtn" onclick="openPdfModal()" class="hidden btn-press inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer whitespace-nowrap">
-              <svg width="15" height="15" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>ดาวน์โหลด PDF</span>
-            </button>
+              <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
+                <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span id="headerAdminBtnText" class="truncate">Login Admin</span>
+                <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -147,7 +145,7 @@
   <!-- Main Content Area -->
   <main class="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6">
 
-    <!-- 1. LINE Login Consent Gate (ไม่มีกล่อง Callback URL) -->
+    <!-- 1. LINE Login Consent Gate -->
     <div id="lineLoginGate" class="max-w-md mx-auto mt-4 sm:mt-8 bg-white rounded-3xl border border-slate-200 shadow-lg p-6 sm:p-8 text-center">
       <div class="w-16 h-16 mx-auto rounded-2xl bg-[#06C755] flex items-center justify-center shadow-md mb-4">
         <svg class="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -215,7 +213,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-800 mb-1">รหัสพนักงาน (ตามรายชื่อในระบบ) <span class="text-rose-600">*</span></label>
             <div class="flex items-center gap-2">
-              <input id="regAmEmpId" type="text" oninput="resetAmVerified()" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyAmEmployee();}" placeholder="กรอกรหัสพนักงาน เช่น 22307060" class="flex-1 h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
+              <input id="regAmEmpId" type="text" oninput="resetAmVerified()" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyAmEmployee();}" placeholder="กรอกรหัสพนักงาน" class="flex-1 h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
               <button type="button" id="btnVerifyAm" onclick="verifyAmEmployee()" class="btn-press h-11 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold cursor-pointer shrink-0 whitespace-nowrap">
                 ตรวจสอบชื่อ
               </button>
@@ -365,7 +363,7 @@
         <h2 class="text-lg font-bold text-slate-900">Login Admin</h2>
         <button onclick="closeModal('pinModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
-      <p class="text-sm text-slate-600 mb-3">กรุณากรอกรหัสพนักงาน (ค่าเริ่มต้น: 14803)</p>
+      <p class="text-sm text-slate-600 mb-3">กรุณากรอกรหัสพนักงาน</p>
       <input id="staffPinInput" type="password" inputmode="numeric" onkeydown="if(event.key==='Enter')submitPin()" placeholder="รหัสพนักงาน" class="w-full h-12 px-4 rounded-xl border border-slate-300 text-center text-lg font-semibold tracking-widest focus:outline-none focus:border-slate-900 font-num">
       <p id="pinError" class="hidden text-xs text-red-600 font-medium mt-2 text-center"></p>
       <button id="pinSubmitBtn" onclick="submitPin()" class="btn-press w-full h-12 mt-4 rounded-xl bg-slate-900 text-white text-sm font-semibold cursor-pointer">เข้าสู่ระบบ</button>
@@ -643,7 +641,7 @@
       renderProducts();
     }
 
-    async function callBackendApi(action, payload) {
+    async function callBackendApi(action, payload, timeoutMs) {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         return new Promise(function(resolve, reject) {
           var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
@@ -662,15 +660,29 @@
         });
       }
 
-      var response = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: action, payload: payload || {} })
-      });
-      if (!response.ok) {
-        throw new Error('HTTP Error ' + response.status);
+      var controller = new AbortController();
+      var ms = timeoutMs || 20000;
+      var timer = setTimeout(function() { controller.abort(); }, ms);
+
+      try {
+        var response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: action, payload: payload || {} }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          throw new Error('HTTP Error ' + response.status);
+        }
+        return await response.json();
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          throw new Error('เซิร์ฟเวอร์ตอบสนองช้าเกินกำหนด (Timeout) กรุณาลองใหม่อีกครั้ง');
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
       }
-      return await response.json();
     }
 
     function getOAuthRedirectUri() {
@@ -810,6 +822,24 @@
       window.location.href = authUrl;
     }
 
+    function applyWholesaleData_(res) {
+      if (!res || !res.ok) return false;
+      STATE.docTitle = res.docTitle || STATE.docTitle;
+      STATE.docDate = res.docDate || '';
+      STATE.warningText = res.warningText || STATE.warningText;
+      STATE.brands = res.brands || [];
+      STATE.products = res.products || [];
+      STATE.modelImages = res.modelImages || [];
+
+      setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'ใบราคาขายส่งล่าสุด');
+      var warnEl = document.getElementById('warningBanner');
+      if (warnEl) warnEl.textContent = STATE.warningText;
+
+      renderBrandTabs();
+      renderProducts();
+      return true;
+    }
+
     function verifyLineUserAccess(lineUserId) {
       setDocDateText('กำลังตรวจสอบสิทธิ์...');
 
@@ -823,6 +853,10 @@
             applyDealerGateUI();
             loadCatalogData();
             openAdminWorkspace();
+          })
+          .catch(function(err) {
+            setDocDateText('เชื่อมต่อผิดพลาด');
+            showToast('ผูกบัญชี LINE ไม่สำเร็จ: ' + (err.message || err));
           });
         return;
       }
@@ -837,7 +871,9 @@
               return;
             }
             STATE.dealerStatus = 'unregistered';
+            setDocDateText('ลงทะเบียนดีลเลอร์');
             applyDealerGateUI();
+            if (res && res.error) showToast(res.error);
             return;
           }
 
@@ -850,14 +886,18 @@
             try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: STATE.verifiedPin, name: STATE.staffName, lineUserId: lineUserId })); } catch (e) {}
             updateAdminHeaderUI();
             applyDealerGateUI();
-            loadCatalogData();
+            if (!applyWholesaleData_(res.wholesaleData)) {
+              loadCatalogData();
+            }
             return;
           }
 
           if (STATE.isAdmin) {
             STATE.dealerStatus = 'Approved';
             applyDealerGateUI();
-            loadCatalogData();
+            if (!applyWholesaleData_(res.wholesaleData)) {
+              loadCatalogData();
+            }
             return;
           }
 
@@ -866,14 +906,24 @@
           applyDealerGateUI();
 
           if (STATE.dealerStatus === 'Approved') {
-            loadCatalogData();
+            if (!applyWholesaleData_(res.wholesaleData)) {
+              loadCatalogData();
+            }
           } else {
             setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
           }
         })
-        .catch(function() {
+        .catch(function(err) {
+          if (STATE.isAdmin) {
+            STATE.dealerStatus = 'Approved';
+            applyDealerGateUI();
+            loadCatalogData();
+            return;
+          }
           STATE.dealerStatus = 'unregistered';
+          setDocDateText('เชื่อมต่อผิดพลาด');
           applyDealerGateUI();
+          showToast('ตรวจสอบสิทธิ์ไม่สำเร็จ: ' + (err.message || err));
         });
     }
 
@@ -886,7 +936,6 @@
       var pdfBtn = document.getElementById('headerPdfBtn');
       var switchBtn = document.getElementById('headerSwitchLineBtn');
       var adminBtn = document.getElementById('headerAdminBtn');
-      var controlsRow = document.getElementById('headerStaffControlsRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
       [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
@@ -894,7 +943,6 @@
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
       if (adminBtn) adminBtn.classList.remove('hidden');
-      if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
         if (catalogArea) catalogArea.classList.remove('hidden');
@@ -906,10 +954,9 @@
           if (switchBtn) switchBtn.classList.remove('hidden');
           if (adminBtn) adminBtn.classList.remove('hidden');
         } else {
-          // ดีลเลอร์ทั่วไป: แสดงเฉพาะชื่อที่ลงทะเบียน และปุ่มดาวน์โหลด PDF เท่านั้น (ซ่อนสลับ LINE และ Workspace/Admin)
+          // ดีลเลอร์ทั่วไป: แสดงชื่อร้านและปุ่มดาวน์โหลด PDF ในบรรทัดเดียวกัน
           if (switchBtn) switchBtn.classList.add('hidden');
           if (adminBtn) adminBtn.classList.add('hidden');
-          if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
         }
 
         if (dealerBadge && STATE.dealerInfo && STATE.dealerInfo.typedShopName) {
@@ -1018,7 +1065,7 @@
       btn.disabled = true;
       btn.textContent = 'กำลังค้นหา...';
 
-      callBackendApi('lookupAmEmployee', { employeeId: empId })
+      callBackendApi('lookupAmEmployee', { employeeId: empId }, 15000)
         .then(function(res) {
           btn.disabled = false;
           btn.textContent = 'ตรวจสอบชื่อ';
@@ -1147,20 +1194,7 @@
           if (!silent) showToast((res && res.error) || 'โหลดข้อมูลราคาไม่สำเร็จ');
           return;
         }
-
-        STATE.docTitle = res.docTitle || STATE.docTitle;
-        STATE.docDate = res.docDate || '';
-        STATE.warningText = res.warningText || STATE.warningText;
-        STATE.brands = res.brands || [];
-        STATE.products = res.products || [];
-        STATE.modelImages = res.modelImages || [];
-
-        setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'ใบราคาขายส่งล่าสุด');
-        var warnEl = document.getElementById('warningBanner');
-        if (warnEl) warnEl.textContent = STATE.warningText;
-
-        renderBrandTabs();
-        renderProducts();
+        applyWholesaleData_(res);
       } catch (err) {
         if (loadingGrid) loadingGrid.classList.add('hidden');
         if (!silent) showToast('โหลดข้อมูลผิดพลาด: ' + (err.message || err));
@@ -1287,11 +1321,14 @@
               updateAdminHeaderUI();
             }
             applyDealerGateUI();
-            loadCatalogData();
+            if (!applyWholesaleData_(res.wholesaleData)) {
+              loadCatalogData();
+            }
             showToast('ยืนยันตัวตนสำเร็จ! อนุมัติเข้าใช้งานเรียบร้อยแล้ว');
             return;
           }
 
+          setDocDateText('รออนุมัติสิทธิ์');
           applyDealerGateUI();
           showToast(res.isDeviceSwitch ? 'ส่งคำขอเปลี่ยนเครื่องเข้าคิวรออนุมัติเรียบร้อยแล้ว' : 'ส่งข้อมูลลงทะเบียนเรียบร้อย กรุณารอแอดมินอนุมัติ');
         })
@@ -1553,7 +1590,6 @@
 
           closeModal('pdfModal');
 
-          // บนมือถือรองรับกดส่งไฟล์ PDF เข้าแชท LINE หรือบันทึกลงเครื่องผ่านหน้าต่าง Share ได้ทันที
           if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
             try {
               await navigator.share({
@@ -2088,7 +2124,7 @@
           modelKey: modelKey,
           fileName: file.name,
           base64DataUrl: evt.target.result
-        }).then(function(res) {
+        }, 45000).then(function(res) {
           if (banner) banner.classList.add('hidden');
           if (!res || !res.ok) {
             showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
