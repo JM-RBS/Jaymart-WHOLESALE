@@ -92,7 +92,7 @@
           <div class="flex items-center justify-between sm:justify-end gap-2">
             <label class="inline-flex items-center gap-2 h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none whitespace-nowrap">
               <input id="hideExpiredToggle" type="checkbox" onchange="renderProducts()" class="w-4 h-4 rounded border-slate-300 text-slate-900">
-              <span>ซ่อนรุ่นหมดโปรฯ</span>
+              <span>ซ่อนรุ่นหมดโปรฯ / รอเริ่มโปรฯ</span>
             </label>
             <div id="resultCount" class="h-10 px-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold flex items-center whitespace-nowrap font-num">0 รุ่น</div>
           </div>
@@ -257,6 +257,15 @@
           </div>
           <div id="pdfBrandChecklist" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
         </div>
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" id="pdfHideInactive" class="mt-0.5 w-4 h-4 rounded border-slate-300 text-rose-600">
+            <div class="text-xs">
+              <span class="font-bold text-slate-800 block">ซ่อนรุ่นที่หมดโปรโมชั่น / ยังไม่เริ่มโปรฯ ออกจากไฟล์ PDF</span>
+              <span class="text-slate-600">หากไม่ติ๊ก จะแสดงเป็นตัวอักษรสีเทา พร้อมป้าย [หมดโปรฯ] หรือ [เริ่มใน X วัน]</span>
+            </div>
+          </label>
+        </div>
       </div>
       <div class="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2.5">
         <button onclick="closeModal('pdfModal')" class="h-11 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 cursor-pointer">ยกเลิก</button>
@@ -315,11 +324,53 @@
 
       <!-- TAB 2: EXCEL UPLOAD -->
       <div id="adminExcelTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
-                  <th class="p-2 font-bold">Brand</th>
-                  <th class="p-2 font-bold">MODEL_DESC</th>
-                  <th class="p-2 font-bold text-right">ราคาส่ง</th>
-                  <th class="p-2 font-bold text-right">RRP</th>
-                  <th class="p-2 font-bold">ระยะเวลา</th>
+        <div class="grid grid-cols-3 gap-2 p-2 rounded-2xl bg-slate-100 border border-slate-200 text-xs">
+          <div id="excelStep1" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition">
+            <span class="w-5 h-5 rounded-full bg-white text-slate-900 flex items-center justify-center text-[11px] font-black shrink-0">1</span>
+            <span class="truncate">เลือกไฟล์ Excel</span>
+          </div>
+          <div id="excelStep2" class="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition">
+            <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0">2</span>
+            <span class="truncate">ตรวจสอบรายการ</span>
+          </div>
+          <div id="excelStep3" class="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition">
+            <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0">3</span>
+            <span class="truncate">บันทึกสำเร็จ</span>
+          </div>
+        </div>
+
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100/70 transition">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls" onchange="handleExcelSelect(event)" class="hidden">
+          <label for="excelFileInput" class="cursor-pointer flex flex-col items-center">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="text-sm font-bold text-slate-800">คลิกเพื่อเลือกไฟล์ Excel ใบราคา (.xlsx / .xls)</span>
+            <span id="excelSelectedFileName" class="text-xs text-slate-500 mt-1">ระบบจะอ่านคอลัมน์ Brand, MODEL_DESC, ราคาส่ง, RRP และระยะเวลาให้อัตโนมัติ</span>
+          </label>
+        </div>
+
+        <div id="excelPreviewSection" class="hidden space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+            <div class="text-xs sm:text-sm">
+              <span class="font-bold text-emerald-900">พร้อมอัปเดต:</span>
+              <span id="excelSummaryText" class="text-emerald-800 ml-1"></span>
+            </div>
+            <button type="button" id="btnConfirmExcel" onclick="confirmExcelUpload()" class="btn-press inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer whitespace-nowrap">
+              ยืนยันอัปเดตลงแท็บ "ภาพรวม"
+            </button>
+          </div>
+
+          <div class="max-h-64 overflow-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 sticky top-0">
+                <tr>
+                  <th class="p-2 font-bold text-slate-700">สถานะ</th>
+                  <th class="p-2 font-bold text-slate-700">Brand</th>
+                  <th class="p-2 font-bold text-slate-700">MODEL_DESC</th>
+                  <th class="p-2 font-bold text-slate-700 text-right">ราคาส่ง</th>
+                  <th class="p-2 font-bold text-slate-700 text-right">RRP</th>
+                  <th class="p-2 font-bold text-slate-700">ระยะเวลา</th>
                 </tr>
               </thead>
               <tbody id="excelPreviewBody" class="divide-y divide-slate-200 bg-white"></tbody>
@@ -328,19 +379,61 @@
         </div>
       </div>
 
-      <!-- TAB 2: IMAGES MANAGER -->
+      <!-- TAB 3: IMAGES MANAGER -->
       <div id="adminImagesTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
+        <div id="imageUploadProgressBanner" class="hidden sticky top-0 z-20 p-3 rounded-xl bg-blue-600 text-white shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2.5">
+          <svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span id="imageUploadProgressText">กำลังอัปโหลดรูปภาพขึ้น Google Drive...</span>
+        </div>
+
+        <!-- ฟอร์มกรอกข้อมูลและอัปโหลดรูปภาพรุ่นใหม่โดยตรง -->
         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-          <div class="text-sm font-bold text-slate-900">เพิ่ม / แก้ไขรูปรุ่นกลาง</div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <select id="imgBrandInput" class="h-11 px-3 rounded-xl border border-slate-300 bg-white text-sm"><option value="">เลือกแบรนด์</option></select>
-            <input id="imgKeyInput" type="text" placeholder="ชื่อรุ่นกลาง เช่น SAM A06" class="h-11 px-3 rounded-xl border border-slate-300 bg-white text-sm sm:col-span-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900">+ เพิ่ม / อัปโหลดรูปภาพสินค้า</h3>
+            <span class="text-[11px] text-slate-500">เลือกไฟล์รูปจากเครื่องหรือวางลิงก์ URL</span>
           </div>
-          <div class="flex flex-col sm:flex-row gap-2.5">
-            <input id="imgUrlInput" type="url" placeholder="วางลิงก์รูปภาพ (https://...)" class="flex-1 h-11 px-3 rounded-xl border border-slate-300 bg-white text-sm">
-            <button id="saveImgBtn" onclick="saveImageMapping()" class="btn-press h-11 px-5 rounded-xl bg-slate-900 text-white font-semibold cursor-pointer whitespace-nowrap">บันทึกรูป</button>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">แบรนด์ (Brand)</label>
+              <input type="text" id="newImgBrand" list="brandDataList" placeholder="เช่น SAMSUNG" class="w-full h-9 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm">
+              <datalist id="brandDataList"></datalist>
+            </div>
+            <div class="sm:col-span-4">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">ชื่อรุ่น / คำค้น (Model) <span class="text-rose-600">*</span></label>
+              <input type="text" id="newImgModelKey" placeholder="เช่น SAM A06 4/64GB" class="w-full h-9 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm">
+            </div>
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">อัปโหลดไฟล์ หรือ วางลิงก์รูปภาพ</label>
+              <div class="flex items-center gap-1.5">
+                <input type="file" id="newImgFileInput" accept="image/*" class="hidden" onchange="handleNewModelImageFile(event)">
+                <label id="newImgFileLabel" for="newImgFileInput" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shrink-0 whitespace-nowrap transition">
+                  เลือกไฟล์รูป
+                </label>
+                <input type="url" id="newImgUrlInput" placeholder="หรือวางลิงก์รูปภาพ..." class="w-full h-9 px-3 rounded-xl border border-slate-300 bg-white text-xs">
+                <button type="button" id="btnSaveNewImg" onclick="submitNewModelImage()" class="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer shrink-0 whitespace-nowrap">
+                  บันทึก
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="adminBrandFilter" onchange="renderAdminImageList()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold bg-white"></select>
+            <input type="text" id="adminImageSearch" oninput="renderAdminImageList()" placeholder="ค้นหารุ่นเพื่อใส่รูป..." class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white w-44 sm:w-56">
+            <label class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 cursor-pointer whitespace-nowrap">
+              <input type="checkbox" id="adminOnlyMissingImg" onchange="renderAdminImageList()" class="rounded border-slate-300">
+              <span>แสดงเฉพาะรุ่นที่ยังไม่มีรูป</span>
+            </label>
+          </div>
+          <span id="adminImageCount" class="text-xs font-semibold text-slate-500"></span>
+        </div>
+
+        <div id="adminImageList" class="space-y-2.5"></div>
       </div>
     </div>
   </div>
@@ -794,52 +887,85 @@
       switchAdminTab('dealers');
       loadAdminDealers();
       openModal('adminModal');
+
+      if (!STATE.products.length) {
+        document.getElementById('adminImageList').innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายการรุ่นสินค้าจากชีท...</div>';
+        loadCatalogData(true);
+      } else {
+        renderAdminImageList();
+      }
     }
 
     function switchAdminTab(tab) {
-      var isDealers = tab === 'dealers';
-      var isExcel = tab === 'excel';
-      var isImages = tab === 'images';
+      var tabs = {
+        dealers: { btn: 'tabDealersBtn', panel: 'adminDealersTab' },
+        excel: { btn: 'tabExcelBtn', panel: 'adminExcelTab' },
+        images: { btn: 'tabImagesBtn', panel: 'adminImagesTab' }
+      };
+      Object.keys(tabs).forEach(function(k) {
+        var isActive = (k === tab);
+        var btnEl = document.getElementById(tabs[k].btn);
+        var panelEl = document.getElementById(tabs[k].panel);
+        if (btnEl) {
+          btnEl.classList.toggle('border-slate-900', isActive);
+          btnEl.classList.toggle('text-slate-900', isActive);
+          btnEl.classList.toggle('border-transparent', !isActive);
+          btnEl.classList.toggle('text-slate-500', !isActive);
+        }
+        if (panelEl) panelEl.classList.toggle('hidden', !isActive);
+      });
+      if (tab === 'images') renderAdminImageList();
+    }
 
-      document.getElementById('adminDealersTab').classList.toggle('hidden', !isDealers);
-      document.getElementById('adminExcelTab').classList.toggle('hidden', !isExcel);
-      document.getElementById('adminImagesTab').classList.toggle('hidden', !isImages);
-
-      document.getElementById('tabDealersBtn').className = 'inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isDealers ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
-      document.getElementById('tabExcelBtn').className = 'px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isExcel ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
-      document.getElementById('tabImagesBtn').className = 'px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer whitespace-nowrap ' + (isImages ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800');
+    function setExcelStep(stepNum) {
+      [1, 2, 3].forEach(function(n) {
+        var el = document.getElementById('excelStep' + n);
+        if (!el) return;
+        var badge = el.querySelector('span');
+        if (n === stepNum) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition';
+          if (badge) badge.className = 'w-5 h-5 rounded-full bg-white text-slate-900 flex items-center justify-center text-[11px] font-black shrink-0';
+        } else if (n < stepNum) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-100 text-emerald-900 font-bold transition';
+          if (badge) badge.className = 'w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black shrink-0';
+        } else {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition';
+          if (badge) badge.className = 'w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0';
+        }
+      });
     }
 
     function loadAdminDealers() {
-      if (!STATE.verifiedPin) return;
       var listEl = document.getElementById('adminDealerList');
-      listEl.innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายชื่อดีลเลอร์...</div>';
+      if (!listEl) return;
+      listEl.innerHTML = '<div class="text-center py-8 text-sm text-slate-500">กำลังโหลดรายชื่อผู้ลงทะเบียน...</div>';
 
       callBackendApi('getDealerRegistrations', { pin: STATE.verifiedPin })
         .then(function(res) {
           if (!res || !res.ok) {
-            listEl.innerHTML = '<div class="text-center py-8 text-sm text-rose-600">โหลดรายชื่อไม่สำเร็จ</div>';
+            listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml((res && res.error) ? res.error : 'โหลดข้อมูลไม่สำเร็จ') + '</div>';
             return;
           }
           STATE.dealersList = res.dealers || [];
           renderAdminDealers();
+        })
+        .catch(function(err) {
+          listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">เกิดข้อผิดพลาด: ' + escapeHtml(err.message || err) + '</div>';
         });
     }
 
     function renderAdminDealers() {
       var listEl = document.getElementById('adminDealerList');
-      var pendingCount = STATE.dealersList.filter(function(d) { return d.status === 'Pending'; }).length;
+      var badgeEl = document.getElementById('adminDealerPendingBadge');
+      var dotEl = document.getElementById('headerPendingDot');
+      if (!listEl) return;
 
-      var badge = document.getElementById('adminDealerPendingBadge');
-      var dot = document.getElementById('headerPendingDot');
-      if (pendingCount > 0) {
-        badge.textContent = String(pendingCount);
-        badge.classList.remove('hidden');
-        dot.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-        dot.classList.add('hidden');
+      var pendingCount = STATE.dealersList.filter(function(d) { return d.status === 'Pending'; }).length;
+      if (badgeEl) {
+        badgeEl.textContent = pendingCount;
+        badgeEl.classList.toggle('hidden', pendingCount === 0);
       }
+      if (dotEl) dotEl.classList.toggle('hidden', pendingCount === 0);
 
       if (!STATE.dealersList.length) {
         listEl.innerHTML = '<div class="text-center py-10 text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ยังไม่มีรายการลงทะเบียนดีลเลอร์</div>';
@@ -847,65 +973,76 @@
       }
 
       listEl.innerHTML = STATE.dealersList.map(function(d) {
-        var uidSafe = escapeHtml(d.lineUserId).replace(/'/g, "\\'");
-        var statusBadge = d.status === 'Approved'
-          ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">อนุมัติแล้ว</span>'
-          : (d.status === 'Rejected'
-            ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">ไม่อนุมัติ</span>'
-            : '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">รออนุมัติ</span>');
+        var isPending = d.status === 'Pending';
+        var isApproved = d.status === 'Approved';
+        var badgeCls = isApproved ? 'bg-emerald-100 text-emerald-800' : (isPending ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800');
+        var statusLabel = isApproved ? 'อนุมัติแล้ว' : (isPending ? 'รออนุมัติ' : 'ปฏิเสธ');
+        var safeUid = escapeHtml(d.lineUserId).replace(/'/g, "\\'");
 
-        return '<div class="p-4 rounded-2xl border border-slate-200 bg-white space-y-3">' +
-          '<div class="flex items-start justify-between gap-3">' +
-            '<div class="flex items-center gap-3 min-w-0">' +
-              '<img src="' + escapeHtml(d.linePicture || 'https://placehold.co/80x80/e2e8f0/475569?text=LINE') + '" referrerpolicy="no-referrer" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0">' +
-              '<div class="min-w-0">' +
-                '<div class="flex items-center gap-2 flex-wrap">' +
-                  '<span class="text-sm font-bold text-slate-900 truncate">' + escapeHtml(d.lineName || 'ไม่ระบุชื่อ LINE') + '</span>' +
-                  '<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">' + escapeHtml(d.roleType || 'เจ้าของร้าน') + '</span>' +
-                '</div>' +
-                '<div class="text-[11px] text-slate-500 mt-0.5">ส่งเมื่อ: ' + escapeHtml(d.createdAt || '-') + '</div>' +
+        return '<div class="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+          '<div class="flex items-start gap-3 min-w-0">' +
+            '<img src="' + escapeHtml(d.linePicture || 'https://placehold.co/80x80/e2e8f0/475569?text=LINE') + '" referrerpolicy="no-referrer" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0 bg-slate-100">' +
+            '<div class="min-w-0 space-y-0.5 text-xs">' +
+              '<div class="flex items-center gap-2 flex-wrap">' +
+                '<span class="font-bold text-sm text-slate-900">' + escapeHtml(d.typedShopName) + '</span>' +
+                '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ' + badgeCls + '">' + statusLabel + '</span>' +
+                '<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold">' + escapeHtml(d.roleType) + '</span>' +
               '</div>' +
+              '<div class="text-slate-600">LINE: <strong>' + escapeHtml(d.lineName) + '</strong> | SG Finance+: <strong class="text-slate-900">' + escapeHtml(d.sgFinanceUser) + '</strong></div>' +
+              '<div class="text-slate-500">โทร: ' + escapeHtml(d.phone) + (d.email ? (' | อีเมล: ' + escapeHtml(d.email)) : '') + '</div>' +
             '</div>' +
-            statusBadge +
           '</div>' +
-          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">' +
-            '<div><span class="text-slate-500 block">ชื่อร้านค้า</span><strong class="text-slate-900">' + escapeHtml(d.typedShopName) + '</strong></div>' +
-            '<div><span class="text-slate-500 block">User SG Finance+</span><strong class="text-blue-700 font-num">' + escapeHtml(d.sgFinanceUser) + '</strong></div>' +
-            '<div><span class="text-slate-500 block">เบอร์โทร</span><strong class="text-slate-900 font-num">' + escapeHtml(d.phone) + '</strong></div>' +
-            '<div><span class="text-slate-500 block">อีเมล</span><strong class="text-slate-900">' + escapeHtml(d.email || '-') + '</strong></div>' +
-          '</div>' +
-          '<div class="flex items-center justify-end gap-2">' +
-            '<button onclick="changeDealerStatus(\'' + uidSafe + '\', \'Rejected\')" class="h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ / ระงับ</button>' +
-            '<button onclick="changeDealerStatus(\'' + uidSafe + '\', \'Approved\')" class="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติสิทธิ์</button>' +
+          '<div class="flex items-center gap-2 shrink-0">' +
+            (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + safeUid + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
+            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + safeUid + '\', \'Rejected\')" class="btn-press h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ปฏิเสธ</button>' : '') +
           '</div>' +
         '</div>';
       }).join('');
     }
 
     function changeDealerStatus(lineUserId, newStatus) {
-      if (!STATE.verifiedPin) return;
       showToast('กำลังอัปเดตสถานะ...');
       callBackendApi('updateDealerStatus', { pin: STATE.verifiedPin, lineUserId: lineUserId, newStatus: newStatus })
         .then(function(res) {
-          if (!res || !res.ok) { showToast('อัปเดตสถานะไม่สำเร็จ'); return; }
-          showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'ระงับสิทธิ์เรียบร้อยแล้ว');
-          loadAdminDealers();
-          if (STATE.lineUser && STATE.lineUser.userId === lineUserId) {
-            verifyLineUserAccess(lineUserId);
+          if (!res || !res.ok) {
+            showToast((res && res.error) ? res.error : 'อัปเดตสถานะไม่สำเร็จ');
+            return;
           }
+          showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'บันทึกสถานะเรียบร้อยแล้ว');
+          loadAdminDealers();
+        })
+        .catch(function(err) {
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
     }
 
-    function populateAdminBrandSelect() {
-      var sel = document.getElementById('imgBrandInput');
-      var html = '<option value="">เลือกแบรนด์</option>';
-      STATE.brands.forEach(function(b) { html += '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>'; });
-      sel.innerHTML = html;
+    function formatExcelDateCell(val) {
+      if (!val) return '';
+      if (val instanceof Date && !isNaN(val.getTime())) {
+        var d = val.getDate(), m = val.getMonth() + 1, y = val.getFullYear();
+        if (y > 2400) y -= 543;
+        return (d < 10 ? '0' + d : d) + '/' + (m < 10 ? '0' + m : m) + '/' + y;
+      }
+      return String(val).trim();
+    }
+
+    function formatExcelPeriodCell(val) {
+      if (!val) return '';
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      if (val instanceof Date && !isNaN(val.getTime())) {
+        return val.getDate() + '-' + months[val.getMonth()];
+      }
+      return String(val).trim();
     }
 
     function handleExcelSelect(evt) {
-      var file = evt.target.files[0];
+      var inputEl = evt.target;
+      var file = inputEl.files[0];
       if (!file) return;
+      setExcelStep(1);
+      document.getElementById('excelSelectedFileName').textContent = 'ไฟล์ที่เลือก: ' + file.name;
+      showToast('กำลังอ่านไฟล์ Excel: ' + file.name);
+
       var reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -914,6 +1051,7 @@
           var ws = wb.Sheets[wb.SheetNames[0]];
           var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
+          var extractedDate = (rows[0] && rows[0][3]) ? formatExcelDateCell(rows[0][3]) : '';
           var headerIdx = 4;
           var colMap = { brand: 1, model: 2, wholesale: 3, rrp: 4, start: 11, end: 12 };
           for (var r = 0; r < Math.min(rows.length, 15); r++) {
@@ -937,7 +1075,11 @@
             }
           }
 
+          var existingMap = {};
+          STATE.products.forEach(function(p) { existingMap[p.modelDesc.toLowerCase()] = p; });
+
           var items = [];
+          var newCount = 0, changedCount = 0;
           for (var i = headerIdx + 1; i < rows.length; i++) {
             var brand = String(rows[i][colMap.brand] || '').trim();
             var model = String(rows[i][colMap.model] || '').trim();
@@ -947,22 +1089,35 @@
             if (brand.charAt(0) === '*' || brand.indexOf('หมายเหตุ') === 0) continue;
             if (isNaN(rrp)) rrp = 0;
 
-            var p1 = String(rows[i][colMap.start] || '').trim();
-            var p2 = String(rows[i][colMap.end] || '').trim();
+            var p1 = formatExcelPeriodCell(rows[i][colMap.start]);
+            var p2 = formatExcelPeriodCell(rows[i][colMap.end]);
             var period = (p1 && p2) ? (p1 + ' - ' + p2) : (p1 || p2);
 
-            items.push({ brand: brand, modelDesc: model, wholesale: wholesale, rrp: rrp, period: period });
+            var prev = existingMap[model.toLowerCase()];
+            var status = 'เดิม';
+            if (!prev) { status = 'ใหม่'; newCount++; }
+            else if (prev.wholesale !== wholesale || prev.rrp !== rrp || prev.period !== period) { status = 'อัปเดต'; changedCount++; }
+
+            items.push({ brand: brand, modelDesc: model, wholesale: wholesale, rrp: rrp, period: period, status: status });
           }
 
+          inputEl.value = '';
           if (!items.length) { showToast('ไม่พบรายการสินค้าในไฟล์ Excel'); return; }
-          STATE.parsedExcelPayload = { items: items };
-          document.getElementById('excelSummaryText').textContent = 'พร้อมอัปเดต ' + items.length + ' รุ่น';
-          document.getElementById('excelPreviewBody').innerHTML = items.slice(0, 100).map(function(it) {
-            return '<tr><td class="p-2">' + escapeHtml(it.brand) + '</td><td class="p-2">' + escapeHtml(it.modelDesc) + '</td><td class="p-2 text-right font-bold">' + it.wholesale + '</td><td class="p-2 text-right">' + it.rrp + '</td><td class="p-2">' + escapeHtml(it.period) + '</td></tr>';
+
+          setExcelStep(2);
+          STATE.parsedExcelPayload = { docDate: extractedDate || STATE.docDate, items: items };
+          document.getElementById('excelSummaryText').textContent = 'พบ ' + items.length + ' รุ่น (ใหม่ ' + newCount + ' | เปลี่ยนแปลง ' + changedCount + ')';
+          document.getElementById('excelPreviewBody').innerHTML = items.slice(0, 150).map(function(it) {
+            var badgeClass = it.status === 'ใหม่' ? 'bg-emerald-100 text-emerald-700' : (it.status === 'อัปเดต' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600');
+            return '<tr><td class="p-2"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ' + badgeClass + '">' + it.status + '</span></td>' +
+              '<td class="p-2 font-semibold">' + escapeHtml(it.brand) + '</td><td class="p-2">' + escapeHtml(it.modelDesc) + '</td>' +
+              '<td class="p-2 text-right font-bold text-rose-600">' + formatMoney(it.wholesale) + '</td><td class="p-2 text-right text-slate-500">' + formatMoney(it.rrp) + '</td>' +
+              '<td class="p-2 whitespace-nowrap">' + escapeHtml(it.period) + '</td></tr>';
           }).join('');
           document.getElementById('excelPreviewSection').classList.remove('hidden');
           showToast('อ่านไฟล์ Excel สำเร็จ (' + items.length + ' รุ่น)');
         } catch (err) {
+          inputEl.value = '';
           showToast('อ่านไฟล์ไม่สำเร็จ: ' + err.message);
         }
       };
@@ -978,35 +1133,305 @@
       callBackendApi('updateOverviewSheet', { pin: STATE.verifiedPin, excelPayload: STATE.parsedExcelPayload })
         .then(function(res) {
           btn.disabled = false;
-          btn.textContent = 'ยืนยันอัปเดตลงชีท';
-          if (!res || !res.ok) { showToast('บันทึกไม่สำเร็จ'); return; }
+          btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
+          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกไม่สำเร็จ'); return; }
+          setExcelStep(3);
           showToast('อัปเดตชีทเรียบร้อยแล้ว (' + res.count + ' รุ่น)');
-          document.getElementById('excelPreviewSection').classList.add('hidden');
-          loadCatalogData();
+          setTimeout(function() {
+            document.getElementById('excelPreviewSection').classList.add('hidden');
+            setExcelStep(1);
+            loadCatalogData();
+          }, 600);
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
     }
 
-    function saveImageMapping() {
-      var brand = document.getElementById('imgBrandInput').value.trim();
-      var key = document.getElementById('imgKeyInput').value.trim();
-      var url = document.getElementById('imgUrlInput').value.trim();
-      if (!key || !url) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
+    function renderAdminImageList() {
+      var listEl = document.getElementById('adminImageList');
+      var countEl = document.getElementById('adminImageCount');
+      if (!listEl) return;
 
-      callBackendApi('saveModelImage', { pin: STATE.verifiedPin, brand: brand, modelKey: key, imageUrl: url })
+      var brandFilter = (document.getElementById('adminBrandFilter') && document.getElementById('adminBrandFilter').value) || 'ALL';
+      var q = ((document.getElementById('adminImageSearch') && document.getElementById('adminImageSearch').value) || '').trim().toLowerCase();
+      var onlyMissing = document.getElementById('adminOnlyMissingImg') && document.getElementById('adminOnlyMissingImg').checked;
+
+      var uniqueMap = {};
+      var items = [];
+      STATE.products.forEach(function(p) {
+        var key = p.brand + '||' + p.modelDesc;
+        if (!uniqueMap[key]) {
+          uniqueMap[key] = true;
+          items.push(p);
+        }
+      });
+
+      var filtered = items.filter(function(p) {
+        if (brandFilter !== 'ALL' && p.brand !== brandFilter) return false;
+        if (onlyMissing && p.imageUrl) return false;
+        if (q && (p.brand + ' ' + p.modelDesc).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+
+      if (countEl) countEl.textContent = 'แสดง ' + filtered.length + ' รุ่น';
+
+      if (!filtered.length) {
+        listEl.innerHTML = '<div class="text-center py-10 text-sm text-slate-500 bg-slate-50 rounded-2xl border border-slate-200">ไม่มีรายการตามตัวกรองที่เลือก</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(function(p, idx) {
+        var inputId = 'imgUrlInput_' + idx;
+        var fileId = 'imgFileInput_' + idx;
+        var btnId = 'imgSaveBtn_' + idx;
+        var safeBrand = escapeHtml(p.brand).replace(/'/g, "\\'");
+        var safeModel = escapeHtml(p.modelDesc).replace(/'/g, "\\'");
+        var thumbHtml = p.imageUrl
+          ? '<img src="' + escapeHtml(p.imageUrl) + '" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain border border-slate-200 bg-white p-1 shrink-0">'
+          : '<div class="w-12 h-12 rounded-xl border border-dashed border-slate-300 bg-slate-100 flex items-center justify-center text-[10px] text-slate-400 shrink-0">ไม่มีรูป</div>';
+
+        return '<div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+          '<div class="flex items-center gap-3 min-w-0 flex-1">' +
+            thumbHtml +
+            '<div class="min-w-0">' +
+              '<span class="text-[11px] font-extrabold text-slate-500 uppercase">' + escapeHtml(p.brand) + '</span>' +
+              '<div class="text-xs sm:text-sm font-bold text-slate-900 truncate">' + escapeHtml(p.modelDesc) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="flex items-center gap-1.5 sm:w-96 shrink-0">' +
+            '<input type="file" id="' + fileId + '" accept="image/*" class="hidden" onchange="handleRowModelImageFile(event, \'' + safeBrand + '\', \'' + safeModel + '\')">' +
+            '<label for="' + fileId + '" class="inline-flex items-center justify-center h-9 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shrink-0 whitespace-nowrap">อัปโหลด</label>' +
+            '<input type="url" id="' + inputId + '" value="' + escapeHtml(p.imageUrl || '') + '" placeholder="หรือวางลิงก์รูปภาพ..." class="w-full h-9 px-2.5 rounded-xl border border-slate-300 text-xs bg-slate-50 focus:bg-white">' +
+            '<button type="button" id="' + btnId + '" onclick="saveModelImageUrl(\'' + safeBrand + '\', \'' + safeModel + '\', \'' + inputId + '\', \'' + btnId + '\')" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer shrink-0">บันทึก</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function handleRowModelImageFile(e, brand, modelDesc) {
+      var inputEl = e.target;
+      var file = inputEl.files[0];
+      if (!file) return;
+
+      var progressBanner = document.getElementById('imageUploadProgressBanner');
+      var progressText = document.getElementById('imageUploadProgressText');
+      progressText.textContent = 'กำลังอัปโหลดรูป "' + file.name + '" สำหรับรุ่น ' + modelDesc + '...';
+      progressBanner.classList.remove('hidden');
+
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        callBackendApi('uploadModelImageFile', {
+          pin: STATE.verifiedPin, brand: brand, modelKey: modelDesc, fileName: file.name, base64DataUrl: evt.target.result
+        }).then(function(res) {
+          inputEl.value = '';
+          progressBanner.classList.add('hidden');
+          if (res && res.ok) {
+            STATE.products.forEach(function(p) { if (p.modelDesc === modelDesc) p.imageUrl = res.imageUrl; });
+            renderProducts();
+            renderAdminImageList();
+            showToast('อัปโหลดและบันทึกรูป "' + modelDesc + '" เรียบร้อย');
+          } else {
+            showToast((res && res.error) ? res.error : 'อัปโหลดรูปไม่สำเร็จ');
+          }
+        }).catch(function(err) {
+          inputEl.value = '';
+          progressBanner.classList.add('hidden');
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function populateAdminBrandSelect() {
+      var sel = document.getElementById('adminBrandFilter');
+      var dl = document.getElementById('brandDataList');
+      if (sel) {
+        var html = '<option value="ALL">ทุกแบรนด์</option>';
+        STATE.brands.forEach(function(b) { html += '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>'; });
+        sel.innerHTML = html;
+      }
+      if (dl) {
+        dl.innerHTML = STATE.brands.map(function(b) { return '<option value="' + escapeHtml(b) + '">'; }).join('');
+      }
+    }
+
+    function submitNewModelImage() {
+      var brand = document.getElementById('newImgBrand').value.trim();
+      var modelKey = document.getElementById('newImgModelKey').value.trim();
+      var url = document.getElementById('newImgUrlInput').value.trim();
+      if (!modelKey) { showToast('กรุณากรอกชื่อรุ่นสินค้าก่อนบันทึก'); return; }
+      if (!url) { showToast('กรุณาเลือกไฟล์รูปภาพหรือวางลิงก์รูปภาพ'); return; }
+
+      var btn = document.getElementById('btnSaveNewImg');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      callBackendApi('saveModelImage', { pin: STATE.verifiedPin, brand: brand, modelKey: modelKey, imageUrl: url })
         .then(function(res) {
-          if (!res || !res.ok) { showToast('บันทึกรูปไม่สำเร็จ'); return; }
-          showToast('บันทึกรูปภาพเรียบร้อย');
-          document.getElementById('imgKeyInput').value = '';
-          document.getElementById('imgUrlInput').value = '';
-          loadCatalogData();
+          btn.disabled = false;
+          btn.textContent = 'บันทึก';
+          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกไม่สำเร็จ'); return; }
+          document.getElementById('newImgModelKey').value = '';
+          document.getElementById('newImgUrlInput').value = '';
+          showToast('บันทึกรูปภาพเรียบร้อยแล้ว');
+          loadCatalogData(true);
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'บันทึก';
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
         });
     }
 
-    // ================= CATALOG & PDF FUNCTIONS =================
-    function loadCatalogData() {
+    function handleNewModelImageFile(e) {
+      var inputEl = e.target;
+      var file = inputEl.files[0];
+      if (!file) return;
+
+      var brand = document.getElementById('newImgBrand').value.trim();
+      var modelKey = document.getElementById('newImgModelKey').value.trim();
+      if (!modelKey) {
+        inputEl.value = '';
+        showToast('กรุณากรอกช่อง "ชื่อรุ่น / คำค้น (Model)" ก่อนเลือกไฟล์รูป');
+        document.getElementById('newImgModelKey').focus();
+        return;
+      }
+
+      var labelEl = document.getElementById('newImgFileLabel');
+      var progressBanner = document.getElementById('imageUploadProgressBanner');
+      var progressText = document.getElementById('imageUploadProgressText');
+
+      labelEl.classList.add('opacity-70', 'pointer-events-none');
+      labelEl.textContent = 'กำลังอัปโหลด...';
+      progressText.textContent = 'กำลังอัปโหลดรูป "' + file.name + '" สำหรับรุ่น ' + modelKey + '...';
+      progressBanner.classList.remove('hidden');
+
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        callBackendApi('uploadModelImageFile', {
+          pin: STATE.verifiedPin, brand: brand, modelKey: modelKey, fileName: file.name, base64DataUrl: evt.target.result
+        }).then(function(res) {
+          inputEl.value = '';
+          progressBanner.classList.add('hidden');
+          labelEl.classList.remove('opacity-70', 'pointer-events-none');
+          labelEl.textContent = 'เลือกไฟล์รูป';
+          if (res && res.ok) {
+            document.getElementById('newImgModelKey').value = '';
+            document.getElementById('newImgUrlInput').value = '';
+            showToast('อัปโหลดและบันทึกรูป "' + modelKey + '" เรียบร้อย');
+            loadCatalogData(true);
+          } else {
+            showToast((res && res.error) ? res.error : 'อัปโหลดรูปไม่สำเร็จ');
+          }
+        }).catch(function(err) {
+          inputEl.value = '';
+          progressBanner.classList.add('hidden');
+          labelEl.classList.remove('opacity-70', 'pointer-events-none');
+          labelEl.textContent = 'เลือกไฟล์รูป';
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveModelImageUrl(brand, modelDesc, inputId, btnId) {
+      var url = document.getElementById(inputId).value.trim();
+      if (!url) { showToast('กรุณาวางลิงก์รูปภาพก่อนกดบันทึก'); return; }
+      var btn = document.getElementById(btnId);
+      if (btn) { btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; }
+
+      callBackendApi('saveModelImage', { pin: STATE.verifiedPin, brand: brand, modelKey: modelDesc, imageUrl: url })
+        .then(function(res) {
+          if (btn) { btn.disabled = false; btn.textContent = 'บันทึก'; }
+          if (!res || !res.ok) { showToast((res && res.error) ? res.error : 'บันทึกรูปไม่สำเร็จ'); return; }
+          STATE.products.forEach(function(p) { if (p.modelDesc === modelDesc) p.imageUrl = url; });
+          renderProducts();
+          renderAdminImageList();
+          showToast('บันทึกลิงก์รูปภาพเรียบร้อย');
+        })
+        .catch(function(err) {
+          if (btn) { btn.disabled = false; btn.textContent = 'บันทึก'; }
+          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+        });
+    }
+
+    // ================= CATALOG, PROMO STATUS & PDF FUNCTIONS =================
+    function getDocYear() {
+      if (STATE.docDate) {
+        var m = STATE.docDate.match(/(\d{4})/);
+        if (m) {
+          var y = parseInt(m[1], 10);
+          return y > 2400 ? y - 543 : y;
+        }
+      }
+      return new Date().getFullYear();
+    }
+
+    function parseMonthIndex(monStr) {
+      var months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+      return months[String(monStr || '').toLowerCase().slice(0, 3)];
+    }
+
+    function parseDateToken(tokenStr, baseYear) {
+      var s = String(tokenStr || '').trim();
+      var m1 = s.match(/^(\d{1,2})[-\/\s]([A-Za-z]{3,})(?:[-\/\s](\d{2,4}))?$/);
+      if (m1) {
+        var day = parseInt(m1[1], 10), mon = parseMonthIndex(m1[2]), yr = m1[3] ? parseInt(m1[3], 10) : baseYear;
+        if (yr < 100) yr += 2000;
+        if (yr > 2400) yr -= 543;
+        if (mon !== undefined) return { date: new Date(yr, mon, day), hasExplicitYear: !!m1[3], day: day, monName: m1[2] };
+      }
+      var m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (m2) {
+        var d2 = parseInt(m2[1], 10), mo2 = parseInt(m2[2], 10) - 1, y2 = parseInt(m2[3], 10);
+        if (y2 < 100) y2 += 2000;
+        if (y2 > 2400) y2 -= 543;
+        var monNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return { date: new Date(y2, mo2, d2), hasExplicitYear: true, day: d2, monName: monNames[mo2] || '' };
+      }
+      return null;
+    }
+
+    function getPromoInfo(periodStr) {
+      if (!periodStr) return { status: 'active', label: '', pdfTag: '' };
+      var baseYear = getDocYear();
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      var parts = String(periodStr).split(/\s*-\s*/);
+      if (parts.length >= 2) {
+        var startParsed = parseDateToken(parts[0], baseYear);
+        var endParsed = parseDateToken(parts[parts.length - 1], baseYear);
+        if (startParsed && endParsed) {
+          var startDate = new Date(startParsed.date.getTime());
+          var endDate = new Date(endParsed.date.getTime());
+          if (!endParsed.hasExplicitYear && endDate.getMonth() < startDate.getMonth()) endDate.setFullYear(endDate.getFullYear() + 1);
+          startDate.setHours(0, 0, 0, 0);
+          endDate.setHours(23, 59, 59, 999);
+
+          if (today < startDate) {
+            var diffDays = Math.ceil((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            var ddStr = ('0' + startParsed.day).slice(-2) + '/' + startParsed.monName;
+            var labelText = diffDays === 1 ? ('โปรโมชั่นเริ่มพรุ่งนี้ (' + ddStr + ')') : (diffDays <= 7 ? ('โปรโมชั่นเริ่มในอีก ' + diffDays + ' วัน (' + ddStr + ')') : ('โปรโมชั่นเริ่ม ' + ddStr));
+            var pdfTagText = diffDays <= 7 ? ('[เริ่มใน ' + diffDays + ' วัน ' + ddStr + ']') : ('[เริ่ม ' + ddStr + ']');
+            return { status: 'upcoming', label: labelText, pdfTag: pdfTagText };
+          }
+          if (today > endDate) {
+            return { status: 'expired', label: 'หมดโปรโมชั่น', pdfTag: '[หมดโปรฯ]' };
+          }
+        }
+      }
+      return { status: 'active', label: '', pdfTag: '' };
+    }
+
+    function loadCatalogData(isAdminBackground) {
       callBackendApi('getWholesaleData', {})
         .then(function(res) {
-          document.getElementById('loadingGrid').classList.add('hidden');
+          var loadingEl = document.getElementById('loadingGrid');
+          if (loadingEl) loadingEl.classList.add('hidden');
           if (!res || !res.ok) {
             showToast('โหลดข้อมูลสินค้าไม่สำเร็จ: ' + ((res && res.error) ? res.error : ''));
             return;
@@ -1015,16 +1440,25 @@
           STATE.docDate = res.docDate || '';
           STATE.warningText = res.warningText || STATE.warningText;
           STATE.brands = res.brands || [];
-          STATE.products = res.products || [];
+          STATE.products = (res.products || []).map(function(p) {
+            var copy = Object.assign({}, p);
+            copy.promo = getPromoInfo(copy.period);
+            return copy;
+          });
           STATE.modelImages = res.modelImages || [];
 
-          document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'พร้อมใช้งาน';
-          document.getElementById('warningBanner').textContent = STATE.warningText;
-          renderBrandTabs();
-          renderProducts();
+          if (!isAdminBackground || STATE.dealerStatus === 'Approved') {
+            document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'พร้อมใช้งาน';
+            document.getElementById('warningBanner').textContent = STATE.warningText;
+            renderBrandTabs();
+            renderProducts();
+          }
+          populateAdminBrandSelect();
+          renderAdminImageList();
         })
         .catch(function(err) {
-          document.getElementById('loadingGrid').classList.add('hidden');
+          var loadingEl = document.getElementById('loadingGrid');
+          if (loadingEl) loadingEl.classList.add('hidden');
           showToast('เกิดข้อผิดพลาดในการโหลดรายการสินค้า: ' + (err.message || err));
         });
     }
@@ -1057,8 +1491,11 @@
 
     function renderProducts() {
       var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      var hideExpired = document.getElementById('hideExpiredToggle').checked;
       var list = STATE.products.filter(function(p) {
         if (STATE.activeBrand !== 'ALL' && p.brand !== STATE.activeBrand) return false;
+        var status = p.promo ? p.promo.status : 'active';
+        if (hideExpired && status !== 'active') return false;
         if (q && (p.brand + ' ' + p.modelDesc + ' ' + p.wholesale + ' ' + p.rrp).toLowerCase().indexOf(q) === -1) return false;
         return true;
       });
@@ -1077,28 +1514,40 @@
 
       grid.innerHTML = list.map(function(p) {
         var theme = getBrandTheme(p.brand);
+        var promo = p.promo || { status: 'active', label: '' };
+        var isInactive = promo.status !== 'active';
         var profit = (p.rrp > 0 && p.wholesale > 0) ? (p.rrp - p.wholesale) : 0;
         var imgHtml = p.imageUrl
           ? '<img src="' + escapeHtml(p.imageUrl) + '" referrerpolicy="no-referrer" loading="lazy" class="w-full h-full object-contain">'
           : '<div class="w-full h-full flex flex-col items-center justify-center p-2 text-center rounded-xl" style="background-color:' + theme.soft + '"><span class="text-xs font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span><span class="text-[10px] text-slate-500 mt-1">ยังไม่มีรูปภาพ</span></div>';
 
-        return '<article class="product-card flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden">' +
-          '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3">' +
-            imgHtml +
-            (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
-          '</div>' +
-          '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2">' +
-            '<div><span class="text-[11px] font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
-            '<h3 class="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mt-0.5">' + escapeHtml(p.modelDesc) + '</h3></div>' +
-            '<div class="pt-2 border-t border-slate-100">' +
-              '<div class="flex items-baseline justify-between gap-1">' +
-                '<span class="text-xs text-slate-400 line-through font-num">' + (p.rrp > 0 ? '฿' + formatMoney(p.rrp) : '') + '</span>' +
-                '<span class="text-xl font-black text-slate-900 font-num">฿' + formatMoney(p.wholesale) + '</span>' +
-              '</div>' +
-              (p.period ? '<div class="text-[11px] text-slate-500 mt-1 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
+        var ribbonHtml = '';
+        if (promo.status === 'expired') {
+          ribbonHtml = '<div class="pointer-events-none absolute inset-x-2 top-1/3 -translate-y-1/2 -rotate-6 bg-rose-600/95 text-white text-center py-1.5 px-2 rounded-xl shadow-md border border-rose-400"><span class="text-xs font-extrabold tracking-wide">' + escapeHtml(promo.label) + '</span></div>';
+        } else if (promo.status === 'upcoming') {
+          ribbonHtml = '<div class="pointer-events-none absolute inset-x-2 top-1/3 -translate-y-1/2 -rotate-3 bg-emerald-600/95 text-white text-center py-1.5 px-2 rounded-xl shadow-md border border-emerald-400"><span class="text-[11px] sm:text-xs font-extrabold tracking-wide">' + escapeHtml(promo.label) + '</span></div>';
+        }
+
+        return '<div class="relative">' +
+          '<article class="product-card h-full flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden ' + (isInactive ? 'expired-card' : '') + '">' +
+            '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3">' +
+              imgHtml +
+              (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
             '</div>' +
-          '</div>' +
-        '</article>';
+            '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2">' +
+              '<div><span class="text-[11px] font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
+              '<h3 class="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mt-0.5">' + escapeHtml(p.modelDesc) + '</h3></div>' +
+              '<div class="pt-2 border-t border-slate-100">' +
+                '<div class="flex items-baseline justify-between gap-1">' +
+                  '<span class="text-xs text-slate-500 font-semibold font-num">' + (p.rrp > 0 ? '฿' + formatMoney(p.rrp) : '') + '</span>' +
+                  '<span class="text-xl font-black text-slate-900 font-num">฿' + formatMoney(p.wholesale) + '</span>' +
+                '</div>' +
+                (p.period ? '<div class="text-[11px] text-slate-500 mt-1 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
+              '</div>' +
+            '</div>' +
+          '</article>' +
+          ribbonHtml +
+        '</div>';
       }).join('');
     }
 
