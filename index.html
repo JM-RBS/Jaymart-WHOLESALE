@@ -454,21 +454,26 @@
       // 1. กรณีเพิ่งกดยินยอมจากหน้า LINE Login แล้วเด้งกลับมาพร้อม ?code=...
       if (code) {
         document.getElementById('docDateBadge').textContent = 'กำลังยืนยันบัญชี LINE...';
+        showToast('กำลังเชื่อมต่อข้อมูลโปรไฟล์ LINE...');
         callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanCurrentUrl })
           .then(function(res) {
             window.history.replaceState({}, document.title, window.location.pathname);
             if (res && res.ok && res.lineUser && res.lineUser.userId) {
               STATE.currentLineUser = res.lineUser;
               try { localStorage.setItem('jm_device_line_user_v2', JSON.stringify(res.lineUser)); } catch (e) {}
+              // แสดงฟอร์มลงทะเบียนทันทีระหว่างรอเช็กสิทธิ์ในชีท
+              STATE.dealerStatus = 'unregistered';
+              applyDealerGateUI();
               verifyLineUserAccess(res.lineUser.userId);
             } else {
-              showToast('ยืนยันตัวตน LINE ไม่สำเร็จ: ' + ((res && res.error) ? res.error : ''));
+              var errDetail = (res && res.error) ? res.error : 'ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์';
+              alertBoxFallback('ยืนยันตัวตน LINE ไม่สำเร็จ: ' + errDetail);
               document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
             }
           })
           .catch(function(err) {
             window.history.replaceState({}, document.title, window.location.pathname);
-            showToast('เชื่อมต่อ LINE API ไม่สำเร็จ: ' + (err.message || err));
+            alertBoxFallback('เชื่อมต่อหลังบ้าน GAS ไม่สำเร็จ: ' + (err.message || err));
             document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
           });
         return;
@@ -668,332 +673,21 @@
       el.textContent = msg;
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(function() { el.classList.add('hidden'); }, 3200);
+      window._toastTimer = setTimeout(function() { el.classList.add('hidden'); }, 4500);
     }
 
-    function formatBaht(num) { return '฿' + Number(num || 0).toLocaleString('en-US'); }
-
-    function getDocYear() {
-      if (STATE.docDate) {
-        var m = STATE.docDate.match(/(\d{4})/);
-        if (m) {
-          var y = parseInt(m[1], 10);
-          return y > 2400 ? y - 543 : y;
+    function alertBoxFallback(msg) {
+      showToast(msg);
+      var box = document.getElementById('lineConnectBox');
+      if (box) {
+        var existing = document.getElementById('lineErrorDetailBox');
+        if (!existing) {
+          existing = document.createElement('div');
+          existing.id = 'lineErrorDetailBox';
+          existing.className = 'mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-medium break-words';
+          box.appendChild(existing);
         }
-      }
-      return new Date().getFullYear();
-    }
-
-    function parseMonthIndex(monStr) {
-      var months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
-      return months[String(monStr || '').toLowerCase().slice(0, 3)];
-    }
-
-    function isPeriodExpired(periodStr) {
-      if (!periodStr) return false;
-      var baseYear = getDocYear();
-      var today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      var parts = String(periodStr).split(/\s*-\s*/);
-      if (parts.length >= 2) {
-        var endPart = parts[parts.length - 1].trim();
-        var mEnd = endPart.match(/^(\d{1,2})[-\/\s]([A-Za-z]{3,})(?:[-\/\s](\d{2,4}))?$/);
-        if (mEnd) {
-          var day = parseInt(mEnd[1], 10);
-          var mon = parseMonthIndex(mEnd[2]);
-          var yr = mEnd[3] ? parseInt(mEnd[3], 10) : baseYear;
-          if (yr < 100) yr += 2000;
-          if (yr > 2400) yr -= 543;
-          if (mon !== undefined) {
-            var endDate = new Date(yr, mon, day, 23, 59, 59, 999);
-            return today > endDate;
-          }
-        }
-      }
-      return false;
-    }
-
-    function loadCatalogData() {
-      callBackendApi('getWholesaleData')
-        .then(function(res) {
-          if (!res || !res.ok) { showToast('โหลดข้อมูลสินค้าไม่สำเร็จ'); return; }
-          STATE.docTitle = res.docTitle;
-          STATE.docDate = res.docDate;
-          STATE.warningText = res.warningText;
-          STATE.brands = res.brands || [];
-          STATE.modelImages = res.modelImages || [];
-          STATE.products = (res.products || []).map(function(p) {
-            p.expired = isPeriodExpired(p.period);
-            return p;
-          });
-
-          document.getElementById('docDateBadge').textContent = STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'พร้อมใช้งาน';
-          document.getElementById('warningBanner').textContent = STATE.warningText;
-          document.getElementById('loadingGrid').classList.add('hidden');
-
-          renderBrandTabs();
-          renderProducts();
-          populateAdminBrandSelect();
-        })
-        .catch(function(err) { showToast('เกิดข้อผิดพลาด: ' + (err.message || err)); });
-    }
-
-    function renderBrandTabs() {
-      var container = document.getElementById('brandTabsContainer');
-      var counts = {};
-      STATE.products.forEach(function(p) { counts[p.brand] = (counts[p.brand] || 0) + 1; });
-
-      var html = '<button onclick="selectBrand(\'ALL\')" class="btn-press shrink-0 h-9 px-3.5 rounded-full text-xs sm:text-sm font-semibold border transition cursor-pointer ' +
-        (STATE.activeBrand === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50') +
-        '">ทั้งหมด <span class="opacity-75 font-num">(' + STATE.products.length + ')</span></button>';
-
-      STATE.brands.forEach(function(b) {
-        var active = STATE.activeBrand === b;
-        var theme = getBrandTheme(b);
-        var styleStr = active ? 'background-color:' + theme.hex + ';color:#FFFFFF;border-color:' + theme.hex + ';' : 'background-color:#FFFFFF;color:#334155;border-color:#E2E8F0;';
-        html += '<button onclick="selectBrand(\'' + escapeHtml(b) + '\')" style="' + styleStr + '" class="btn-press shrink-0 h-9 px-3.5 rounded-full text-xs sm:text-sm font-semibold border transition cursor-pointer">' +
-          escapeHtml(b) + ' <span class="opacity-75 font-num">(' + (counts[b] || 0) + ')</span></button>';
-      });
-      container.innerHTML = html;
-    }
-
-    function selectBrand(brand) {
-      STATE.activeBrand = brand;
-      renderBrandTabs();
-      renderProducts();
-    }
-
-    function handleSearch() {
-      STATE.searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-      document.getElementById('clearSearchBtn').classList.toggle('hidden', !STATE.searchQuery);
-      renderProducts();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      STATE.searchQuery = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
-      renderProducts();
-    }
-
-    function getFilteredProducts() {
-      var hideExpired = document.getElementById('hideExpiredToggle').checked;
-      return STATE.products.filter(function(p) {
-        if (STATE.activeBrand !== 'ALL' && p.brand !== STATE.activeBrand) return false;
-        if (hideExpired && p.expired) return false;
-        if (STATE.searchQuery) {
-          var hay = (p.brand + ' ' + p.modelDesc + ' ' + p.wholesale + ' ' + p.rrp).toLowerCase();
-          var tokens = STATE.searchQuery.split(/\s+/);
-          for (var i = 0; i < tokens.length; i++) {
-            if (hay.indexOf(tokens[i]) === -1) return false;
-          }
-        }
-        return true;
-      });
-    }
-
-    function renderProducts() {
-      var list = getFilteredProducts();
-      document.getElementById('resultCount').textContent = list.length + ' รุ่น';
-      var grid = document.getElementById('productGrid');
-      var empty = document.getElementById('emptyState');
-
-      if (!list.length) {
-        grid.classList.add('hidden');
-        empty.classList.remove('hidden');
-        return;
-      }
-      empty.classList.add('hidden');
-      grid.classList.remove('hidden');
-
-      var html = '';
-      for (var i = 0; i < list.length; i++) {
-        var p = list[i];
-        var theme = getBrandTheme(p.brand);
-        var profit = p.rrp > 0 ? (p.rrp - p.wholesale) : 0;
-
-        html += '<article class="product-card h-full flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden ' + (p.expired ? 'expired-card' : '') + '">';
-        html += '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3 overflow-hidden">';
-        if (p.imageUrl) {
-          html += '<img src="' + escapeHtml(p.imageUrl) + '" alt="' + escapeHtml(p.modelDesc) + '" referrerpolicy="no-referrer" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.classList.remove(\'hidden\');" class="w-full h-full object-contain">';
-          html += renderFallbackVisual(p, theme, true);
-        } else {
-          html += renderFallbackVisual(p, theme, false);
-        }
-        if (profit > 0) {
-          html += '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-red-600 text-white text-[11px] font-bold shadow-sm font-num leading-none whitespace-nowrap">กำไร +' + Number(profit).toLocaleString('en-US') + '฿</span>';
-        }
-        html += '</div>';
-
-        html += '<div class="p-3 sm:p-3.5 flex-1 flex flex-col justify-between gap-2.5">';
-        html += '<div><span class="block text-[11px] font-bold uppercase tracking-wider mb-1" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>';
-        html += '<h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-snug line-clamp-2">' + escapeHtml(p.modelDesc) + '</h3></div>';
-
-        html += '<div class="space-y-1.5 pt-1 border-t border-slate-100">';
-        html += '<div class="flex items-baseline justify-between gap-1 flex-wrap">';
-        if (p.rrp > 0) {
-          html += '<span class="text-xs text-slate-400 line-through font-num">' + formatBaht(p.rrp) + '</span>';
-        } else {
-          html += '<span></span>';
-        }
-        html += '<span class="text-base sm:text-lg font-extrabold text-slate-900 font-num">' + formatBaht(p.wholesale) + '</span>';
-        html += '</div>';
-        if (p.period) {
-          html += '<div class="text-[11px] text-slate-500 font-num truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>';
-        }
-        html += '</div></div></article>';
-      }
-      grid.innerHTML = html;
-    }
-
-    function renderFallbackVisual(p, theme, hiddenInitially) {
-      var shortName = p.modelDesc.replace(new RegExp('^' + escapeRegExp(p.brand) + '\\s*', 'i'), '');
-      return '<div class="' + (hiddenInitially ? 'hidden ' : '') + 'w-full h-full rounded-xl flex flex-col items-center justify-center p-3 text-center" style="background-color:' + theme.soft + ';">' +
-        '<span class="text-xs font-extrabold uppercase tracking-widest mb-1" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
-        '<span class="text-[11px] font-semibold text-slate-600 line-clamp-3 leading-tight">' + escapeHtml(shortName) + '</span></div>';
-    }
-
-    function escapeRegExp(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-    function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    // ================= PDF EXPORT =================
-    function openPdfModal() {
-      var container = document.getElementById('pdfBrandChecklist');
-      var html = '';
-      STATE.brands.forEach(function(b) {
-        var theme = getBrandTheme(b);
-        var checked = (STATE.activeBrand === 'ALL' || STATE.activeBrand === b) ? 'checked' : '';
-        html += '<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-xs font-semibold text-slate-800">' +
-          '<input type="checkbox" name="pdfBrand" value="' + escapeHtml(b) + '" ' + checked + ' class="w-4 h-4 rounded border-slate-300">' +
-          '<span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color:' + theme.hex + '"></span>' +
-          '<span class="truncate">' + escapeHtml(b) + '</span></label>';
-      });
-      container.innerHTML = html;
-      openModal('pdfModal');
-    }
-
-    function togglePdfBrands(checked) {
-      document.querySelectorAll('input[name="pdfBrand"]').forEach(function(b) { b.checked = checked; });
-    }
-
-    async function loadSarabunFonts() {
-      if (STATE.fontCache) return STATE.fontCache;
-      async function fetchAsBase64(url) {
-        var resp = await fetch(url);
-        var buf = await resp.arrayBuffer();
-        var bytes = new Uint8Array(buf);
-        var binary = '';
-        var chunk = 0x8000;
-        for (var j = 0; j < bytes.length; j += chunk) {
-          binary += String.fromCharCode.apply(null, bytes.subarray(j, j + chunk));
-        }
-        return btoa(binary);
-      }
-      var regular = await fetchAsBase64('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf');
-      var bold = await fetchAsBase64('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Bold.ttf');
-      STATE.fontCache = { regular: regular, bold: bold };
-      return STATE.fontCache;
-    }
-
-    async function generatePdfCatalog() {
-      var selectedBrands = [];
-      document.querySelectorAll('input[name="pdfBrand"]:checked').forEach(function(cb) { selectedBrands.push(cb.value); });
-      if (!selectedBrands.length) { showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์'); return; }
-
-      var btn = document.getElementById('generatePdfBtn');
-      btn.disabled = true;
-      btn.innerHTML = 'กำลังสร้าง PDF...';
-
-      try {
-        var fonts = await loadSarabunFonts();
-        var jsPDF = window.jspdf.jsPDF;
-        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-        doc.addFileToVFS('Sarabun-Regular.ttf', fonts.regular);
-        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
-        doc.addFileToVFS('Sarabun-Bold.ttf', fonts.bold);
-        doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold');
-        doc.setFont('Sarabun', 'normal');
-
-        var pageWidth = doc.internal.pageSize.getWidth();
-        var renderedAnyBrand = false;
-
-        selectedBrands.forEach(function(brand) {
-          var items = STATE.products.filter(function(p) { return p.brand === brand; });
-          if (!items.length) return;
-
-          if (renderedAnyBrand) doc.addPage();
-          renderedAnyBrand = true;
-
-          var theme = getBrandTheme(brand);
-          var rgb = theme.rgb;
-
-          doc.setFont('Sarabun', 'bold');
-          doc.setFontSize(14);
-          doc.text(STATE.docTitle, 14, 14);
-          if (STATE.docDate) {
-            doc.setFont('Sarabun', 'normal');
-            doc.setFontSize(10);
-            doc.text('วันที่: ' + STATE.docDate, pageWidth - 14, 14, { align: 'right' });
-          }
-          doc.setFont('Sarabun', 'bold');
-          doc.setFontSize(9.5);
-          doc.setTextColor(220, 38, 38);
-          doc.text(STATE.warningText, 14, 20);
-
-          doc.setFillColor(248, 250, 252);
-          doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
-          doc.setLineWidth(0.8);
-          doc.roundedRect(14, 24, pageWidth - 28, 11, 2, 2, 'FD');
-          doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-          doc.rect(14, 24, 3.5, 11, 'F');
-
-          doc.setFont('Sarabun', 'bold');
-          doc.setFontSize(13);
-          doc.setTextColor(rgb[0], rgb[1], rgb[2]);
-          doc.text(brand.toUpperCase(), 21, 31.2);
-          doc.setFont('Sarabun', 'normal');
-          doc.setFontSize(9.5);
-          doc.setTextColor(71, 85, 105);
-          doc.text(items.length + ' รุ่น', pageWidth - 18, 31.2, { align: 'right' });
-
-          var bodyRows = items.map(function(p) {
-            return [p.modelDesc, p.rrp > 0 ? Number(p.rrp).toLocaleString('en-US') : '-', Number(p.wholesale).toLocaleString('en-US'), p.period || '-'];
-          });
-
-          doc.autoTable({
-            startY: 38,
-            margin: { left: 14, right: 14, bottom: 16 },
-            head: [['ชื่อรุ่น (MODEL_DESC)', 'ราคาขาย (RRP)', 'ราคาส่ง', 'ระยะเวลา']],
-            body: bodyRows,
-            styles: { font: 'Sarabun', fontSize: 9.5, cellPadding: { top: 2.2, right: 3, bottom: 2.2, left: 3 }, textColor: [15, 23, 42], lineColor: [226, 232, 240], lineWidth: 0.2 },
-            headStyles: { font: 'Sarabun', fontStyle: 'bold', fillColor: rgb, textColor: [255, 255, 255] },
-            alternateRowStyles: { fillColor: [248, 250, 252] },
-            columnStyles: { 0: { cellWidth: 'auto', halign: 'left' }, 1: { cellWidth: 28, halign: 'right' }, 2: { cellWidth: 28, halign: 'right', fontStyle: 'bold' }, 3: { cellWidth: 34, halign: 'center' } }
-          });
-        });
-
-        var totalPages = doc.internal.getNumberOfPages();
-        for (var p = 1; p <= totalPages; p++) {
-          doc.setPage(p);
-          doc.setFont('Sarabun', 'normal');
-          doc.setFontSize(8.5);
-          doc.setTextColor(148, 163, 184);
-          doc.text('หน้า ' + p + ' / ' + totalPages, pageWidth - 14, doc.internal.pageSize.getHeight() - 8, { align: 'right' });
-        }
-
-        doc.save('Jaymart_Wholesale_Catalog.pdf');
-        closeModal('pdfModal');
-        showToast('ดาวน์โหลด PDF เรียบร้อยแล้ว');
-      } catch (err) {
-        showToast('สร้าง PDF ไม่สำเร็จ: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'สร้างและดาวน์โหลด PDF';
+        existing.textContent = msg;
       }
     }
 
