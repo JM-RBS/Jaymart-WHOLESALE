@@ -72,7 +72,7 @@
 
           <button onclick="openAdminAuth()" class="relative btn-press inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
             <svg width="16" height="16" class="w-4 h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span>Login Admin</span>
+            <span id="headerAdminBtnText">Login Admin</span>
             <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
           </button>
         </div>
@@ -290,12 +290,16 @@
 
   <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-4xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden h-[92dvh] sm:h-[85dvh] flex flex-col">
-      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-3 min-w-0">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900 truncate">Login Admin Workspace</h2>
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2">
+        <div class="flex items-center gap-2.5 min-w-0 flex-wrap">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 truncate">Admin Workspace</h2>
           <span id="adminStaffBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
+          <span id="adminLineBoundBadge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#06C755]/10 text-[#06C755] border border-[#06C755]/30">✓ ผูกบัญชี LINE แล้ว</span>
+          <button id="btnBindAdminLine" type="button" onclick="bindCurrentLineAsAdmin()" class="hidden btn-press px-2.5 py-1 rounded-lg bg-[#06C755] hover:bg-[#05b34c] text-white text-xs font-bold cursor-pointer whitespace-nowrap">
+            + ผูกบัญชี LINE นี้เป็นแอดมินถาวร
+          </button>
         </div>
-        <button onclick="closeModal('adminModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <button onclick="closeModal('adminModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
 
       <div class="px-5 pt-3 border-b border-slate-200 flex items-center gap-2 shrink-0 bg-slate-50 overflow-x-auto no-scrollbar">
@@ -430,7 +434,10 @@
               <span>แสดงเฉพาะรุ่นที่ยังไม่มีรูป</span>
             </label>
           </div>
-          <span id="adminImageCount" class="text-xs font-semibold text-slate-500"></span>
+          <div class="flex items-center gap-2">
+            <span id="adminImageCount" class="text-xs font-semibold text-slate-500"></span>
+            <button type="button" onclick="loadCatalogData(true)" class="h-8 px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer">รีเฟรชรุ่น</button>
+          </div>
         </div>
 
         <div id="adminImageList" class="space-y-2.5"></div>
@@ -444,6 +451,7 @@
     var LINE_CHANNEL_ID = '2012656454';
     var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
     var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v1';
+    var STORAGE_ADMIN_KEY = 'jm_wholesale_admin_session_v1';
 
     var STATE = {
       docTitle: 'Jaymart Wholesale - ใบราคา Volume Special',
@@ -459,6 +467,7 @@
       parsedExcelPayload: null,
       fontCache: null,
       lineUser: null,
+      isAdmin: false,
       dealerStatus: 'unlogged',
       dealerInfo: null,
       dealersList: []
@@ -528,7 +537,7 @@
           else if (action === 'exchangeLineAuthCode') runner.exchangeLineAuthCode(payload.code, payload.redirectUri);
           else if (action === 'checkDealerAccess') runner.checkDealerAccess(payload.lineUserId);
           else if (action === 'registerDealerRequest') runner.registerDealerRequest(payload);
-          else if (action === 'verifyStaffPin') runner.verifyStaffPin(payload.pin);
+          else if (action === 'verifyStaffPin') runner.verifyStaffPin(payload.pin, payload.lineUserId);
           else if (action === 'getDealerRegistrations') runner.getDealerRegistrations(payload.pin);
           else if (action === 'updateDealerStatus') runner.updateDealerStatus(payload.pin, payload.lineUserId, payload.newStatus);
           else if (action === 'updateOverviewSheet') runner.updateOverviewSheet(payload.pin, payload.excelPayload);
@@ -595,20 +604,59 @@
       }
 
       try {
+        var savedAdmin = localStorage.getItem(STORAGE_ADMIN_KEY);
+        if (savedAdmin) {
+          var parsedAdmin = JSON.parse(savedAdmin);
+          if (parsedAdmin && parsedAdmin.pin) {
+            STATE.isAdmin = true;
+            STATE.verifiedPin = parsedAdmin.pin;
+            STATE.staffName = parsedAdmin.name || 'Admin';
+            STATE.dealerStatus = 'Approved';
+            STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
+            updateAdminHeaderUI();
+          }
+        }
+      } catch (e) {}
+
+      try {
         var saved = localStorage.getItem(STORAGE_LINE_KEY);
         if (saved) {
           var parsedUser = JSON.parse(saved);
           if (parsedUser && parsedUser.userId) {
             STATE.lineUser = parsedUser;
+            if (STATE.isAdmin && STATE.verifiedPin) {
+              callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: parsedUser.userId }).catch(function() {});
+              applyDealerGateUI();
+              loadCatalogData();
+              return;
+            }
             verifyLineUserAccess(parsedUser.userId);
             return;
           }
         }
       } catch (e) {}
 
+      if (STATE.isAdmin) {
+        applyDealerGateUI();
+        loadCatalogData();
+        return;
+      }
+
       STATE.dealerStatus = 'unlogged';
       document.getElementById('docDateBadge').textContent = 'กรุณายืนยันตัวตน';
       applyDealerGateUI();
+    }
+
+    function updateAdminHeaderUI() {
+      var btnText = document.getElementById('headerAdminBtnText');
+      if (btnText) {
+        btnText.textContent = STATE.isAdmin ? ('Admin (' + STATE.staffName + ')') : 'Login Admin';
+      }
+    }
+
+    function bindCurrentLineAsAdmin() {
+      try { localStorage.setItem('jm_bind_admin_after_line', '1'); } catch (e) {}
+      startLineLogin();
     }
 
     function startLineLogin() {
@@ -630,13 +678,55 @@
 
     function verifyLineUserAccess(lineUserId) {
       document.getElementById('docDateBadge').textContent = 'กำลังตรวจสอบสิทธิ์...';
+
+      var pendingBind = false;
+      try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
+      if (pendingBind && STATE.isAdmin && STATE.verifiedPin) {
+        try { localStorage.removeItem('jm_bind_admin_after_line'); } catch (e) {}
+        callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: lineUserId })
+          .then(function() {
+            showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
+            applyDealerGateUI();
+            loadCatalogData();
+            openAdminWorkspace();
+          });
+        return;
+      }
+
       callBackendApi('checkDealerAccess', { lineUserId: lineUserId })
         .then(function(res) {
           if (!res || !res.ok) {
+            if (STATE.isAdmin) {
+              STATE.dealerStatus = 'Approved';
+              applyDealerGateUI();
+              loadCatalogData();
+              return;
+            }
             STATE.dealerStatus = 'unregistered';
             applyDealerGateUI();
             return;
           }
+
+          if (res.isAdmin) {
+            STATE.isAdmin = true;
+            STATE.verifiedPin = res.adminPin || STATE.verifiedPin;
+            STATE.staffName = res.adminName || 'Admin';
+            STATE.dealerStatus = 'Approved';
+            STATE.dealerInfo = res.dealer || { typedShopName: 'Admin: ' + STATE.staffName };
+            try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: STATE.verifiedPin, name: STATE.staffName, lineUserId: lineUserId })); } catch (e) {}
+            updateAdminHeaderUI();
+            applyDealerGateUI();
+            loadCatalogData();
+            return;
+          }
+
+          if (STATE.isAdmin) {
+            STATE.dealerStatus = 'Approved';
+            applyDealerGateUI();
+            loadCatalogData();
+            return;
+          }
+
           STATE.dealerStatus = res.status || 'unregistered';
           STATE.dealerInfo = res.dealer || null;
           applyDealerGateUI();
@@ -859,7 +949,9 @@
       btn.disabled = true;
       btn.textContent = 'กำลังตรวจสอบ...';
 
-      callBackendApi('verifyStaffPin', { pin: pin })
+      var currentLineUid = (STATE.lineUser && STATE.lineUser.userId) ? STATE.lineUser.userId : '';
+
+      callBackendApi('verifyStaffPin', { pin: pin, lineUserId: currentLineUid })
         .then(function(res) {
           btn.disabled = false;
           btn.textContent = 'เข้าสู่ระบบ';
@@ -868,10 +960,31 @@
             errEl.classList.remove('hidden');
             return;
           }
+          STATE.isAdmin = true;
           STATE.verifiedPin = pin;
           STATE.staffName = res.name || 'พนักงาน';
+          STATE.dealerStatus = 'Approved';
+          if (!STATE.dealerInfo) {
+            STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
+          }
+          try {
+            localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
+              pin: pin,
+              name: STATE.staffName,
+              lineUserId: currentLineUid
+            }));
+          } catch (e) {}
+
+          updateAdminHeaderUI();
+          applyDealerGateUI();
+          loadCatalogData();
           closeModal('pinModal');
           openAdminWorkspace();
+          if (currentLineUid) {
+            showToast('เข้าสู่ระบบแอดมินสำเร็จ และผูกบัญชี LINE นี้เรียบร้อยแล้ว');
+          } else {
+            showToast('เข้าสู่ระบบแอดมินสำเร็จ สามารถดูและจัดการได้ทุกเมนู');
+          }
         })
         .catch(function(err) {
           btn.disabled = false;
@@ -883,6 +996,16 @@
 
     function openAdminWorkspace() {
       document.getElementById('adminStaffBadge').textContent = STATE.staffName;
+      var boundBadge = document.getElementById('adminLineBoundBadge');
+      var bindBtn = document.getElementById('btnBindAdminLine');
+      if (STATE.lineUser && STATE.lineUser.userId) {
+        if (boundBadge) boundBadge.classList.remove('hidden');
+        if (bindBtn) bindBtn.classList.add('hidden');
+      } else {
+        if (boundBadge) boundBadge.classList.add('hidden');
+        if (bindBtn) bindBtn.classList.remove('hidden');
+      }
+
       populateAdminBrandSelect();
       switchAdminTab('dealers');
       loadAdminDealers();
@@ -1532,17 +1655,18 @@
           '<article class="product-card h-full flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden ' + (isInactive ? 'expired-card' : '') + '">' +
             '<div class="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center p-3">' +
               imgHtml +
-              (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
+              (profit > 0 ? '<span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold font-num shadow-xs">กำไร +' + formatMoney(profit) + '฿</span>' : '') +
             '</div>' +
             '<div class="p-3.5 flex-1 flex flex-col justify-between gap-2">' +
               '<div><span class="text-[11px] font-extrabold uppercase" style="color:' + theme.hex + '">' + escapeHtml(p.brand) + '</span>' +
               '<h3 class="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 mt-0.5">' + escapeHtml(p.modelDesc) + '</h3></div>' +
-              '<div class="pt-2 border-t border-slate-100">' +
+              '<div class="pt-2.5 border-t border-slate-100 space-y-1">' +
+                (p.rrp > 0 ? '<div class="flex items-center justify-between text-xs text-slate-500"><span>ราคาปกติ (RRP)</span><span class="font-semibold font-num">฿' + formatMoney(p.rrp) + '</span></div>' : '') +
                 '<div class="flex items-baseline justify-between gap-1">' +
-                  '<span class="text-xs text-slate-500 font-semibold font-num">' + (p.rrp > 0 ? '฿' + formatMoney(p.rrp) : '') + '</span>' +
+                  '<span class="text-xs font-bold text-rose-600">ราคาส่ง</span>' +
                   '<span class="text-xl font-black text-slate-900 font-num">฿' + formatMoney(p.wholesale) + '</span>' +
                 '</div>' +
-                (p.period ? '<div class="text-[11px] text-slate-500 mt-1 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
+                (p.period ? '<div class="text-[11px] text-slate-500 pt-0.5 truncate">ระยะเวลา: ' + escapeHtml(p.period) + '</div>' : '') +
               '</div>' +
             '</div>' +
           '</article>' +
