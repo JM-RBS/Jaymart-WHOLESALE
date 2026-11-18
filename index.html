@@ -2096,29 +2096,61 @@
       var banner = document.getElementById('imageUploadProgressBanner');
       var textEl = document.getElementById('imageUploadProgressText');
       if (banner) banner.classList.remove('hidden');
-      if (textEl) textEl.textContent = 'กำลังอัปโหลดรูป ' + modelKey + ' ขึ้น Google Drive...';
+      if (textEl) textEl.textContent = 'กำลังเตรียมและอัปโหลดรูป ' + modelKey + ' ขึ้น Google Drive...';
 
       var reader = new FileReader();
       reader.onload = function(evt) {
-        callBackendApi('uploadModelImageFile', {
-          pin: STATE.verifiedPin,
-          brand: brand,
-          modelKey: modelKey,
-          fileName: file.name,
-          base64DataUrl: evt.target.result
-        }).then(function(res) {
-          if (banner) banner.classList.add('hidden');
-          if (!res || !res.ok) {
-            showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
-            return;
+        var img = new Image();
+        img.onload = function() {
+          try {
+            var maxDim = 900;
+            var w = img.width;
+            var h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round(h * (maxDim / w));
+                w = maxDim;
+              } else {
+                w = Math.round(w * (maxDim / h));
+                h = maxDim;
+              }
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            callBackendApi('uploadModelImageFile', {
+              pin: STATE.verifiedPin,
+              brand: brand,
+              modelKey: modelKey,
+              fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg',
+              base64DataUrl: compressedDataUrl
+            }).then(function(res) {
+              if (banner) banner.classList.add('hidden');
+              if (!res || !res.ok) {
+                showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
+                return;
+              }
+              showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
+              if (onDone) onDone(res.imageUrl);
+              loadCatalogData(true).then(renderAdminImageList);
+            }).catch(function(err) {
+              if (banner) banner.classList.add('hidden');
+              showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+            });
+          } catch (canvasErr) {
+            if (banner) banner.classList.add('hidden');
+            showToast('ประมวลผลรูปภาพไม่สำเร็จ: ' + (canvasErr.message || canvasErr));
           }
-          showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
-          if (onDone) onDone(res.imageUrl);
-          loadCatalogData(true).then(renderAdminImageList);
-        }).catch(function(err) {
+        };
+        img.onerror = function() {
           if (banner) banner.classList.add('hidden');
-          showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
-        });
+          showToast('ไฟล์รูปภาพไม่ถูกต้อง');
+        };
+        img.src = evt.target.result;
       };
       reader.readAsDataURL(file);
     }
