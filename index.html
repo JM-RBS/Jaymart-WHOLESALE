@@ -297,6 +297,10 @@
 
     <!-- 4. Approved Catalog Grid Container -->
     <div id="catalogContentArea" class="hidden space-y-5">
+      <div id="stalePriceAlert" class="hidden p-3.5 sm:p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2.5 text-xs sm:text-sm font-bold shadow-xs">
+        <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18.5h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z"/></svg>
+        <span id="stalePriceAlertText">ไม่ได้อัปเดตนานเกิน 7 วัน รบกวนติดต่อแอดมินเพื่ออัปเดตข้อมูล</span>
+      </div>
       <div id="loadingGrid" class="hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <div class="h-72 rounded-2xl skeleton"></div>
         <div class="h-72 rounded-2xl skeleton"></div>
@@ -424,21 +428,27 @@
         </div>
 
         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100/70 transition">
-          <input type="file" id="excelFileInput" accept=".xlsx,.xls" onchange="handleExcelSelect(event)" class="hidden">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" onchange="handleExcelSelect(event)" class="hidden">
           <label for="excelFileInput" class="cursor-pointer flex flex-col items-center">
             <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
-            <span class="text-sm font-bold text-slate-800">คลิกเพื่อเลือกไฟล์ Excel ใบราคา (.xlsx / .xls)</span>
+            <span class="text-sm font-bold text-slate-800">คลิกเพื่อเลือกไฟล์ Excel ใบราคา (.xlsx, .xls, .xlsm, .xlsb, .csv, .ods)</span>
             <span id="excelSelectedFileName" class="text-xs text-slate-500 mt-1">ระบบจะอ่านคอลัมน์ Brand, MODEL_DESC, ราคาส่ง, RRP และระยะเวลาให้อัตโนมัติ</span>
           </label>
         </div>
 
         <div id="excelPreviewSection" class="hidden space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-            <div class="text-xs sm:text-sm">
-              <span class="font-bold text-emerald-900">พร้อมอัปเดต:</span>
-              <span id="excelSummaryText" class="text-emerald-800 ml-1"></span>
+            <div class="space-y-1">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-emerald-900">พร้อมอัปเดต:</span>
+                <span id="excelSummaryText" class="text-emerald-800 ml-1"></span>
+              </div>
+              <label class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-900 cursor-pointer select-none">
+                <input type="checkbox" id="excelNotifyDealersCheck" checked class="w-4 h-4 rounded border-emerald-400 text-emerald-700">
+                <span>แจ้งเตือนดีลเลอร์ทุกคนทาง LINE</span>
+              </label>
             </div>
             <button type="button" id="btnConfirmExcel" onclick="confirmExcelUpload()" class="btn-press inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer whitespace-nowrap">
               ยืนยันอัปเดตลงแท็บ "ภาพรวม"
@@ -550,7 +560,8 @@
       staffName: '',
       dealersList: [],
       parsedExcelPayload: null,
-      fontCache: null
+      fontCache: null,
+      requestedTab: ''
     };
 
     function getBrandTheme(brand) {
@@ -698,6 +709,13 @@
       var params = new URLSearchParams(window.location.search);
       var code = params.get('code');
       var stateParam = params.get('state') || '';
+      var tabParam = params.get('tab') || '';
+      if (tabParam) {
+        STATE.requestedTab = tabParam;
+        try { sessionStorage.setItem('jm_requested_tab', tabParam); } catch (e) {}
+      } else {
+        try { STATE.requestedTab = sessionStorage.getItem('jm_requested_tab') || ''; } catch (e) {}
+      }
 
       if (code) {
         var cleanUrl = getOAuthRedirectUri();
@@ -819,11 +837,17 @@
       applyDealerGateUI();
     }
 
-    function setDocDateText(txt) {
+    function setDocDateText(txt, isStale) {
       var mEl = document.getElementById('docDateBadge');
       var dEl = document.getElementById('docDateBadgeDesktop');
-      if (mEl) mEl.textContent = txt;
-      if (dEl) dEl.textContent = txt;
+      var clsMobile = isStale
+        ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-300 font-num whitespace-nowrap'
+        : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap';
+      var clsDesktop = isStale
+        ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-300 font-num whitespace-nowrap'
+        : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap';
+      if (mEl) { mEl.textContent = txt; mEl.className = clsMobile; }
+      if (dEl) { dEl.textContent = txt; dEl.className = clsDesktop; }
     }
 
     function updateAdminHeaderUI() {
@@ -855,12 +879,32 @@
       STATE.products = res.products || [];
       STATE.modelImages = res.modelImages || [];
 
-      setDocDateText(STATE.docDate ? ('อัปเดต ' + STATE.docDate) : 'ใบราคาขายส่งล่าสุด');
+      var isStale = Boolean(res.isStale7Days);
+      if (!isStale && res.lastUploadIso) {
+        var diffDays = Math.floor((Date.now() - new Date(res.lastUploadIso).getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 7) isStale = true;
+      }
+
+      var badgeText = STATE.docDate ? ('ชุดราคา ' + STATE.docDate) : 'ใบราคาขายส่งล่าสุด';
+      if (res.uploadedDate && STATE.docDate && res.uploadedDate !== STATE.docDate) {
+        badgeText += ' (อัปโหลด ' + res.uploadedDate + ')';
+      }
+      setDocDateText(badgeText, isStale);
+
+      var staleBox = document.getElementById('stalePriceAlert');
+      if (staleBox) staleBox.classList.toggle('hidden', !isStale);
+
       var warnEl = document.getElementById('warningBanner');
       if (warnEl) warnEl.textContent = STATE.warningText;
 
       renderBrandTabs();
       renderProducts();
+
+      if (STATE.isAdmin && STATE.requestedTab === 'excel') {
+        STATE.requestedTab = '';
+        try { sessionStorage.removeItem('jm_requested_tab'); } catch (e) {}
+        openAdminWorkspace('excel');
+      }
       return true;
     }
 
@@ -1742,7 +1786,7 @@
         });
     }
 
-    function openAdminWorkspace() {
+    function openAdminWorkspace(defaultTab) {
       document.getElementById('adminStaffBadge').textContent = STATE.staffName || 'Admin';
       var boundBadge = document.getElementById('adminLineBoundBadge');
       var bindBtn = document.getElementById('btnBindAdminLine');
@@ -1755,7 +1799,7 @@
       }
 
       openModal('adminModal');
-      switchAdminTab('dealers');
+      switchAdminTab(defaultTab || 'dealers');
       loadAdminDealers();
       if (!STATE.products.length) {
         loadCatalogData(true).then(function() {
@@ -1900,6 +1944,20 @@
       });
     }
 
+    function formatExcelDateCell_(val) {
+      if (val === null || val === undefined || val === '') return '';
+      if (typeof val === 'number' && val > 30000 && val < 70000 && window.XLSX && XLSX.SSF && XLSX.SSF.parse_date_code) {
+        var d = XLSX.SSF.parse_date_code(val);
+        if (d && d.y && d.m && d.d) {
+          return ('0' + d.d).slice(-2) + '/' + ('0' + d.m).slice(-2) + '/' + String(d.y).slice(-2);
+        }
+      }
+      if (val instanceof Date && !isNaN(val.getTime())) {
+        return ('0' + val.getDate()).slice(-2) + '/' + ('0' + (val.getMonth() + 1)).slice(-2) + '/' + String(val.getFullYear()).slice(-2);
+      }
+      return String(val).trim();
+    }
+
     function handleExcelSelect(e) {
       var file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -1913,7 +1971,7 @@
           var rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
 
           var headerIdx = -1;
-          var colMap = { brand: 0, model: 1, wholesale: 2, rrp: 3, period: 4 };
+          var colMap = { brand: 0, model: 1, wholesale: 2, rrp: 3, period: -1, periodEnd: -1 };
 
           for (var r = 0; r < Math.min(rows.length, 15); r++) {
             var rowLower = rows[r].map(function(c) { return String(c || '').trim().toLowerCase(); });
@@ -1928,7 +1986,19 @@
               var pIdx = rowLower.findIndex(function(c) { return c.indexOf('ระยะ') !== -1 || c.indexOf('period') !== -1; });
               if (wIdx !== -1) colMap.wholesale = wIdx;
               if (rIdx !== -1) colMap.rrp = rIdx;
-              if (pIdx !== -1) colMap.period = pIdx;
+              if (pIdx !== -1) {
+                colMap.period = pIdx;
+                // ถ้าหัวตารางเป็น "ระยะเวลาเริ่ม" หรือคอลัมน์ถัดไปเป็นวันสิ้นสุด ให้ดึงมารวมเป็นช่วงวันที่
+                var nextHeader = rowLower[pIdx + 1] || '';
+                var sampleNext = (rows[r + 1] && rows[r + 1][pIdx + 1] !== undefined) ? rows[r + 1][pIdx + 1] : '';
+                if (
+                  nextHeader.indexOf('สิ้นสุด') !== -1 || nextHeader.indexOf('ถึง') !== -1 ||
+                  nextHeader.indexOf('end') !== -1 || nextHeader === 'feqq' ||
+                  (typeof sampleNext === 'number' && sampleNext > 30000 && sampleNext < 70000)
+                ) {
+                  colMap.periodEnd = pIdx + 1;
+                }
+              }
               break;
             }
           }
@@ -1942,7 +2012,10 @@
             var modelDesc = String(row[colMap.model] || '').trim();
             var wholesale = Number(String(row[colMap.wholesale] || '').replace(/,/g, '').trim());
             var rrp = Number(String(row[colMap.rrp] || '').replace(/,/g, '').trim());
-            var period = String(row[colMap.period] || '').trim();
+
+            var pStart = colMap.period !== -1 ? formatExcelDateCell_(row[colMap.period]) : '';
+            var pEnd = colMap.periodEnd !== -1 ? formatExcelDateCell_(row[colMap.periodEnd]) : '';
+            var period = (pStart && pEnd) ? (pStart + ' - ' + pEnd) : (pStart || pEnd);
 
             if (!brand || !modelDesc || isNaN(wholesale) || wholesale <= 0) continue;
             if (isNaN(rrp)) rrp = 0;
@@ -1961,8 +2034,39 @@
             return;
           }
 
-          var now = new Date();
-          var docDate = ('0' + now.getDate()).slice(-2) + '/' + ('0' + (now.getMonth() + 1)).slice(-2) + '/' + now.getFullYear();
+          var docDate = '';
+          var topLimit = headerIdx !== -1 ? headerIdx : Math.min(rows.length, 5);
+          for (var tr = 0; tr < topLimit && !docDate; tr++) {
+            var tRow = rows[tr] || [];
+            for (var tc = 0; tc < tRow.length; tc++) {
+              var cellVal = tRow[tc];
+              if (cellVal === null || cellVal === undefined || cellVal === '') continue;
+              if ((typeof cellVal === 'number' && cellVal > 30000 && cellVal < 70000) || (cellVal instanceof Date)) {
+                docDate = formatExcelDateCell_(cellVal);
+                break;
+              }
+              var cellStr = String(cellVal).trim();
+              var dm = cellStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+              if (dm) {
+                docDate = ('0' + dm[1]).slice(-2) + '/' + ('0' + dm[2]).slice(-2) + '/' + String(dm[3]).slice(-2);
+                break;
+              }
+              var dm2 = cellStr.match(/(\d{1,2})\s*[- ]\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*[- ]\s*(\d{2,4})/i);
+              if (dm2) {
+                var mMap = { jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06', jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12' };
+                var monStr = mMap[dm2[2].toLowerCase()];
+                var yrNum = Number(dm2[3]);
+                if (yrNum < 100) yrNum += 2000;
+                if (yrNum > 2400) yrNum -= 543;
+                docDate = ('0' + dm2[1]).slice(-2) + '/' + monStr + '/' + String(yrNum).slice(-2);
+                break;
+              }
+            }
+          }
+          if (!docDate) {
+            var now = new Date();
+            docDate = ('0' + now.getDate()).slice(-2) + '/' + ('0' + (now.getMonth() + 1)).slice(-2) + '/' + String(now.getFullYear()).slice(-2);
+          }
 
           STATE.parsedExcelPayload = { docDate: docDate, items: parsedItems };
           setExcelStep(2);
@@ -1994,9 +2098,15 @@
       btn.disabled = true;
       btn.textContent = 'กำลังบันทึกข้อมูล...';
 
+      var notifyChk = document.getElementById('excelNotifyDealersCheck');
+      var payloadToSend = {
+        docDate: STATE.parsedExcelPayload.docDate,
+        items: STATE.parsedExcelPayload.items,
+        notifyDealers: notifyChk ? notifyChk.checked : true
+      };
       callBackendApi('updateOverviewSheet', {
         pin: STATE.verifiedPin,
-        excelPayload: STATE.parsedExcelPayload
+        excelPayload: payloadToSend
       }).then(function(res) {
         btn.disabled = false;
         btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
@@ -2005,7 +2115,7 @@
           return;
         }
         setExcelStep(3);
-        showToast('อัปเดตใบราคาจำนวน ' + res.count + ' รายการเรียบร้อยแล้ว!');
+        showToast('อัปเดต ' + res.count + ' รายการเรียบร้อย!' + (res.notifiedCount ? (' แจ้งเตือนดีลเลอร์ ' + res.notifiedCount + ' คนแล้ว') : ''));
         loadCatalogData(true);
       }).catch(function(err) {
         btn.disabled = false;
