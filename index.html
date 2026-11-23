@@ -1464,17 +1464,71 @@
         });
     }
 
+    function normalizeBrandDisplay_(brand) {
+      var b = String(brand || '').trim().toUpperCase();
+      if (b === 'SAM' || b.indexOf('SAMSUNG') !== -1) return 'SAMSUNG';
+      if (b === 'IPHONE' || b === 'IPAD' || b.indexOf('APPLE') !== -1) return 'APPLE';
+      if (b.indexOf('OPPO') !== -1) return 'OPPO';
+      if (b.indexOf('VIVO') !== -1) return 'VIVO';
+      if (b.indexOf('XIAOMI') !== -1 || b.indexOf('REDMI') !== -1 || b.indexOf('POCO') !== -1) return 'XIAOMI';
+      if (b.indexOf('REALME') !== -1) return 'REALME';
+      if (b.indexOf('HONOR') !== -1) return 'HONOR';
+      if (b.indexOf('INFINIX') !== -1) return 'INFINIX';
+      if (b.indexOf('TECNO') !== -1) return 'TECNO';
+      return b;
+    }
+
+    function getCombinedCatalogItems_() {
+      var list = STATE.products.slice();
+      var stockOnly = (STATE.stockGroups || []).filter(function(g) {
+        return !g.inWholesale && g.totalQty > 0;
+      });
+      stockOnly.forEach(function(g) {
+        list.push({
+          brand: g.brand,
+          modelDesc: g.displayName,
+          wholesale: 0,
+          rrp: 0,
+          period: '',
+          imageUrl: '',
+          stockTotal: g.totalQty,
+          stockColors: g.colors || [],
+          isStockOnly: true
+        });
+      });
+      return list;
+    }
+
     function renderBrandTabs() {
       var container = document.getElementById('brandTabsContainer');
       if (!container) return;
 
-      var allBrands = ['ALL'].concat(STATE.brands);
+      var combined = getCombinedCatalogItems_();
+      var brandMap = {};
+      var orderedBrands = [];
+
+      STATE.brands.forEach(function(b) {
+        var norm = normalizeBrandDisplay_(b);
+        if (norm && !brandMap[norm]) {
+          brandMap[norm] = b;
+          orderedBrands.push(norm);
+        }
+      });
+      combined.forEach(function(it) {
+        var norm = normalizeBrandDisplay_(it.brand);
+        if (norm && !brandMap[norm]) {
+          brandMap[norm] = norm;
+          orderedBrands.push(norm);
+        }
+      });
+
+      var allBrands = ['ALL'].concat(orderedBrands);
       container.innerHTML = allBrands.map(function(b) {
         var isActive = STATE.activeBrand === b;
         var count = b === 'ALL'
-          ? STATE.products.length
-          : STATE.products.filter(function(p) { return p.brand === b; }).length;
-        var label = b === 'ALL' ? 'ทั้งหมด' : b;
+          ? combined.length
+          : combined.filter(function(p) { return normalizeBrandDisplay_(p.brand) === b; }).length;
+        var label = b === 'ALL' ? 'ทั้งหมด' : (brandMap[b] || b);
         var activeClass = isActive
           ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
@@ -1500,16 +1554,17 @@
       var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
       var hideInactive = document.getElementById('hideExpiredToggle').checked;
       var onlyInStock = document.getElementById('onlyInStockToggle').checked;
+      var combined = getCombinedCatalogItems_();
 
-      var filtered = STATE.products.filter(function(item) {
-        if (STATE.activeBrand !== 'ALL' && item.brand !== STATE.activeBrand) return false;
+      var filtered = combined.filter(function(item) {
+        if (STATE.activeBrand !== 'ALL' && normalizeBrandDisplay_(item.brand) !== STATE.activeBrand) return false;
         if (onlyInStock && !(item.stockTotal > 0)) return false;
         if (q) {
           var colorsText = (item.stockColors || []).map(function(c) { return c.color; }).join(' ');
-          var hay = (item.brand + ' ' + item.modelDesc + ' ' + item.period + ' ' + colorsText).toLowerCase();
+          var hay = (item.brand + ' ' + item.modelDesc + ' ' + (item.period || '') + ' ' + colorsText).toLowerCase();
           if (hay.indexOf(q) === -1) return false;
         }
-        if (hideInactive) {
+        if (hideInactive && !item.isStockOnly) {
           var promo = getPromoInfo(item.period);
           if (promo.state !== 'active') return false;
         }
@@ -1595,10 +1650,14 @@
             '</div>' +
             '<div class="space-y-1.5 pt-2 border-t border-slate-100">' +
               rrpHtml +
-              '<div class="flex items-baseline justify-between gap-1">' +
-                '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
-                '<span class="text-xl sm:text-2xl font-black text-[#C8102E] font-num tracking-tight">฿' + formatMoney(item.wholesale) + '</span>' +
-              '</div>' +
+              (item.isStockOnly
+                ? '<div class="flex items-center justify-between gap-1 py-1">' +
+                    '<span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold">สต็อกสาขา (ไม่มีราคาส่ง)</span>' +
+                  '</div>'
+                : '<div class="flex items-baseline justify-between gap-1">' +
+                    '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
+                    '<span class="text-xl sm:text-2xl font-black text-[#C8102E] font-num tracking-tight">฿' + formatMoney(item.wholesale) + '</span>' +
+                  '</div>') +
               stockHtml +
               periodHtml +
             '</div>' +
@@ -1877,29 +1936,38 @@
           doc.setFontSize(9.5);
           doc.text('ข้อมูลสต็อก ณ ' + stockDateStr + '   |   รวม ' + items.length + ' รุ่น / ' + brandTotal + ' เครื่อง', 14, 32);
 
-          var rows = items.map(function(it, idx) {
-            var colorSummary = (it.colors || []).map(function(c) {
-              return c.color + ' (' + c.qty + ')';
-            }).join(', ');
-            return [
-              String(idx + 1),
-              it.displayName,
-              colorSummary || '-',
-              String(it.totalQty)
-            ];
+          // แยกสีคนละแถว: 1 แถวต่อ 1 รุ่น/ความจุ + 1 สี
+          var rows = [];
+          var rowNo = 0;
+          items.forEach(function(it) {
+            var colorList = (it.colors || []).filter(function(c) { return c.qty > 0; });
+            if (!colorList.length) {
+              rowNo++;
+              rows.push([String(rowNo), it.displayName, '-', String(it.totalQty)]);
+              return;
+            }
+            colorList.forEach(function(c) {
+              rowNo++;
+              rows.push([
+                String(rowNo),
+                it.displayName,
+                c.color,
+                String(c.qty)
+              ]);
+            });
           });
 
           doc.autoTable({
             startY: 36,
-            head: [['#', 'รุ่นสินค้า / ความจุ', 'สีและจำนวนพร้อมส่ง', 'รวม']],
+            head: [['#', 'รุ่นสินค้า / ความจุ', 'สี', 'จำนวน']],
             body: rows,
-            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.6 },
+            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.5 },
             headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'normal' },
             columnStyles: {
-              0: { halign: 'center', cellWidth: 10 },
-              1: { cellWidth: 62 },
-              2: { cellWidth: 92 },
-              3: { halign: 'right', cellWidth: 18, textColor: [22, 163, 74] }
+              0: { halign: 'center', cellWidth: 12 },
+              1: { cellWidth: 86 },
+              2: { cellWidth: 64 },
+              3: { halign: 'right', cellWidth: 20, textColor: [22, 163, 74] }
             }
           });
         });
@@ -2291,9 +2359,9 @@
       var capStart = -1;
       var capEnd = -1;
 
-      var mRamRom = desc.match(/(\d{1,2})\s*\/\s*(\d{2,4})\s*(GB|TB)?/i);
+      var mRamRom = desc.match(/(\d{1,2})\s*[\/+]\s*(32|64|128|256|512|1024)\s*(GB|TB|G)?/i);
       if (mRamRom) {
-        capacity = mRamRom[1] + '/' + mRamRom[2] + (mRamRom[3] ? mRamRom[3].toUpperCase() : 'GB');
+        var rawU = mRamRom[3] ? mRamRom[3].toUpperCase() : 'GB'; capacity = mRamRom[1] + '/' + mRamRom[2] + (rawU === 'G' ? 'GB' : rawU);
         capStart = mRamRom.index;
         capEnd = capStart + mRamRom[0].length;
       } else {
@@ -2400,7 +2468,6 @@
               headerFound = true;
               continue;
             }
-            if (!headerFound) continue;
             if (lineText.indexOf('Grand Total') !== -1) continue;
 
             var colCode = [];
@@ -2428,7 +2495,7 @@
                 uom: uom,
                 qty: Number(qtyStr)
               });
-            } else if (!itemCode && !uom && !qtyStr && descPart && rawRows.length > 0) {
+            } else if (headerFound && !itemCode && !uom && !qtyStr && descPart && rawRows.length > 0) {
               // บรรทัดที่ตัดคำลงมาต่อจากแถวก่อนหน้า เช่น "Cover"
               rawRows[rawRows.length - 1].rawDescription = (rawRows[rawRows.length - 1].rawDescription + ' ' + descPart).trim();
             }
