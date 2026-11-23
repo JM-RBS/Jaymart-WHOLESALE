@@ -760,6 +760,8 @@
       parsedStockPayload: null,
       fontCache: null,
       requestedTab: '',
+      requestedRejectUid: '',
+      requestedAction: '',
       pdfMode: 'price'
     };
 
@@ -929,11 +931,25 @@
       var params = new URLSearchParams(window.location.search);
       var code = params.get('code');
       var tabParam = params.get('tab') || '';
+      var rejectUidParam = params.get('rejectUid') || '';
+      var actionParam = params.get('action') || '';
       if (tabParam) {
         STATE.requestedTab = tabParam;
         try { sessionStorage.setItem('jm_requested_tab', tabParam); } catch (e) {}
       } else {
         try { STATE.requestedTab = sessionStorage.getItem('jm_requested_tab') || ''; } catch (e) {}
+      }
+      if (rejectUidParam) {
+        STATE.requestedRejectUid = rejectUidParam;
+        try { sessionStorage.setItem('jm_requested_reject_uid', rejectUidParam); } catch (e) {}
+      } else {
+        try { STATE.requestedRejectUid = sessionStorage.getItem('jm_requested_reject_uid') || ''; } catch (e) {}
+      }
+      if (actionParam) {
+        STATE.requestedAction = actionParam;
+        try { sessionStorage.setItem('jm_requested_action', actionParam); } catch (e) {}
+      } else {
+        try { STATE.requestedAction = sessionStorage.getItem('jm_requested_action') || ''; } catch (e) {}
       }
 
       if (code) {
@@ -1092,8 +1108,8 @@
       renderBrandTabs();
       renderProducts();
 
-      if (STATE.isAdmin && (STATE.requestedTab === 'excel' || STATE.requestedTab === 'stock')) {
-        var targetTab = STATE.requestedTab;
+      if (STATE.isAdmin && (STATE.requestedTab === 'excel' || STATE.requestedTab === 'stock' || STATE.requestedTab === 'dealers' || STATE.requestedRejectUid)) {
+        var targetTab = STATE.requestedTab || 'dealers';
         STATE.requestedTab = '';
         try { sessionStorage.removeItem('jm_requested_tab'); } catch (e) {}
         openAdminWorkspace(targetTab);
@@ -1154,6 +1170,11 @@
         }
       } else {
         setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
+        if (STATE.dealerStatus === 'Rejected' && STATE.requestedAction === 'edit') {
+          STATE.requestedAction = '';
+          try { sessionStorage.removeItem('jm_requested_action'); } catch (e) {}
+          editDealerRegistration();
+        }
       }
     }
 
@@ -2535,6 +2556,12 @@
           }
           STATE.dealersList = res.dealers || [];
           renderAdminDealers();
+          if (STATE.requestedRejectUid) {
+            var targetRejectUid = STATE.requestedRejectUid;
+            STATE.requestedRejectUid = '';
+            try { sessionStorage.removeItem('jm_requested_reject_uid'); } catch (e) {}
+            openRejectReasonModalByUid(targetRejectUid);
+          }
         })
         .catch(function(err) {
           if (listEl) listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml(err.message || err) + '</div>';
@@ -2588,15 +2615,19 @@
                 (isAm ? ('รหัสพนักงาน: <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong>') : ('SG User: <strong>' + escapeHtml(d.sgFinanceUser || '-') + '</strong> • โทร: ' + escapeHtml(d.phone || '-'))) +
               '</div>' +
               '<div class="text-[11px] text-slate-400 font-num">ลงทะเบียน: ' + escapeHtml(d.createdAt || '-') + (d.updatedAt ? ' • อัปเดต: ' + escapeHtml(d.updatedAt) : '') + '</div>' +
+              ((d.status === 'Rejected' && ((d.rejectFields && d.rejectFields.length) || d.rejectNote))
+                ? '<div class="mt-1.5 p-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-800 space-y-0.5">' +
+                    ((d.rejectFields && d.rejectFields.length) ? '<div><strong>ให้แก้ไข:</strong> ' + d.rejectFields.map(function(fk) { return escapeHtml(getRejectFieldLabel_(fk)); }).join(', ') + '</div>' : '') +
+                    (d.rejectNote ? '<div><strong>เหตุผล:</strong> ' + escapeHtml(d.rejectNote) + '</div>' : '') +
+                  '</div>'
+                : '') +
             '</div>' +
           '</div>' +
           '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
             (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
-            (d.status !== 'Rejected'
-              ? (isAm
-                ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ</button>'
-                : '<button type="button" onclick="openRejectReasonModal(\'' + escapeHtml(d.lineUserId) + '\', \'' + escapeHtml(d.typedShopName || d.lineName || '') + '\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ / แจ้งแก้ไข</button>')
-              : '') +
+            (isAm
+              ? (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ</button>' : '')
+              : '<button type="button" onclick="openRejectReasonModalByUid(\'' + escapeHtml(d.lineUserId) + '\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">' + (d.status === 'Rejected' ? 'แก้จุดที่ไม่อนุมัติ' : 'ไม่อนุมัติ / แจ้งแก้ไข') + '</button>') +
           '</div>' +
         '</div>';
       }).join('');
@@ -2604,12 +2635,21 @@
 
     var REJECTING_DEALER = null;
 
-    function openRejectReasonModal(lineUserId, dealerName) {
+    function openRejectReasonModalByUid(lineUserId) {
+      var found = (STATE.dealersList || []).find(function(d) { return d.lineUserId === lineUserId; });
+      var dealerName = found ? (found.typedShopName || found.lineName || lineUserId) : lineUserId;
+      var existingFields = (found && Array.isArray(found.rejectFields)) ? found.rejectFields : [];
+      var existingNote = (found && found.rejectNote) ? found.rejectNote : '';
+      openRejectReasonModal(lineUserId, dealerName, existingFields, existingNote);
+    }
+
+    function openRejectReasonModal(lineUserId, dealerName, existingFields, existingNote) {
       REJECTING_DEALER = { lineUserId: lineUserId, dealerName: dealerName };
       document.getElementById('rejectModalDealerName').textContent = dealerName || lineUserId;
-      document.getElementById('rejectModalNote').value = '';
+      document.getElementById('rejectModalNote').value = existingNote || '';
+      var preChecked = Array.isArray(existingFields) ? existingFields : [];
       document.querySelectorAll('input[name="rejectFieldChk"]').forEach(function(cb) {
-        cb.checked = false;
+        cb.checked = preChecked.indexOf(cb.value) !== -1;
       });
       openModal('rejectReasonModal');
     }
