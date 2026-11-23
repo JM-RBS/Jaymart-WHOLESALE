@@ -2599,7 +2599,18 @@
         return;
       }
 
-      listEl.innerHTML = STATE.dealersList.map(function(d) {
+      var statusRank = { Pending: 0, Rejected: 1, Approved: 2, Replaced: 3 };
+      var sortedDealers = STATE.dealersList.slice().sort(function(a, b) {
+        var ra = statusRank[a.status] !== undefined ? statusRank[a.status] : 9;
+        var rb = statusRank[b.status] !== undefined ? statusRank[b.status] : 9;
+        if (ra !== rb) return ra - rb;
+        var ta = Number(a.sortTs || 0);
+        var tb = Number(b.sortTs || 0);
+        if (ta !== tb) return tb - ta;
+        return Number(b.rowOrder || 0) - Number(a.rowOrder || 0);
+      });
+
+      listEl.innerHTML = sortedDealers.map(function(d) {
         var isPending = d.status === 'Pending';
         var isApproved = d.status === 'Approved';
         var isAm = d.roleType === 'AM (สำหรับสาขา)';
