@@ -317,7 +317,7 @@
         <button onclick="recheckDealerStatus()" class="btn-press flex-1 h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold cursor-pointer">
           รีเฟรชตรวจสอบสถานะ
         </button>
-        <button onclick="editDealerRegistration()" class="btn-press h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold cursor-pointer">
+        <button id="btnEditDealerReg" onclick="editDealerRegistration()" class="btn-press h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold cursor-pointer">
           แก้ไขข้อมูลที่ส่ง
         </button>
       </div>
@@ -1264,12 +1264,21 @@
 
         var rejectBox = document.getElementById('pendingRejectDetailBox');
         if (rejectBox) rejectBox.classList.add('hidden');
+        var editRegBtn = document.getElementById('btnEditDealerReg');
+        if (editRegBtn) {
+          editRegBtn.textContent = 'แก้ไขข้อมูลที่ส่ง';
+          editRegBtn.className = 'btn-press h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold cursor-pointer';
+        }
 
         if (STATE.dealerStatus === 'Rejected') {
           iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center';
           var rFields = (STATE.dealerInfo && Array.isArray(STATE.dealerInfo.rejectFields)) ? STATE.dealerInfo.rejectFields : [];
           var rNote = (STATE.dealerInfo && STATE.dealerInfo.rejectNote) ? STATE.dealerInfo.rejectNote : '';
           titleEl.textContent = rFields.length ? 'กรุณาแก้ไขข้อมูลลงทะเบียนบางรายการ' : 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ';
+          if (editRegBtn && rFields.length) {
+            editRegBtn.textContent = 'แก้ไขเฉพาะช่องที่ผิด';
+            editRegBtn.className = 'btn-press h-11 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold cursor-pointer shadow-sm';
+          }
           subEl.textContent = rFields.length
             ? 'แอดมินแจ้งจุดที่ต้องแก้ไขด้านล่าง กดปุ่ม "แก้ไขข้อมูลที่ส่ง" เพื่อแก้เฉพาะช่องที่ผิดได้เลยครับ'
             : 'กรุณาตรวจสอบข้อมูลของท่าน หรือกดแก้ไขข้อมูลเพื่อส่งคำขอใหม่อีกครั้ง';
@@ -1485,8 +1494,9 @@
       ];
 
       var normalCls = 'w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:border-slate-900';
-      var lockedCls = 'w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed select-none';
-      var errorCls  = 'w-full h-11 px-3.5 rounded-xl border-2 border-rose-400 ring-2 ring-rose-100 bg-white text-sm focus:outline-none focus:border-rose-600';
+      var lockedCls = 'w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-slate-200/80 text-slate-500 text-sm cursor-not-allowed select-none opacity-80 pointer-events-none';
+      var errorCls  = 'w-full h-11 px-3.5 rounded-xl border-2 border-rose-500 ring-2 ring-rose-100 bg-white text-sm focus:outline-none focus:border-rose-600';
+      var firstEditable = null;
 
       fieldMap.forEach(function(f) {
         var inp = document.getElementById(f.id);
@@ -1495,19 +1505,23 @@
         var numCls = (f.key === 'sgUser' || f.key === 'phone') ? ' font-num' : '';
 
         if (!isPartial) {
+          inp.disabled = false;
           inp.readOnly = false;
           inp.removeAttribute('data-rejected-field');
           inp.className = normalCls + numCls;
           if (tag) tag.classList.add('hidden');
         } else if (fields.indexOf(f.key) !== -1) {
+          inp.disabled = false;
           inp.readOnly = false;
           inp.setAttribute('data-rejected-field', '1');
           inp.className = errorCls + numCls;
+          if (!firstEditable) firstEditable = inp;
           if (tag) {
             tag.textContent = '✕ กรุณาแก้ไขช่องนี้';
-            tag.className = 'text-[11px] font-bold text-rose-600';
+            tag.className = 'text-xs font-extrabold text-rose-600';
           }
         } else {
+          inp.disabled = true;
           inp.readOnly = true;
           inp.removeAttribute('data-rejected-field');
           inp.className = lockedCls + numCls;
@@ -1517,6 +1531,12 @@
           }
         }
       });
+
+      if (firstEditable) {
+        setTimeout(function() {
+          try { firstEditable.focus(); } catch (e) {}
+        }, 120);
+      }
     }
 
     function editDealerRegistration() {
@@ -2715,6 +2735,10 @@
       var selectedFields = Array.from(document.querySelectorAll('input[name="rejectFieldChk"]:checked')).map(function(cb) {
         return cb.value;
       });
+      if (!selectedFields.length) {
+        showToast('กรุณาติ๊กเลือกอย่างน้อย 1 ช่องที่ข้อมูลไม่ถูกต้อง (เพื่อล็อกช่องที่ถูกต้องไว้)');
+        return;
+      }
       var note = (document.getElementById('rejectModalNote').value || '').trim();
       var btn = document.getElementById('btnConfirmRejectDealer');
       btn.disabled = true;
