@@ -11,6 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
       --bg-page: #F8FAFC;
@@ -54,44 +55,44 @@
 </head>
 <body class="min-h-[100dvh] flex flex-col bg-[#F8FAFC] text-slate-900">
 
-  <!-- Top Sticky Header (Responsive Mobile-First Layout) -->
+  <!-- Top Sticky Header -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-3 py-2.5 sm:py-3">
 
         <!-- ฝั่งซ้ายบนคอม / เรียงบรรทัด 1-3 บนมือถือ -->
         <div class="flex flex-col gap-1.5 min-w-0">
-          <!-- บรรทัดที่ 1 (มือถือ): โลโก้ Jaymart WHOLESALE อยู่กึ่งกลางข้างบน -->
           <div class="flex items-center justify-center lg:justify-start gap-2.5">
             <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C8102E] shadow-xs shrink-0 select-none">
               <span class="px-2 py-0.5 rounded-full bg-white text-[#C8102E] font-extrabold text-xs tracking-tight leading-none">Jaymart</span>
               <span class="text-white font-extrabold text-xs tracking-wide leading-none">WHOLESALE</span>
             </div>
 
-            <!-- บนคอมแสดงชื่อเอกสารและวันที่ต่อท้ายโลโก้ -->
-            <div class="hidden lg:flex items-center gap-2 min-w-0">
+            <div class="hidden lg:flex items-center gap-2 min-w-0 flex-wrap">
               <h1 class="text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">ใบราคาขายส่ง</h1>
               <span id="docDateBadgeDesktop" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
                 กำลังตรวจสอบสิทธิ์...
               </span>
+              <span id="stockDateBadgeDesktop" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 font-num whitespace-nowrap"></span>
             </div>
           </div>
 
-          <!-- บรรทัดที่ 2 (มือถือ): ใบราคาขายส่ง อยู่ซ้าย / อัปเดต อยู่ขวา -->
           <div class="flex lg:hidden items-center justify-between gap-2 pt-0.5">
             <h1 class="text-sm font-bold tracking-tight text-slate-900 whitespace-nowrap">ใบราคาขายส่ง</h1>
-            <span id="docDateBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
-              กำลังตรวจสอบสิทธิ์...
-            </span>
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span id="docDateBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-num whitespace-nowrap">
+                กำลังตรวจสอบสิทธิ์...
+              </span>
+              <span id="stockDateBadgeMobile" class="hidden inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 font-num whitespace-nowrap"></span>
+            </div>
           </div>
 
-          <!-- บรรทัดที่ 3: ข้อความแจ้งเตือน Activate เต็มจอ / เลื่อนได้บนมือถือ -->
           <div class="w-full overflow-hidden text-center lg:text-left bg-red-50/80 lg:bg-transparent border border-red-100 lg:border-0 rounded-lg py-1 px-2 lg:p-0">
             <p id="warningBanner" class="mobile-marquee text-[11px] sm:text-xs text-red-600 font-semibold leading-snug">**สำคัญ!! ต้อง Activate ทุกเครื่องที่มี Sell Out**</p>
           </div>
         </div>
 
-        <!-- ฝั่งขวาบนคอม / มือถือ (AM: แถว 4 = ชื่อ + สลับ LINE + Workspace, แถว 5 = โหลด PDF | Dealer: แถวเดียว = ชื่อ + โหลด PDF) -->
+        <!-- ฝั่งขวา (Admin เห็นเฉพาะ LINE ที่ผูกในแท็บ Staff) -->
         <div class="flex flex-col lg:flex-row lg:items-center gap-1.5 sm:gap-2 shrink-0">
           <div id="headerStaffControlsRow" class="flex items-center justify-end gap-1.5 sm:gap-2">
             <span id="dealerActiveBadge" class="hidden inline-flex items-center justify-center h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 truncate"></span>
@@ -100,9 +101,9 @@
               <span>สลับ LINE</span>
             </button>
 
-            <button id="headerAdminBtn" onclick="openAdminAuth()" class="relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
-              <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-              <span id="headerAdminBtnText" class="truncate">Login Admin</span>
+            <button id="headerAdminBtn" onclick="openAdminWorkspace()" class="hidden relative btn-press inline-flex items-center justify-center gap-1 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-[11px] sm:text-sm font-semibold cursor-pointer whitespace-nowrap">
+              <svg width="14" height="14" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span class="truncate">Workspace</span>
               <span id="headerPendingDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-white"></span>
             </button>
 
@@ -120,16 +121,20 @@
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="relative flex-1 min-w-0">
             <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input id="searchInput" type="text" oninput="handleSearch()" placeholder="ค้นหารุ่น, ความจุ หรือสเปก เช่น A07, 8/256, 5G..." class="w-full h-10 pl-10 pr-9 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400">
+            <input id="searchInput" type="text" oninput="handleSearch()" placeholder="ค้นหารุ่น, ความจุ, สี หรือสเปก เช่น A57, 8/256, Black..." class="w-full h-10 pl-10 pr-9 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400">
             <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
 
-          <div class="flex items-center justify-between sm:justify-end gap-2">
-            <label class="inline-flex items-center gap-2 h-9 sm:h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none whitespace-nowrap">
+          <div class="flex items-center flex-wrap justify-between sm:justify-end gap-2">
+            <label class="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs sm:text-sm font-semibold text-emerald-800 cursor-pointer select-none whitespace-nowrap">
+              <input id="onlyInStockToggle" type="checkbox" onchange="renderProducts()" class="w-4 h-4 rounded border-emerald-400 text-emerald-700">
+              <span>เฉพาะรุ่นมีของพร้อมส่ง</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none whitespace-nowrap">
               <input id="hideExpiredToggle" type="checkbox" onchange="renderProducts()" class="w-4 h-4 rounded border-slate-300 text-slate-900">
-              <span>ซ่อนรุ่นหมดโปรฯ / รอเริ่มโปรฯ</span>
+              <span>ซ่อนรุ่นหมดโปรฯ</span>
             </label>
             <div id="resultCount" class="h-9 sm:h-10 px-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold flex items-center whitespace-nowrap font-num">0 รุ่น</div>
           </div>
@@ -152,7 +157,7 @@
       </div>
       <h2 class="text-xl font-bold text-slate-900">เข้าสู่ระบบด้วย LINE</h2>
       <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">
-        ยืนยันตัวตนผ่านบัญชี LINE ของท่าน ระบบจะจดจำอุปกรณ์เครื่องนี้ไว้ให้อัตโนมัติสำหรับการใช้งานครั้งถัดไป
+        ยืนยันตัวตนผ่านบัญชี LINE ของท่าน ระบบจะตรวจสอบสิทธิ์จากบัญชีที่ผูกไว้โดยอัตโนมัติ (ทั้งดีลเลอร์และพนักงาน AM)
       </p>
 
       <button id="btnLineLogin" onclick="startLineLogin()" class="btn-press w-full h-12 mt-6 rounded-2xl bg-[#06C755] hover:bg-[#05b34c] text-white font-bold text-sm sm:text-base shadow-md flex items-center justify-center gap-2.5 cursor-pointer">
@@ -209,7 +214,7 @@
         <!-- ช่องกรอกเฉพาะ AM (สำหรับสาขา) -->
         <div id="amFieldsGroup" class="hidden space-y-3 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
           <div>
-            <label class="block text-xs font-bold text-slate-800 mb-1">รหัสพนักงาน (ตามรายชื่อในระบบ) <span class="text-rose-600">*</span></label>
+            <label class="block text-xs font-bold text-slate-800 mb-1">รหัสพนักงาน (ตามรายชื่อในแท็บ Staff) <span class="text-rose-600">*</span></label>
             <div class="flex items-center gap-2">
               <input id="regAmEmpId" type="text" oninput="resetAmVerified()" onkeydown="if(event.key==='Enter'){event.preventDefault();verifyAmEmployee();}" placeholder="กรอกรหัสพนักงาน" class="flex-1 h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold font-num focus:outline-none focus:border-emerald-700">
               <button type="button" id="btnVerifyAm" onclick="verifyAmEmployee()" class="btn-press h-11 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold cursor-pointer shrink-0 whitespace-nowrap">
@@ -231,7 +236,7 @@
           </div>
         </div>
 
-        <!-- ช่องกรอกสำหรับดีลเลอร์ (เจ้าของร้าน / พนักงานร้าน) -->
+        <!-- ช่องกรอกสำหรับดีลเลอร์ -->
         <div id="dealerFieldsGroup" class="space-y-3.5">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
@@ -301,6 +306,7 @@
         <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.65 18.5h16.7a1 1 0 00.86-1.5l-7.5-13a1 1 0 00-1.72 0z"/></svg>
         <span id="stalePriceAlertText">ไม่ได้อัปเดตนานเกิน 7 วัน รบกวนติดต่อแอดมินเพื่ออัปเดตข้อมูล</span>
       </div>
+
       <div id="loadingGrid" class="hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <div class="h-72 rounded-2xl skeleton"></div>
         <div class="h-72 rounded-2xl skeleton"></div>
@@ -313,35 +319,48 @@
 
       <div id="emptyState" class="hidden py-16 text-center bg-white rounded-3xl border border-slate-200">
         <p class="text-base font-bold text-slate-700">ไม่พบรายการสินค้าตามเงื่อนไขที่ค้นหา</p>
-        <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือยกเลิกตัวกรองซ่อนรุ่นหมดโปรฯ</p>
+        <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือยกเลิกตัวกรองที่เลือกไว้</p>
       </div>
     </div>
 
   </main>
 
-  <!-- PDF Download Modal -->
+  <!-- Unified PDF Download Modal (Mode 1: ใบราคาขายส่ง / Mode 2: ใบสต็อกพร้อมส่ง) -->
   <div id="pdfModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90dvh] flex flex-col">
       <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
         <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">ดาวน์โหลดใบราคา PDF</h2>
-          <p class="text-xs text-slate-500 mt-0.5">ตารางคมชัด แยกหน้าใหม่ทุกแบรนด์อัตโนมัติ</p>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">ดาวน์โหลดเอกสาร PDF</h2>
+          <p class="text-xs text-slate-500 mt-0.5">เลือกโหมดที่ต้องการพิมพ์ แยกหน้าใหม่ทุกแบรนด์อัตโนมัติ</p>
         </div>
         <button onclick="closeModal('pdfModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
+
       <div class="p-5 overflow-y-auto space-y-4">
+        <!-- โหมดเลือกประเภท PDF -->
+        <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200">
+          <button type="button" id="pdfModePriceBtn" onclick="switchPdfMode('price')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs">
+            ใบราคาขายส่ง
+          </button>
+          <button type="button" id="pdfModeStockBtn" onclick="switchPdfMode('stock')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+            ใบสต็อกพร้อมส่ง
+          </button>
+        </div>
+
         <div>
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-semibold text-slate-800">เลือกแบรนด์ที่ต้องการพิมพ์</span>
             <div class="flex items-center gap-2 text-xs">
-              <button onclick="togglePdfBrands(true)" class="text-slate-700 font-semibold hover:underline cursor-pointer">เลือกทั้งหมด</button>
+              <button type="button" onclick="togglePdfBrands(true)" class="text-slate-700 font-semibold hover:underline cursor-pointer">เลือกทั้งหมด</button>
               <span class="text-slate-300">|</span>
-              <button onclick="togglePdfBrands(false)" class="text-slate-500 hover:underline cursor-pointer">ล้างทั้งหมด</button>
+              <button type="button" onclick="togglePdfBrands(false)" class="text-slate-500 hover:underline cursor-pointer">ล้างทั้งหมด</button>
             </div>
           </div>
           <div id="pdfBrandChecklist" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
         </div>
-        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+
+        <!-- ตัวเลือกเฉพาะโหมดใบราคา -->
+        <div id="pdfPriceOptions" class="p-3 rounded-xl bg-amber-50 border border-amber-200">
           <label class="flex items-start gap-2.5 cursor-pointer">
             <input type="checkbox" id="pdfHideInactive" class="mt-0.5 w-4 h-4 rounded border-slate-300 text-rose-600">
             <div class="text-xs">
@@ -350,38 +369,37 @@
             </div>
           </label>
         </div>
+
+        <!-- ตัวเลือกเฉพาะโหมดใบสต็อก -->
+        <div id="pdfStockOptions" class="hidden space-y-2.5">
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="pdfStockOnlyWholesale" class="mt-0.5 w-4 h-4 rounded border-emerald-400 text-emerald-700">
+              <div class="text-xs">
+                <span class="font-bold text-emerald-950 block">พิมพ์เฉพาะรุ่นที่มีในใบราคาขายส่งเท่านั้น</span>
+                <span class="text-emerald-800">หากไม่ติ๊ก จะพิมพ์รายการสต็อกสินค้าพร้อมส่งทั้งหมดที่อัปโหลด (ไม่รวม DEMO / SIM / ยอด 0)</span>
+              </div>
+            </label>
+          </div>
+          <p id="pdfStockMetaHint" class="text-[11px] text-slate-500 font-num"></p>
+        </div>
       </div>
+
       <div class="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2.5">
-        <button onclick="closeModal('pdfModal')" class="h-11 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 cursor-pointer">ยกเลิก</button>
-        <button id="generatePdfBtn" onclick="generatePdfCatalog()" class="btn-press h-11 px-5 rounded-xl bg-[#C8102E] text-white text-sm font-semibold cursor-pointer">สร้างและดาวน์โหลด PDF</button>
+        <button type="button" onclick="closeModal('pdfModal')" class="h-11 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 cursor-pointer">ยกเลิก</button>
+        <button type="button" id="generatePdfBtn" onclick="generatePdfDocument()" class="btn-press h-11 px-5 rounded-xl bg-[#C8102E] text-white text-sm font-semibold cursor-pointer">สร้างและดาวน์โหลด PDF</button>
       </div>
     </div>
   </div>
 
-  <!-- Admin Auth & Workspace Modal -->
-  <div id="pinModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-slate-900">Login Admin</h2>
-        <button onclick="closeModal('pinModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
-      </div>
-      <p class="text-sm text-slate-600 mb-3">กรุณากรอกรหัสพนักงาน</p>
-      <input id="staffPinInput" type="password" inputmode="numeric" onkeydown="if(event.key==='Enter')submitPin()" placeholder="รหัสพนักงาน" class="w-full h-12 px-4 rounded-xl border border-slate-300 text-center text-lg font-semibold tracking-widest focus:outline-none focus:border-slate-900 font-num">
-      <p id="pinError" class="hidden text-xs text-red-600 font-medium mt-2 text-center"></p>
-      <button id="pinSubmitBtn" onclick="submitPin()" class="btn-press w-full h-12 mt-4 rounded-xl bg-slate-900 text-white text-sm font-semibold cursor-pointer">เข้าสู่ระบบ</button>
-    </div>
-  </div>
-
+  <!-- Admin Workspace Modal (เปิดได้เฉพาะบัญชี LINE ในแท็บ Staff) -->
   <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-4xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden h-[92dvh] sm:h-[85dvh] flex flex-col">
       <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2">
         <div class="flex items-center gap-2.5 min-w-0 flex-wrap">
           <h2 class="text-base sm:text-lg font-bold text-slate-900 truncate">Admin Workspace</h2>
           <span id="adminStaffBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
-          <span id="adminLineBoundBadge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#06C755]/10 text-[#06C755] border border-[#06C755]/30">✓ ผูกบัญชี LINE แล้ว</span>
-          <button id="btnBindAdminLine" type="button" onclick="bindCurrentLineAsAdmin()" class="hidden btn-press px-2.5 py-1 rounded-lg bg-[#06C755] hover:bg-[#05b34c] text-white text-xs font-bold cursor-pointer whitespace-nowrap">
-            + ผูกบัญชี LINE นี้เป็นแอดมินถาวร
-          </button>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#06C755]/10 text-[#06C755] border border-[#06C755]/30">✓ ยืนยันสิทธิ์ผ่าน Staff</span>
         </div>
         <button onclick="closeModal('adminModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
@@ -391,8 +409,9 @@
           <span>1. อนุมัติดีลเลอร์ LINE</span>
           <span id="adminDealerPendingBadge" class="hidden px-2 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-bold">0</span>
         </button>
-        <button id="tabExcelBtn" onclick="switchAdminTab('excel')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">2. อัปโหลด Excel</button>
-        <button id="tabImagesBtn" onclick="switchAdminTab('images')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">3. จัดการรูปภาพ</button>
+        <button id="tabExcelBtn" onclick="switchAdminTab('excel')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">2. อัปโหลดใบราคา (Excel)</button>
+        <button id="tabStockBtn" onclick="switchAdminTab('stock')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">3. อัปโหลดสต็อก (PDF)</button>
+        <button id="tabImagesBtn" onclick="switchAdminTab('images')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer whitespace-nowrap">4. จัดการรูปภาพ</button>
       </div>
 
       <!-- TAB 1: DEALER APPROVALS -->
@@ -473,7 +492,66 @@
         </div>
       </div>
 
-      <!-- TAB 3: IMAGES MANAGER -->
+      <!-- TAB 3: STOCK PDF UPLOAD (PSINRP11) -->
+      <div id="adminStockTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
+        <div class="grid grid-cols-3 gap-2 p-2 rounded-2xl bg-slate-100 border border-slate-200 text-xs">
+          <div id="stockStep1" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition">
+            <span class="w-5 h-5 rounded-full bg-white text-slate-900 flex items-center justify-center text-[11px] font-black shrink-0">1</span>
+            <span class="truncate">เลือกไฟล์ PDF สต็อก</span>
+          </div>
+          <div id="stockStep2" class="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition">
+            <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0">2</span>
+            <span class="truncate">ตรวจสอบรายการ</span>
+          </div>
+          <div id="stockStep3" class="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition">
+            <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[11px] font-black shrink-0">3</span>
+            <span class="truncate">บันทึกสำเร็จ</span>
+          </div>
+        </div>
+
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100/70 transition">
+          <input type="file" id="stockPdfInput" accept="application/pdf,.pdf" onchange="handleStockPdfSelect(event)" class="hidden">
+          <label for="stockPdfInput" class="cursor-pointer flex flex-col items-center">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <span class="text-sm font-bold text-slate-800">คลิกเพื่อเลือกไฟล์ PDF สต็อก (PSINRP11 — Stock on Hand by Item)</span>
+            <span id="stockSelectedFileName" class="text-xs text-slate-500 mt-1">ระบบจะตัดรายการ DEMO, SIM และยอด 0 ออกให้อัตโนมัติ และจับคู่กับใบราคาให้อัตโนมัติ</span>
+          </label>
+        </div>
+
+        <div id="stockPreviewSection" class="hidden space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
+            <div class="space-y-0.5 text-xs sm:text-sm">
+              <div>
+                <span class="font-bold text-blue-950">อ่านไฟล์สำเร็จ:</span>
+                <span id="stockSummaryText" class="text-blue-900 ml-1"></span>
+              </div>
+              <div id="stockSkippedText" class="text-[11px] text-slate-600"></div>
+            </div>
+            <button type="button" id="btnConfirmStock" onclick="confirmStockUpload()" class="btn-press inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer whitespace-nowrap">
+              ยืนยันบันทึกลงแท็บ "Stock"
+            </button>
+          </div>
+
+          <div class="max-h-72 overflow-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 sticky top-0">
+                <tr>
+                  <th class="p-2 font-bold text-slate-700">Brand</th>
+                  <th class="p-2 font-bold text-slate-700">รุ่นสินค้า</th>
+                  <th class="p-2 font-bold text-slate-700">ความจุ</th>
+                  <th class="p-2 font-bold text-slate-700">สี</th>
+                  <th class="p-2 font-bold text-slate-700 text-right">จำนวน</th>
+                </tr>
+              </thead>
+              <tbody id="stockPreviewBody" class="divide-y divide-slate-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: IMAGES MANAGER -->
       <div id="adminImagesTab" class="hidden flex-1 overflow-y-auto p-5 space-y-4">
         <div id="imageUploadProgressBanner" class="hidden sticky top-0 z-20 p-3 rounded-xl bg-blue-600 text-white shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2.5">
           <svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24">
@@ -483,7 +561,6 @@
           <span id="imageUploadProgressText">กำลังอัปโหลดรูปภาพขึ้น Google Drive...</span>
         </div>
 
-        <!-- ฟอร์มกรอกข้อมูลและอัปโหลดรูปภาพรุ่นใหม่โดยตรง -->
         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="text-xs sm:text-sm font-bold text-slate-900">+ เพิ่ม / อัปโหลดรูปภาพสินค้า</h3>
@@ -538,11 +615,15 @@
   <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium shadow-lg"></div>
 
   <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     var LINE_CHANNEL_ID = '2012684748';
     var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxfY8isXCLIsKL8egX0zTNVqgZntxSdZw2rLGlgQIOLo3_hwb0R-ZhmpfkJ7N5L6lGKpQ/exec';
-    var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v1';
-    var STORAGE_ADMIN_KEY = 'jm_wholesale_admin_session_v1';
-    var STORAGE_FAST_CACHE_KEY = 'jm_wholesale_fast_cache_v1';
+    var STORAGE_LINE_KEY = 'jm_wholesale_line_user_v2';
+    var STORAGE_SESSION_KEY = 'jm_wholesale_session_token_v2';
+    var STORAGE_FAST_CACHE_KEY = 'jm_wholesale_fast_cache_v2';
 
     var STATE = {
       docTitle: 'Jaymart Wholesale — ใบราคาขายส่ง',
@@ -551,17 +632,23 @@
       brands: [],
       products: [],
       modelImages: [],
+      hasStockData: false,
+      stockUploadedDate: '',
+      stockPrintedDate: '',
+      stockGroups: [],
       activeBrand: 'ALL',
+      sessionToken: '',
       lineUser: null,
       dealerStatus: 'unlogged',
       dealerInfo: null,
       isAdmin: false,
-      verifiedPin: '',
       staffName: '',
       dealersList: [],
       parsedExcelPayload: null,
+      parsedStockPayload: null,
       fontCache: null,
-      requestedTab: ''
+      requestedTab: '',
+      pdfMode: 'price'
     };
 
     function getBrandTheme(brand) {
@@ -597,20 +684,39 @@
       window.location.href = authUrl;
     }
 
-    function switchLineAccount() {
+    function clearLocalSession_() {
       try {
         localStorage.removeItem(STORAGE_LINE_KEY);
-        localStorage.removeItem(STORAGE_ADMIN_KEY);
+        localStorage.removeItem(STORAGE_SESSION_KEY);
         localStorage.removeItem(STORAGE_FAST_CACHE_KEY);
-        localStorage.removeItem('jm_bind_admin_after_line');
+        // ลบคีย์ระบบเก่าด้วยเพื่อความสะอาด
+        localStorage.removeItem('jm_wholesale_line_user_v1');
+        localStorage.removeItem('jm_wholesale_admin_session_v1');
+        localStorage.removeItem('jm_wholesale_fast_cache_v1');
       } catch (e) {}
+      STATE.sessionToken = '';
       STATE.lineUser = null;
       STATE.isAdmin = false;
-      STATE.verifiedPin = '';
       STATE.staffName = '';
       STATE.dealerStatus = 'unlogged';
       STATE.dealerInfo = null;
-      updateAdminHeaderUI();
+    }
+
+    function handleAuthExpired_(msg) {
+      clearLocalSession_();
+      closeModal('adminModal');
+      closeModal('pdfModal');
+      setDocDateText('กรุณายืนยันตัวตน');
+      applyDealerGateUI();
+      var errBox = document.getElementById('lineAuthErrorBox');
+      if (errBox && msg) {
+        errBox.textContent = msg;
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    function switchLineAccount() {
+      clearLocalSession_();
       applyDealerGateUI();
       startLineLogin(true);
     }
@@ -632,12 +738,20 @@
 
     function openModal(id) {
       var el = document.getElementById(id);
-      if (el) el.classList.remove('hidden');
+      if (el) {
+        el.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     function closeModal(id) {
       var el = document.getElementById(id);
       if (el) el.classList.add('hidden');
+      var anyOpen = ['pdfModal', 'adminModal'].some(function(mid) {
+        var m = document.getElementById(mid);
+        return m && !m.classList.contains('hidden');
+      });
+      if (!anyOpen) document.body.style.overflow = '';
     }
 
     function handleSearch() {
@@ -653,39 +767,33 @@
     }
 
     async function callBackendApi(action, payload, timeoutMs) {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        return new Promise(function(resolve, reject) {
-          var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
-          if (action === 'getWholesaleData') runner.getWholesaleData();
-          else if (action === 'exchangeLineAuthCode') runner.exchangeLineAuthCode(payload.code, payload.redirectUri);
-          else if (action === 'lookupAmEmployee') runner.lookupAmEmployee(payload.employeeId);
-          else if (action === 'checkDealerAccess') runner.checkDealerAccess(payload.lineUserId);
-          else if (action === 'registerDealerRequest') runner.registerDealerRequest(payload);
-          else if (action === 'verifyStaffPin') runner.verifyStaffPin(payload.pin, payload.lineUserId);
-          else if (action === 'getDealerRegistrations') runner.getDealerRegistrations(payload.pin);
-          else if (action === 'updateDealerStatus') runner.updateDealerStatus(payload.pin, payload.lineUserId, payload.newStatus);
-          else if (action === 'updateOverviewSheet') runner.updateOverviewSheet(payload.pin, payload.excelPayload);
-          else if (action === 'saveModelImage') runner.saveModelImage(payload.pin, payload.brand, payload.modelKey, payload.imageUrl);
-          else if (action === 'uploadModelImageFile') runner.uploadModelImageFile(payload.pin, payload.brand, payload.modelKey, payload.fileName, payload.base64DataUrl);
-          else reject(new Error('Unknown action: ' + action));
-        });
-      }
-
       var controller = new AbortController();
-      var ms = timeoutMs || 20000;
+      var ms = timeoutMs || 25000;
       var timer = setTimeout(function() { controller.abort(); }, ms);
 
       try {
+        var reqBody = {
+          action: action,
+          payload: payload || {}
+        };
+        if (action !== 'exchangeLineAuthCode' && STATE.sessionToken) {
+          reqBody.sessionToken = STATE.sessionToken;
+        }
+
         var response = await fetch(GAS_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: action, payload: payload || {} }),
+          body: JSON.stringify(reqBody),
           signal: controller.signal
         });
         if (!response.ok) {
           throw new Error('HTTP Error ' + response.status);
         }
-        return await response.json();
+        var data = await response.json();
+        if (data && data.authError && action !== 'exchangeLineAuthCode') {
+          handleAuthExpired_(data.error || 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบด้วย LINE ใหม่อีกครั้ง');
+        }
+        return data;
       } catch (err) {
         if (err && err.name === 'AbortError') {
           throw new Error('เซิร์ฟเวอร์ตอบสนองช้าเกินกำหนด (Timeout) กรุณาลองใหม่อีกครั้ง');
@@ -708,7 +816,6 @@
     function initLineAuthFlow() {
       var params = new URLSearchParams(window.location.search);
       var code = params.get('code');
-      var stateParam = params.get('state') || '';
       var tabParam = params.get('tab') || '';
       if (tabParam) {
         STATE.requestedTab = tabParam;
@@ -725,7 +832,7 @@
 
         callBackendApi('exchangeLineAuthCode', { code: code, redirectUri: cleanUrl })
           .then(function(res) {
-            if (!res || !res.ok || !res.lineUser) {
+            if (!res || !res.ok || !res.lineUser || !res.sessionToken) {
               var errBox = document.getElementById('lineAuthErrorBox');
               if (errBox) {
                 errBox.textContent = 'ยืนยันตัวตน LINE ไม่สำเร็จ: ' + ((res && res.error) ? res.error : 'กรุณาลองใหม่อีกครั้ง');
@@ -735,49 +842,17 @@
               return;
             }
 
+            STATE.sessionToken = res.sessionToken;
             STATE.lineUser = res.lineUser;
-            try { localStorage.setItem(STORAGE_LINE_KEY, JSON.stringify(res.lineUser)); } catch (e) {}
-
-            if (stateParam.indexOf('jm_admin_') === 0) {
-              var parts = stateParam.split('_');
-              var adminPin = parts[2] ? decodeURIComponent(parts[2]) : '';
-              if (adminPin) {
-                callBackendApi('verifyStaffPin', { pin: adminPin, lineUserId: res.lineUser.userId })
-                  .then(function(pinRes) {
-                    if (pinRes && pinRes.ok) {
-                      STATE.isAdmin = true;
-                      STATE.verifiedPin = pinRes.pin || adminPin;
-                      STATE.staffName = pinRes.name || 'Admin';
-                      STATE.dealerStatus = 'Approved';
-                      STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-                      try {
-                        localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
-                          pin: STATE.verifiedPin,
-                          name: STATE.staffName,
-                          lineUserId: res.lineUser.userId
-                        }));
-                      } catch (e) {}
-                      updateAdminHeaderUI();
-                      applyDealerGateUI();
-                      loadCatalogData();
-                      openAdminWorkspace();
-                      showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
-                      return;
-                    }
-                    if (res.access) {
-                      handleAccessResult_(res.lineUser.userId, res.access, false);
-                    } else {
-                      verifyLineUserAccess(res.lineUser.userId, false);
-                    }
-                  });
-                return;
-              }
-            }
+            try {
+              localStorage.setItem(STORAGE_SESSION_KEY, res.sessionToken);
+              localStorage.setItem(STORAGE_LINE_KEY, JSON.stringify(res.lineUser));
+            } catch (e) {}
 
             if (res.access) {
               handleAccessResult_(res.lineUser.userId, res.access, false);
             } else {
-              verifyLineUserAccess(res.lineUser.userId, false);
+              verifyLineUserAccess(false);
             }
           })
           .catch(function(err) {
@@ -791,45 +866,46 @@
         return;
       }
 
-      var savedAdmin = null;
-      try { savedAdmin = JSON.parse(localStorage.getItem(STORAGE_ADMIN_KEY) || 'null'); } catch (e) {}
-      if (savedAdmin && savedAdmin.pin) {
-        STATE.isAdmin = true;
-        STATE.verifiedPin = savedAdmin.pin;
-        STATE.staffName = savedAdmin.name || 'Admin';
-        updateAdminHeaderUI();
-      }
-
+      var savedToken = '';
       var savedLine = null;
-      try { savedLine = JSON.parse(localStorage.getItem(STORAGE_LINE_KEY) || 'null'); } catch (e) {}
-      if (savedLine && savedLine.userId) {
+      try {
+        savedToken = localStorage.getItem(STORAGE_SESSION_KEY) || '';
+        savedLine = JSON.parse(localStorage.getItem(STORAGE_LINE_KEY) || 'null');
+      } catch (e) {}
+
+      if (savedToken && savedLine && savedLine.userId) {
+        STATE.sessionToken = savedToken;
         STATE.lineUser = savedLine;
+
         var fastCache = null;
         try { fastCache = JSON.parse(localStorage.getItem(STORAGE_FAST_CACHE_KEY) || 'null'); } catch (e) {}
         if (fastCache && fastCache.lineUserId === savedLine.userId && fastCache.status === 'Approved' && fastCache.wholesaleData) {
           STATE.dealerStatus = 'Approved';
           STATE.dealerInfo = fastCache.dealer || STATE.dealerInfo;
-          if (fastCache.isAdmin) {
-            STATE.isAdmin = true;
-            STATE.verifiedPin = fastCache.adminPin || STATE.verifiedPin;
-            STATE.staffName = fastCache.adminName || STATE.staffName;
-            updateAdminHeaderUI();
-          }
+          STATE.isAdmin = Boolean(fastCache.isAdmin);
+          STATE.staffName = fastCache.adminName || '';
           applyDealerGateUI();
           applyWholesaleData_(fastCache.wholesaleData);
-          verifyLineUserAccess(savedLine.userId, true);
+          verifyLineUserAccess(true);
           return;
         }
-        verifyLineUserAccess(savedLine.userId, false);
+        verifyLineUserAccess(false);
         return;
       }
 
-      if (STATE.isAdmin) {
-        STATE.dealerStatus = 'Approved';
-        STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-        applyDealerGateUI();
-        loadCatalogData();
-        return;
+      // ถ้ามีข้อมูลระบบเก่าค้างอยู่ ให้แจ้งให้กดยืนยัน LINE ใหม่ 1 ครั้ง
+      var hadOldSession = false;
+      try {
+        hadOldSession = Boolean(localStorage.getItem('jm_wholesale_line_user_v1') || localStorage.getItem('jm_wholesale_admin_session_v1'));
+      } catch (e) {}
+      if (hadOldSession) {
+        clearLocalSession_();
+        var errBox = document.getElementById('lineAuthErrorBox');
+        if (errBox) {
+          errBox.className = 'mt-4 p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs text-left leading-relaxed';
+          errBox.textContent = 'ระบบได้อัปเกรดความปลอดภัยใหม่ กรุณากด "อนุญาตเชื่อมต่อบัญชี LINE" อีก 1 ครั้ง ระบบจะจำบัญชีเดิมของท่านให้อัตโนมัติโดยไม่ต้องลงทะเบียนใหม่ครับ';
+          errBox.classList.remove('hidden');
+        }
       }
 
       STATE.dealerStatus = 'unlogged';
@@ -850,24 +926,23 @@
       if (dEl) { dEl.textContent = txt; dEl.className = clsDesktop; }
     }
 
-    function updateAdminHeaderUI() {
-      var btnText = document.getElementById('headerAdminBtnText');
-      if (btnText) {
-        btnText.textContent = STATE.isAdmin ? 'Workspace' : 'Login Admin';
+    function setStockDateBadge_(printedDate, hasStock) {
+      var dEl = document.getElementById('stockDateBadgeDesktop');
+      var mEl = document.getElementById('stockDateBadgeMobile');
+      if (!hasStock || !printedDate) {
+        if (dEl) dEl.classList.add('hidden');
+        if (mEl) mEl.classList.add('hidden');
+        return;
       }
-    }
-
-    function bindCurrentLineAsAdmin() {
-      if (!STATE.verifiedPin) return;
-      var redirectUri = getOAuthRedirectUri();
-      var stateToken = 'jm_admin_' + encodeURIComponent(STATE.verifiedPin) + '_' + Math.random().toString(36).substring(2, 8);
-      var authUrl = 'https://access.line.me/oauth2/v2.1/authorize' +
-        '?response_type=code' +
-        '&client_id=' + encodeURIComponent(LINE_CHANNEL_ID) +
-        '&redirect_uri=' + encodeURIComponent(redirectUri) +
-        '&state=' + encodeURIComponent(stateToken) +
-        '&scope=' + encodeURIComponent('profile openid');
-      window.location.href = authUrl;
+      var shortDate = String(printedDate).replace(/(\d{2}\/\d{2})\/20(\d{2})/, '$1/$2').replace(/:(\d{2})$/, '');
+      if (dEl) {
+        dEl.textContent = 'สต็อก ' + shortDate;
+        dEl.classList.remove('hidden');
+      }
+      if (mEl) {
+        mEl.textContent = 'สต็อก ' + shortDate.split(' ')[0];
+        mEl.classList.remove('hidden');
+      }
     }
 
     function applyWholesaleData_(res) {
@@ -878,6 +953,10 @@
       STATE.brands = res.brands || [];
       STATE.products = res.products || [];
       STATE.modelImages = res.modelImages || [];
+      STATE.hasStockData = Boolean(res.hasStockData);
+      STATE.stockUploadedDate = res.stockUploadedDate || '';
+      STATE.stockPrintedDate = res.stockPrintedDate || '';
+      STATE.stockGroups = res.stockGroups || [];
 
       var isStale = Boolean(res.isStale7Days);
       if (!isStale && res.lastUploadIso) {
@@ -890,6 +969,7 @@
         badgeText += ' (อัปโหลด ' + res.uploadedDate + ')';
       }
       setDocDateText(badgeText, isStale);
+      setStockDateBadge_(STATE.stockPrintedDate || STATE.stockUploadedDate, STATE.hasStockData);
 
       var staleBox = document.getElementById('stalePriceAlert');
       if (staleBox) staleBox.classList.toggle('hidden', !isStale);
@@ -900,10 +980,11 @@
       renderBrandTabs();
       renderProducts();
 
-      if (STATE.isAdmin && STATE.requestedTab === 'excel') {
+      if (STATE.isAdmin && (STATE.requestedTab === 'excel' || STATE.requestedTab === 'stock')) {
+        var targetTab = STATE.requestedTab;
         STATE.requestedTab = '';
         try { sessionStorage.removeItem('jm_requested_tab'); } catch (e) {}
-        openAdminWorkspace('excel');
+        openAdminWorkspace(targetTab);
       }
       return true;
     }
@@ -915,7 +996,6 @@
             lineUserId: lineUserId,
             status: 'Approved',
             isAdmin: Boolean(res.isAdmin),
-            adminPin: res.adminPin || '',
             adminName: res.adminName || '',
             dealer: res.dealer || null,
             wholesaleData: res.wholesaleData
@@ -927,99 +1007,61 @@
     }
 
     function handleAccessResult_(lineUserId, res, isBackground) {
-          if (!res || !res.ok) {
-            if (STATE.isAdmin) {
-              STATE.dealerStatus = 'Approved';
-              applyDealerGateUI();
-              loadCatalogData();
-              return;
-            }
-            STATE.dealerStatus = 'unregistered';
-            setDocDateText('ลงทะเบียนดีลเลอร์');
-            applyDealerGateUI();
-            if (res && res.error) showToast(res.error);
-            return;
-          }
+      if (!res || !res.ok) {
+        if (res && res.authError) return;
+        STATE.dealerStatus = 'unregistered';
+        setDocDateText('ลงทะเบียนดีลเลอร์');
+        applyDealerGateUI();
+        if (res && res.error) showToast(res.error);
+        return;
+      }
 
-          if (res.isAdmin) {
-            STATE.isAdmin = true;
-            STATE.verifiedPin = res.adminPin || STATE.verifiedPin;
-            STATE.staffName = res.adminName || 'Admin';
-            STATE.dealerStatus = 'Approved';
-            STATE.dealerInfo = res.dealer || { typedShopName: 'Admin: ' + STATE.staffName };
-            try { localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({ pin: STATE.verifiedPin, name: STATE.staffName, lineUserId: lineUserId })); } catch (e) {}
-            saveFastCache_(lineUserId, res);
-            updateAdminHeaderUI();
-            applyDealerGateUI();
-            if (!applyWholesaleData_(res.wholesaleData)) {
-              loadCatalogData(isBackground);
-            }
-            return;
-          }
+      if (res.isAdmin) {
+        STATE.isAdmin = true;
+        STATE.staffName = res.adminName || 'Admin';
+        STATE.dealerStatus = 'Approved';
+        STATE.dealerInfo = res.dealer || { typedShopName: 'AM: ' + STATE.staffName };
+        saveFastCache_(lineUserId, res);
+        applyDealerGateUI();
+        if (!applyWholesaleData_(res.wholesaleData)) {
+          loadCatalogData(isBackground);
+        }
+        return;
+      }
 
-          if (STATE.isAdmin) {
-            STATE.dealerStatus = 'Approved';
-            applyDealerGateUI();
-            if (!applyWholesaleData_(res.wholesaleData)) {
-              loadCatalogData();
-            }
-            return;
-          }
+      STATE.isAdmin = false;
+      STATE.staffName = '';
+      STATE.dealerStatus = res.status || 'unregistered';
+      STATE.dealerInfo = res.dealer || null;
+      saveFastCache_(lineUserId, res);
+      applyDealerGateUI();
 
-          STATE.dealerStatus = res.status || 'unregistered';
-          STATE.dealerInfo = res.dealer || null;
-          saveFastCache_(lineUserId, res);
-          applyDealerGateUI();
-
-          if (STATE.dealerStatus === 'Approved') {
-            if (!applyWholesaleData_(res.wholesaleData)) {
-              loadCatalogData(isBackground);
-            }
-          } else {
-            setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
-          }
+      if (STATE.dealerStatus === 'Approved') {
+        if (!applyWholesaleData_(res.wholesaleData)) {
+          loadCatalogData(isBackground);
+        }
+      } else {
+        setDocDateText(STATE.dealerStatus === 'Pending' ? 'รออนุมัติสิทธิ์' : 'ลงทะเบียนดีลเลอร์');
+      }
     }
 
-    function verifyLineUserAccess(lineUserId, isBackground) {
+    function verifyLineUserAccess(isBackground) {
+      if (!STATE.sessionToken || !STATE.lineUser) {
+        handleAuthExpired_();
+        return;
+      }
       if (!isBackground) {
         setDocDateText('กำลังตรวจสอบสิทธิ์...');
       }
 
-      var pendingBind = false;
-      try { pendingBind = localStorage.getItem('jm_bind_admin_after_line') === '1'; } catch (e) {}
-      if (pendingBind && STATE.isAdmin && STATE.verifiedPin) {
-        try { localStorage.removeItem('jm_bind_admin_after_line'); } catch (e) {}
-        callBackendApi('verifyStaffPin', { pin: STATE.verifiedPin, lineUserId: lineUserId })
-          .then(function() {
-            showToast('ผูกบัญชี LINE กับสิทธิ์แอดมินเรียบร้อยแล้ว');
-            applyDealerGateUI();
-            loadCatalogData();
-            openAdminWorkspace();
-          })
-          .catch(function(err) {
-            setDocDateText('เชื่อมต่อผิดพลาด');
-            showToast('ผูกบัญชี LINE ไม่สำเร็จ: ' + (err.message || err));
-          });
-        return;
-      }
-
-      callBackendApi('checkDealerAccess', { lineUserId: lineUserId })
+      callBackendApi('checkDealerAccess', {})
         .then(function(res) {
-          handleAccessResult_(lineUserId, res, isBackground);
+          if (res && res.authError) return;
+          handleAccessResult_(STATE.lineUser.userId, res, isBackground);
         })
         .catch(function(err) {
-          if (isBackground && STATE.dealerStatus === 'Approved') {
-            return;
-          }
-          if (STATE.isAdmin) {
-            STATE.dealerStatus = 'Approved';
-            applyDealerGateUI();
-            loadCatalogData();
-            return;
-          }
-          STATE.dealerStatus = 'unregistered';
+          if (isBackground && STATE.dealerStatus === 'Approved') return;
           setDocDateText('เชื่อมต่อผิดพลาด');
-          applyDealerGateUI();
           showToast('ตรวจสอบสิทธิ์ไม่สำเร็จ: ' + (err.message || err));
         });
     }
@@ -1036,11 +1078,10 @@
       var controlsRow = document.getElementById('headerStaffControlsRow');
       var dealerBadge = document.getElementById('dealerActiveBadge');
 
-      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn].forEach(function(el) {
+      [loginGate, regView, pendingView, catalogArea, filterBar, pdfBtn, switchBtn, adminBtn].forEach(function(el) {
         if (el) el.classList.add('hidden');
       });
       if (dealerBadge) dealerBadge.classList.add('hidden');
-      if (adminBtn) adminBtn.classList.remove('hidden');
       if (controlsRow) controlsRow.className = 'flex items-center justify-end gap-1.5 sm:gap-2';
 
       if (STATE.dealerStatus === 'Approved' || STATE.isAdmin) {
@@ -1048,15 +1089,11 @@
         if (filterBar) filterBar.classList.remove('hidden');
         if (pdfBtn) pdfBtn.classList.remove('hidden');
 
-        var isStaffOrManager = STATE.isAdmin || (STATE.dealerInfo && STATE.dealerInfo.roleType === 'AM (สำหรับสาขา)');
-        if (isStaffOrManager) {
+        if (STATE.isAdmin) {
           if (switchBtn) switchBtn.classList.remove('hidden');
           if (adminBtn) adminBtn.classList.remove('hidden');
           if (controlsRow) controlsRow.className = 'grid grid-cols-3 lg:flex items-center gap-1.5 sm:gap-2';
         } else {
-          // ดีลเลอร์ทั่วไป: แสดงชื่อร้านและปุ่มดาวน์โหลด PDF ในบรรทัดเดียวกัน
-          if (switchBtn) switchBtn.classList.add('hidden');
-          if (adminBtn) adminBtn.classList.add('hidden');
           if (controlsRow) controlsRow.className = 'flex items-center justify-between lg:justify-end gap-2';
         }
 
@@ -1067,7 +1104,7 @@
         return;
       }
 
-      if (!STATE.lineUser || STATE.dealerStatus === 'unlogged') {
+      if (!STATE.lineUser || !STATE.sessionToken || STATE.dealerStatus === 'unlogged') {
         if (loginGate) loginGate.classList.remove('hidden');
         return;
       }
@@ -1172,7 +1209,7 @@
           btn.textContent = 'ตรวจสอบชื่อ';
           if (!res || !res.ok) {
             resetAmVerified();
-            showToast((res && res.error) ? res.error : 'ไม่พบรหัสพนักงานนี้ในระบบ');
+            if (!res || !res.authError) showToast((res && res.error) ? res.error : 'ไม่พบรหัสพนักงานนี้ในระบบ');
             return;
           }
 
@@ -1200,9 +1237,9 @@
     }
 
     function recheckDealerStatus() {
-      if (!STATE.lineUser) return;
+      if (!STATE.sessionToken) return;
       showToast('กำลังตรวจสอบสถานะล่าสุด...');
-      verifyLineUserAccess(STATE.lineUser.userId);
+      verifyLineUserAccess(false);
     }
 
     function editDealerRegistration() {
@@ -1272,9 +1309,7 @@
       var range = parsePromoPeriod(periodStr);
       if (!range) return { state: 'active', label: '' };
       var now = new Date();
-      if (now > range.end) {
-        return { state: 'expired', label: 'หมดโปรโมชั่น' };
-      }
+      if (now > range.end) return { state: 'expired', label: 'หมดโปรโมชั่น' };
       if (now < range.start) {
         var diffDays = Math.ceil((range.start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         return { state: 'upcoming', label: 'เริ่มในอีก ' + diffDays + ' วัน' };
@@ -1292,7 +1327,7 @@
         var res = await callBackendApi('getWholesaleData', {});
         if (loadingGrid) loadingGrid.classList.add('hidden');
         if (!res || !res.ok) {
-          if (!silent) showToast((res && res.error) || 'โหลดข้อมูลราคาไม่สำเร็จ');
+          if (!silent && (!res || !res.authError)) showToast((res && res.error) || 'โหลดข้อมูลราคาไม่สำเร็จ');
           return;
         }
         applyWholesaleData_(res);
@@ -1337,7 +1372,7 @@
 
     function submitDealerRegistration(e) {
       if (e) e.preventDefault();
-      if (!STATE.lineUser || !STATE.lineUser.userId) {
+      if (!STATE.lineUser || !STATE.sessionToken) {
         showToast('กรุณายืนยันตัวตนผ่าน LINE ก่อนลงทะเบียน');
         return;
       }
@@ -1355,7 +1390,6 @@
       }
 
       var payload = {
-        lineUserId: STATE.lineUser.userId,
         lineName: STATE.lineUser.displayName || '',
         linePicture: STATE.lineUser.pictureUrl || '',
         roleType: roleType
@@ -1394,7 +1428,7 @@
           btn.disabled = false;
           btn.textContent = isAm ? 'ยืนยันลงทะเบียน AM' : 'ส่งข้อมูลลงทะเบียนขออนุมัติ';
           if (!res || !res.ok) {
-            showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
+            if (!res || !res.authError) showToast((res && res.error) ? res.error : 'ส่งข้อมูลไม่สำเร็จ');
             return;
           }
           STATE.dealerStatus = res.status || 'Pending';
@@ -1408,19 +1442,9 @@
           };
 
           if (res.status === 'Approved') {
-            if (res.isAdmin) {
-              STATE.isAdmin = true;
-              STATE.verifiedPin = res.adminPin || payload.employeeId;
-              STATE.staffName = res.adminName || STATE.dealerInfo.typedShopName;
-              try {
-                localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
-                  pin: STATE.verifiedPin,
-                  name: STATE.staffName,
-                  lineUserId: STATE.lineUser.userId
-                }));
-              } catch (errSave) {}
-              updateAdminHeaderUI();
-            }
+            STATE.isAdmin = Boolean(res.isAdmin);
+            STATE.staffName = res.adminName || STATE.dealerInfo.typedShopName;
+            saveFastCache_(STATE.lineUser.userId, res);
             applyDealerGateUI();
             if (!applyWholesaleData_(res.wholesaleData)) {
               loadCatalogData();
@@ -1475,11 +1499,14 @@
 
       var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
       var hideInactive = document.getElementById('hideExpiredToggle').checked;
+      var onlyInStock = document.getElementById('onlyInStockToggle').checked;
 
       var filtered = STATE.products.filter(function(item) {
         if (STATE.activeBrand !== 'ALL' && item.brand !== STATE.activeBrand) return false;
+        if (onlyInStock && !(item.stockTotal > 0)) return false;
         if (q) {
-          var hay = (item.brand + ' ' + item.modelDesc + ' ' + item.period).toLowerCase();
+          var colorsText = (item.stockColors || []).map(function(c) { return c.color; }).join(' ');
+          var hay = (item.brand + ' ' + item.modelDesc + ' ' + item.period + ' ' + colorsText).toLowerCase();
           if (hay.indexOf(q) === -1) return false;
         }
         if (hideInactive) {
@@ -1531,6 +1558,23 @@
             '</div>'
           : '';
 
+        var stockHtml = '';
+        if (item.stockTotal > 0 && item.stockColors && item.stockColors.length) {
+          var chips = item.stockColors.filter(function(c) { return c.qty > 0; }).map(function(c) {
+            return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-[10px] sm:text-[11px] font-semibold text-emerald-800">' +
+              '<span>' + escapeHtml(c.color) + '</span>' +
+              '<span class="font-bold font-num text-emerald-950">(' + c.qty + ')</span>' +
+            '</span>';
+          }).join('');
+          stockHtml = '<div class="pt-1.5 border-t border-slate-100 space-y-1.5">' +
+            '<div class="flex items-center justify-between text-[11px]">' +
+              '<span class="font-bold text-emerald-700">สต็อกพร้อมส่ง</span>' +
+              '<span class="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white font-bold font-num text-[10px]">รวม ' + item.stockTotal + ' เครื่อง</span>' +
+            '</div>' +
+            '<div class="flex flex-wrap gap-1">' + chips + '</div>' +
+          '</div>';
+        }
+
         var periodHtml = item.period
           ? '<div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">' +
               '<span>ระยะเวลา</span>' +
@@ -1555,6 +1599,7 @@
                 '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
                 '<span class="text-xl sm:text-2xl font-black text-[#C8102E] font-num tracking-tight">฿' + formatMoney(item.wholesale) + '</span>' +
               '</div>' +
+              stockHtml +
               periodHtml +
             '</div>' +
           '</div>' +
@@ -1562,17 +1607,70 @@
       }).join('');
     }
 
-    // ================= PDF EXPORT =================
+    // ================= UNIFIED PDF EXPORT (PRICE / STOCK) =================
     function openPdfModal() {
+      switchPdfMode('price');
+      openModal('pdfModal');
+    }
+
+    function switchPdfMode(mode) {
+      STATE.pdfMode = mode;
+      var priceBtn = document.getElementById('pdfModePriceBtn');
+      var stockBtn = document.getElementById('pdfModeStockBtn');
+      var priceOpt = document.getElementById('pdfPriceOptions');
+      var stockOpt = document.getElementById('pdfStockOptions');
+      var genBtn = document.getElementById('generatePdfBtn');
+
+      if (mode === 'stock') {
+        priceBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        stockBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-emerald-600 text-white shadow-xs';
+        priceOpt.classList.add('hidden');
+        stockOpt.classList.remove('hidden');
+        genBtn.textContent = 'สร้าง PDF ใบสต็อกพร้อมส่ง';
+        genBtn.className = 'btn-press h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold cursor-pointer';
+        var hint = document.getElementById('pdfStockMetaHint');
+        if (hint) {
+          hint.textContent = STATE.hasStockData
+            ? ('ข้อมูลสต็อก ณ ' + (STATE.stockPrintedDate || STATE.stockUploadedDate || '-') + ' (' + STATE.stockGroups.length + ' รุ่น/ความจุ)')
+            : 'ยังไม่มีข้อมูลสต็อกในระบบ กรุณาให้แอดมินอัปโหลดไฟล์ PDF สต็อกก่อน';
+        }
+        renderPdfBrandList(getUniqueStockBrands_());
+      } else {
+        priceBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs';
+        stockBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        priceOpt.classList.remove('hidden');
+        stockOpt.classList.add('hidden');
+        genBtn.textContent = 'สร้าง PDF ใบราคาขายส่ง';
+        genBtn.className = 'btn-press h-11 px-5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-sm font-semibold cursor-pointer';
+        renderPdfBrandList(STATE.brands);
+      }
+    }
+
+    function getUniqueStockBrands_() {
+      var seen = {};
+      var list = [];
+      (STATE.stockGroups || []).forEach(function(g) {
+        if (g.brand && !seen[g.brand]) {
+          seen[g.brand] = true;
+          list.push(g.brand);
+        }
+      });
+      return list;
+    }
+
+    function renderPdfBrandList(brands) {
       var listEl = document.getElementById('pdfBrandChecklist');
       if (!listEl) return;
-      listEl.innerHTML = STATE.brands.map(function(b) {
+      if (!brands || !brands.length) {
+        listEl.innerHTML = '<div class="col-span-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 text-center">ไม่พบรายการแบรนด์</div>';
+        return;
+      }
+      listEl.innerHTML = brands.map(function(b) {
         return '<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm font-semibold text-slate-800">' +
           '<input type="checkbox" name="pdfBrandCheck" value="' + escapeHtml(b) + '" checked class="w-4 h-4 rounded border-slate-300 text-[#C8102E]">' +
           '<span class="truncate">' + escapeHtml(b) + '</span>' +
         '</label>';
       }).join('');
-      openModal('pdfModal');
     }
 
     function togglePdfBrands(checked) {
@@ -1595,7 +1693,40 @@
       return STATE.fontCache;
     }
 
-    async function generatePdfCatalog() {
+    async function saveOrSharePdfDoc_(doc, fileName, titleText) {
+      var pdfBlob = doc.output('blob');
+      var pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      closeModal('pdfModal');
+
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        try {
+          await navigator.share({
+            files: [pdfFile],
+            title: titleText,
+            text: titleText
+          });
+          showToast('ส่ง/บันทึกไฟล์ PDF เรียบร้อยแล้ว');
+        } catch (shareErr) {
+          if (shareErr && shareErr.name !== 'AbortError') {
+            doc.save(fileName);
+            showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+          }
+        }
+      } else {
+        doc.save(fileName);
+        showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
+      }
+    }
+
+    async function generatePdfDocument() {
+      if (STATE.pdfMode === 'stock') {
+        await generateStockPdf();
+      } else {
+        await generatePricePdf();
+      }
+    }
+
+    async function generatePricePdf() {
       var selectedBrands = Array.from(document.querySelectorAll('input[name="pdfBrandCheck"]:checked')).map(function(cb) {
         return cb.value;
       });
@@ -1686,118 +1817,115 @@
           showToast('ไม่มีรายการสินค้าตามเงื่อนไขที่เลือก');
         } else {
           var fileName = 'Jaymart-Wholesale-' + (STATE.docDate || 'PriceList').replace(/\//g, '-') + '.pdf';
-          var pdfBlob = doc.output('blob');
-          var pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
-          closeModal('pdfModal');
-
-          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-            try {
-              await navigator.share({
-                files: [pdfFile],
-                title: 'ใบราคาขายส่ง Jaymart Wholesale',
-                text: 'ใบราคาขายส่ง Jaymart Wholesale (' + (STATE.docDate || 'ล่าสุด') + ')'
-              });
-              showToast('ส่ง/บันทึกไฟล์ PDF เรียบร้อยแล้ว');
-            } catch (shareErr) {
-              if (shareErr && shareErr.name !== 'AbortError') {
-                doc.save(fileName);
-                showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
-              }
-            }
-          } else {
-            doc.save(fileName);
-            showToast('ดาวน์โหลดไฟล์ PDF เรียบร้อยแล้ว');
-          }
+          await saveOrSharePdfDoc_(doc, fileName, 'ใบราคาขายส่ง Jaymart Wholesale (' + (STATE.docDate || 'ล่าสุด') + ')');
         }
       } catch (err) {
         showToast('สร้าง PDF ไม่สำเร็จ: ' + (err.message || err));
       } finally {
         btn.disabled = false;
-        btn.textContent = 'สร้างและดาวน์โหลด PDF';
+        btn.textContent = 'สร้าง PDF ใบราคาขายส่ง';
+      }
+    }
+
+    async function generateStockPdf() {
+      var selectedBrands = Array.from(document.querySelectorAll('input[name="pdfBrandCheck"]:checked')).map(function(cb) {
+        return cb.value;
+      });
+      if (!selectedBrands.length) {
+        showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์');
+        return;
+      }
+
+      var onlyWholesale = document.getElementById('pdfStockOnlyWholesale').checked;
+      var btn = document.getElementById('generatePdfBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้างไฟล์ PDF สต็อก...';
+
+      try {
+        var fontBase64 = await loadThaiFontBase64();
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
+        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.setFont('Sarabun', 'normal');
+
+        var pageAdded = false;
+        var stockDateStr = STATE.stockPrintedDate || STATE.stockUploadedDate || '-';
+
+        selectedBrands.forEach(function(brand) {
+          var items = (STATE.stockGroups || []).filter(function(g) {
+            if (g.brand !== brand) return false;
+            if (onlyWholesale && !g.inWholesale) return false;
+            return g.totalQty > 0;
+          });
+          if (!items.length) return;
+
+          if (pageAdded) doc.addPage();
+          pageAdded = true;
+
+          var brandTotal = items.reduce(function(acc, it) { return acc + (it.totalQty || 0); }, 0);
+          var theme = getBrandTheme(brand);
+
+          doc.setFillColor(theme.rgb[0], theme.rgb[1], theme.rgb[2]);
+          doc.rect(14, 12, 182, 14, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(13);
+          doc.text('JAYMART STOCK READY — ' + brand.toUpperCase(), 18, 21);
+
+          doc.setTextColor(71, 85, 105);
+          doc.setFontSize(9.5);
+          doc.text('ข้อมูลสต็อก ณ ' + stockDateStr + '   |   รวม ' + items.length + ' รุ่น / ' + brandTotal + ' เครื่อง', 14, 32);
+
+          var rows = items.map(function(it, idx) {
+            var colorSummary = (it.colors || []).map(function(c) {
+              return c.color + ' (' + c.qty + ')';
+            }).join(', ');
+            return [
+              String(idx + 1),
+              it.displayName,
+              colorSummary || '-',
+              String(it.totalQty)
+            ];
+          });
+
+          doc.autoTable({
+            startY: 36,
+            head: [['#', 'รุ่นสินค้า / ความจุ', 'สีและจำนวนพร้อมส่ง', 'รวม']],
+            body: rows,
+            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.6 },
+            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'normal' },
+            columnStyles: {
+              0: { halign: 'center', cellWidth: 10 },
+              1: { cellWidth: 62 },
+              2: { cellWidth: 92 },
+              3: { halign: 'right', cellWidth: 18, textColor: [22, 163, 74] }
+            }
+          });
+        });
+
+        if (!pageAdded) {
+          showToast('ไม่มีรายการสต็อกตามเงื่อนไขที่เลือก');
+        } else {
+          var safeDate = String(stockDateStr).split(' ')[0].replace(/\//g, '-') || 'Latest';
+          var fileName = 'Jaymart-Stock-' + safeDate + '.pdf';
+          await saveOrSharePdfDoc_(doc, fileName, 'ใบสต็อกพร้อมส่ง Jaymart (' + stockDateStr + ')');
+        }
+      } catch (err) {
+        showToast('สร้าง PDF สต็อกไม่สำเร็จ: ' + (err.message || err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'สร้าง PDF ใบสต็อกพร้อมส่ง';
       }
     }
 
     // ================= ADMIN WORKSPACE & TABS =================
-    function openAdminAuth() {
-      if (STATE.isAdmin && STATE.verifiedPin) {
-        openAdminWorkspace();
-        return;
-      }
-      document.getElementById('pinError').classList.add('hidden');
-      document.getElementById('staffPinInput').value = '';
-      openModal('pinModal');
-      setTimeout(function() {
-        var inp = document.getElementById('staffPinInput');
-        if (inp) inp.focus();
-      }, 100);
-    }
-
-    function submitPin() {
-      var pin = (document.getElementById('staffPinInput').value || '').trim();
-      var errEl = document.getElementById('pinError');
-      if (!pin) {
-        errEl.textContent = 'กรุณากรอกรหัสพนักงาน';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      var btn = document.getElementById('pinSubmitBtn');
-      btn.disabled = true;
-      btn.textContent = 'กำลังตรวจสอบ...';
-
-      var uid = STATE.lineUser ? STATE.lineUser.userId : '';
-      callBackendApi('verifyStaffPin', { pin: pin, lineUserId: uid })
-        .then(function(res) {
-          btn.disabled = false;
-          btn.textContent = 'เข้าสู่ระบบ';
-          if (!res || !res.ok) {
-            errEl.textContent = (res && res.error) ? res.error : 'รหัสพนักงานไม่ถูกต้อง';
-            errEl.classList.remove('hidden');
-            return;
-          }
-
-          STATE.isAdmin = true;
-          STATE.verifiedPin = res.pin || pin;
-          STATE.staffName = res.name || 'Admin';
-          STATE.dealerStatus = 'Approved';
-          STATE.dealerInfo = { typedShopName: 'Admin: ' + STATE.staffName };
-
-          try {
-            localStorage.setItem(STORAGE_ADMIN_KEY, JSON.stringify({
-              pin: STATE.verifiedPin,
-              name: STATE.staffName,
-              lineUserId: uid
-            }));
-          } catch (e) {}
-
-          closeModal('pinModal');
-          updateAdminHeaderUI();
-          applyDealerGateUI();
-          loadCatalogData(true);
-          openAdminWorkspace();
-          showToast('เข้าสู่ระบบแอดมินสำเร็จ (' + STATE.staffName + ')');
-        })
-        .catch(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'เข้าสู่ระบบ';
-          errEl.textContent = 'เชื่อมต่อผิดพลาด: ' + (err.message || err);
-          errEl.classList.remove('hidden');
-        });
-    }
-
     function openAdminWorkspace(defaultTab) {
-      document.getElementById('adminStaffBadge').textContent = STATE.staffName || 'Admin';
-      var boundBadge = document.getElementById('adminLineBoundBadge');
-      var bindBtn = document.getElementById('btnBindAdminLine');
-      if (STATE.lineUser && STATE.lineUser.userId) {
-        if (boundBadge) boundBadge.classList.remove('hidden');
-        if (bindBtn) bindBtn.classList.add('hidden');
-      } else {
-        if (boundBadge) boundBadge.classList.add('hidden');
-        if (bindBtn) bindBtn.classList.remove('hidden');
+      if (!STATE.isAdmin) {
+        showToast('เฉพาะบัญชี LINE ในแท็บ Staff เท่านั้นที่เปิด Workspace ได้');
+        return;
       }
-
+      document.getElementById('adminStaffBadge').textContent = STATE.staffName || 'Admin';
       openModal('adminModal');
       switchAdminTab(defaultTab || 'dealers');
       loadAdminDealers();
@@ -1816,6 +1944,7 @@
       var tabs = {
         dealers: { btn: 'tabDealersBtn', panel: 'adminDealersTab' },
         excel:   { btn: 'tabExcelBtn',   panel: 'adminExcelTab' },
+        stock:   { btn: 'tabStockBtn',   panel: 'adminStockTab' },
         images:  { btn: 'tabImagesBtn',  panel: 'adminImagesTab' }
       };
 
@@ -1842,10 +1971,12 @@
       var listEl = document.getElementById('adminDealerList');
       if (listEl) listEl.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">กำลังโหลดรายชื่อ...</div>';
 
-      callBackendApi('getDealerRegistrations', { pin: STATE.verifiedPin })
+      callBackendApi('getDealerRegistrations', {})
         .then(function(res) {
           if (!res || !res.ok) {
-            if (listEl) listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml((res && res.error) || 'โหลดข้อมูลไม่สำเร็จ') + '</div>';
+            if (listEl && (!res || !res.authError)) {
+              listEl.innerHTML = '<div class="p-4 rounded-xl bg-rose-50 text-rose-700 text-xs">' + escapeHtml((res && res.error) || 'โหลดข้อมูลไม่สำเร็จ') + '</div>';
+            }
             return;
           }
           STATE.dealersList = res.dealers || [];
@@ -1907,7 +2038,7 @@
           '</div>' +
           '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
             (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
-            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ระงับ/ไม่อนุมัติ</button>' : '') +
+            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ระงับ/ไม่อนุมัติ</button>' : '') +
           '</div>' +
         '</div>';
       }).join('');
@@ -1916,12 +2047,11 @@
     function changeDealerStatus(lineUserId, newStatus) {
       showToast('กำลังบันทึกสถานะ...');
       callBackendApi('updateDealerStatus', {
-        pin: STATE.verifiedPin,
         lineUserId: lineUserId,
         newStatus: newStatus
       }).then(function(res) {
         if (!res || !res.ok) {
-          showToast((res && res.error) || 'อัปเดตสถานะไม่สำเร็จ');
+          if (!res || !res.authError) showToast((res && res.error) || 'อัปเดตสถานะไม่สำเร็จ');
           return;
         }
         showToast(newStatus === 'Approved' ? 'อนุมัติสิทธิ์เรียบร้อยแล้ว' : 'อัปเดตสถานะเรียบร้อยแล้ว');
@@ -1988,7 +2118,6 @@
               if (rIdx !== -1) colMap.rrp = rIdx;
               if (pIdx !== -1) {
                 colMap.period = pIdx;
-                // ถ้าหัวตารางเป็น "ระยะเวลาเริ่ม" หรือคอลัมน์ถัดไปเป็นวันสิ้นสุด ให้ดึงมารวมเป็นช่วงวันที่
                 var nextHeader = rowLower[pIdx + 1] || '';
                 var sampleNext = (rows[r + 1] && rows[r + 1][pIdx + 1] !== undefined) ? rows[r + 1][pIdx + 1] : '';
                 if (
@@ -2075,7 +2204,7 @@
           document.getElementById('excelPreviewSection').classList.remove('hidden');
 
           var bodyEl = document.getElementById('excelPreviewBody');
-          bodyEl.innerHTML = parsedItems.slice(0, 100).map(function(item) {
+          bodyEl.innerHTML = parsedItems.slice(0, 150).map(function(item) {
             return '<tr>' +
               '<td class="p-2 text-emerald-600 font-bold">✓ พร้อม</td>' +
               '<td class="p-2 font-semibold">' + escapeHtml(item.brand) + '</td>' +
@@ -2105,13 +2234,12 @@
         notifyDealers: notifyChk ? notifyChk.checked : true
       };
       callBackendApi('updateOverviewSheet', {
-        pin: STATE.verifiedPin,
         excelPayload: payloadToSend
-      }).then(function(res) {
+      }, 45000).then(function(res) {
         btn.disabled = false;
         btn.textContent = 'ยืนยันอัปเดตลงแท็บ "ภาพรวม"';
         if (!res || !res.ok) {
-          showToast((res && res.error) || 'อัปเดตข้อมูลไม่สำเร็จ');
+          if (!res || !res.authError) showToast((res && res.error) || 'อัปเดตข้อมูลไม่สำเร็จ');
           return;
         }
         setExcelStep(3);
@@ -2124,7 +2252,287 @@
       });
     }
 
-    // --- TAB 3: IMAGES MANAGER ---
+    // --- TAB 3: STOCK PDF PARSER & UPLOAD (PSINRP11) ---
+    function setStockStep(step) {
+      [1, 2, 3].forEach(function(n) {
+        var el = document.getElementById('stockStep' + n);
+        if (!el) return;
+        if (n === step) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white font-bold transition';
+        } else if (n < step) {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold transition';
+        } else {
+          el.className = 'flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 font-semibold transition';
+        }
+      });
+    }
+
+    function detectStockBrand_(desc) {
+      var s = String(desc || '').trim();
+      var upper = s.toUpperCase();
+      if (upper.indexOf('SAM ') === 0 || upper.indexOf('SAMSUNG') === 0) return 'SAMSUNG';
+      if (upper.indexOf('OPPO ') === 0) return 'OPPO';
+      if (upper.indexOf('IPHONE ') === 0 || upper.indexOf('IPAD ') === 0 || upper.indexOf('APPLE ') === 0) return 'APPLE';
+      if (upper.indexOf('INFINIX ') === 0) return 'INFINIX';
+      if (upper.indexOf('VIVO ') === 0) return 'VIVO';
+      if (upper.indexOf('REALME ') === 0) return 'REALME';
+      if (upper.indexOf('XIAOMI ') === 0 || upper.indexOf('REDMI ') === 0 || upper.indexOf('POCO ') === 0) return 'XIAOMI';
+      if (upper.indexOf('HONOR ') === 0) return 'HONOR';
+      if (upper.indexOf('TECNO ') === 0) return 'TECNO';
+      var first = s.split(/\s+/)[0] || 'OTHER';
+      return first.toUpperCase();
+    }
+
+    function parseStockDescription_(rawDesc) {
+      var desc = String(rawDesc || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+      var brand = detectStockBrand_(desc);
+
+      var capacity = '';
+      var capStart = -1;
+      var capEnd = -1;
+
+      var mRamRom = desc.match(/(\d{1,2})\s*\/\s*(\d{2,4})\s*(GB|TB)?/i);
+      if (mRamRom) {
+        capacity = mRamRom[1] + '/' + mRamRom[2] + (mRamRom[3] ? mRamRom[3].toUpperCase() : 'GB');
+        capStart = mRamRom.index;
+        capEnd = capStart + mRamRom[0].length;
+      } else {
+        var mRom = desc.match(/\b(32|64|128|256|512)\s*GB\b|\b(1|2)\s*TB\b/i);
+        if (mRom) {
+          capacity = mRom[1] ? (mRom[1] + 'GB') : (mRom[2] + 'TB');
+          capStart = mRom.index;
+          capEnd = capStart + mRom[0].length;
+        }
+      }
+
+      var modelName = desc;
+      var colorPart = '';
+
+      if (capStart !== -1) {
+        modelName = desc.substring(0, capStart).trim();
+        colorPart = desc.substring(capEnd).trim();
+      }
+
+      // เก็บ (LTE) / (5G) ในชื่อรุ่นถ้ามี แต่ตัดรหัสวงเล็บเครื่องออกจากส่วนสี เช่น (CPH2789), (CPH2789, (SM-S938...), (OPD2503), (07PAD010), (AWN)
+      colorPart = colorPart
+        .replace(/^\s*(?:LTE|5G|WIFI)\b/i, function(m) {
+          modelName = (modelName + ' ' + m.trim()).trim();
+          return '';
+        })
+        .replace(/\(\s*(?:CPH|CHP|SM-|OPD|07PAD|AWN)[A-Za-z0-9\-]*\s*\)?/gi, ' ')
+        .replace(/\(\s*AWN\s*\)/gi, ' ')
+        .replace(/[-\s]+(NEW\s*SP|NEW|UPGRADE)\b/gi, ' ')
+        .replace(/^[-–:\s]+|[-–:\s]+$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      modelName = modelName
+        .replace(/\(\s*(?:CPH|CHP|SM-|OPD|07PAD|AWN)[A-Za-z0-9\-]*\s*\)?/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      return {
+        brand: brand,
+        modelName: modelName || desc,
+        capacity: capacity,
+        color: colorPart || 'ไม่ระบุสี'
+      };
+    }
+
+    async function handleStockPdfSelect(e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (!window.pdfjsLib) {
+        showToast('ไม่พบไลบรารี PDF.js กรุณารีเฟรชหน้าเว็บ');
+        return;
+      }
+
+      document.getElementById('stockSelectedFileName').textContent = 'กำลังอ่านไฟล์: ' + file.name + '...';
+
+      try {
+        var arrayBuf = await file.arrayBuffer();
+        var pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+        var printedDate = '';
+        var rawRows = [];
+
+        for (var pNum = 1; pNum <= pdf.numPages; pNum++) {
+          var page = await pdf.getPage(pNum);
+          var textContent = await page.getTextContent();
+          var items = textContent.items || [];
+
+          // จัดกลุ่มตามบรรทัด (พิกัด Y ต่างกันไม่เกิน 3.5 pt)
+          var lines = [];
+          for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            var str = String(it.str || '').trim();
+            if (!str) continue;
+            var x = it.transform ? it.transform[4] : 0;
+            var y = it.transform ? it.transform[5] : 0;
+
+            var matchedLine = null;
+            for (var li = 0; li < lines.length; li++) {
+              if (Math.abs(lines[li].y - y) <= 3.5) {
+                matchedLine = lines[li];
+                break;
+              }
+            }
+            if (!matchedLine) {
+              matchedLine = { y: y, tokens: [] };
+              lines.push(matchedLine);
+            }
+            matchedLine.tokens.push({ x: x, str: str });
+          }
+
+          // เรียงจากบนลงล่าง (Y มาก -> น้อย ในพิกัด PDF)
+          lines.sort(function(a, b) { return b.y - a.y; });
+
+          var headerFound = false;
+          for (var l = 0; l < lines.length; l++) {
+            var toks = lines[l].tokens.sort(function(a, b) { return a.x - b.x; });
+            var lineText = toks.map(function(t) { return t.str; }).join(' ');
+
+            if (!printedDate) {
+              var pm = lineText.match(/Printed\s*Date\s*:\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}(?:\s+[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)?)/i);
+              if (pm) printedDate = pm[1].trim();
+            }
+
+            if (lineText.indexOf('Item Code') !== -1 && lineText.indexOf('Description') !== -1) {
+              headerFound = true;
+              continue;
+            }
+            if (!headerFound) continue;
+            if (lineText.indexOf('Grand Total') !== -1) continue;
+
+            var colCode = [];
+            var colDesc = [];
+            var colUom = [];
+            var colQty = [];
+
+            for (var ti = 0; ti < toks.length; ti++) {
+              var tk = toks[ti];
+              if (tk.x < 90) colCode.push(tk.str);
+              else if (tk.x >= 90 && tk.x < 365) colDesc.push(tk.str);
+              else if (tk.x >= 365 && tk.x < 425) colUom.push(tk.str);
+              else if (tk.x >= 720) colQty.push(tk.str);
+            }
+
+            var itemCode = colCode.join('').replace(/\s+/g, '');
+            var descPart = colDesc.join(' ').trim();
+            var uom = colUom.join(' ').trim();
+            var qtyStr = colQty.join('').replace(/,/g, '').trim();
+
+            if (/^\d{10,}$/.test(itemCode)) {
+              rawRows.push({
+                itemCode: itemCode,
+                rawDescription: descPart,
+                uom: uom,
+                qty: Number(qtyStr)
+              });
+            } else if (!itemCode && !uom && !qtyStr && descPart && rawRows.length > 0) {
+              // บรรทัดที่ตัดคำลงมาต่อจากแถวก่อนหน้า เช่น "Cover"
+              rawRows[rawRows.length - 1].rawDescription = (rawRows[rawRows.length - 1].rawDescription + ' ' + descPart).trim();
+            }
+          }
+        }
+
+        var keptItems = [];
+        var skippedDemo = 0;
+        var skippedSim = 0;
+        var skippedZero = 0;
+        var totalUnits = 0;
+
+        for (var r = 0; r < rawRows.length; r++) {
+          var row = rawRows[r];
+          var dTxt = row.rawDescription || '';
+
+          if (/\bDEMO\b/i.test(dTxt) || /^DEMO/i.test(dTxt)) {
+            skippedDemo++;
+            continue;
+          }
+          if (row.uom === 'ใบ' || /^SIM\b/i.test(dTxt)) {
+            skippedSim++;
+            continue;
+          }
+          if (isNaN(row.qty) || row.qty <= 0) {
+            skippedZero++;
+            continue;
+          }
+
+          var parsed = parseStockDescription_(dTxt);
+          totalUnits += row.qty;
+          keptItems.push({
+            itemCode: row.itemCode,
+            brand: parsed.brand,
+            modelName: parsed.modelName,
+            capacity: parsed.capacity,
+            color: parsed.color,
+            qty: row.qty,
+            uom: row.uom,
+            rawDescription: dTxt
+          });
+        }
+
+        if (!keptItems.length) {
+          document.getElementById('stockSelectedFileName').textContent = 'ไม่พบรายการสต็อกเครื่องปกติในไฟล์: ' + file.name;
+          showToast('ไม่พบรายการสต็อกในไฟล์ PDF กรุณาตรวจสอบว่าเป็นรายงาน PSINRP11');
+          return;
+        }
+
+        document.getElementById('stockSelectedFileName').textContent = 'ไฟล์ที่เลือก: ' + file.name + (printedDate ? (' (พิมพ์เมื่อ ' + printedDate + ')') : '');
+        STATE.parsedStockPayload = {
+          printedDate: printedDate,
+          items: keptItems
+        };
+        setStockStep(2);
+
+        document.getElementById('stockSummaryText').textContent =
+          keptItems.length + ' รายการ / รวม ' + totalUnits + ' เครื่อง' + (printedDate ? (' • ข้อมูล ณ ' + printedDate) : '');
+        document.getElementById('stockSkippedText').textContent =
+          'ตัดออกอัตโนมัติ: DEMO ' + skippedDemo + ' รายการ • SIM ' + skippedSim + ' รายการ • สต็อก 0 จำนวน ' + skippedZero + ' รายการ';
+        document.getElementById('stockPreviewSection').classList.remove('hidden');
+
+        var bodyEl = document.getElementById('stockPreviewBody');
+        bodyEl.innerHTML = keptItems.map(function(it) {
+          return '<tr>' +
+            '<td class="p-2 font-bold text-slate-700">' + escapeHtml(it.brand) + '</td>' +
+            '<td class="p-2 font-semibold text-slate-900">' + escapeHtml(it.modelName) + '</td>' +
+            '<td class="p-2 font-num text-slate-700">' + escapeHtml(it.capacity || '-') + '</td>' +
+            '<td class="p-2 text-slate-700">' + escapeHtml(it.color) + '</td>' +
+            '<td class="p-2 text-right font-bold font-num text-emerald-700">' + it.qty + '</td>' +
+          '</tr>';
+        }).join('');
+      } catch (err) {
+        document.getElementById('stockSelectedFileName').textContent = 'อ่านไฟล์ไม่สำเร็จ: ' + file.name;
+        showToast('อ่านไฟล์ PDF สต็อกไม่สำเร็จ: ' + (err.message || err));
+      }
+    }
+
+    function confirmStockUpload() {
+      if (!STATE.parsedStockPayload || !STATE.parsedStockPayload.items.length) return;
+      var btn = document.getElementById('btnConfirmStock');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึกสต็อก...';
+
+      callBackendApi('updateStockSheet', {
+        stockPayload: STATE.parsedStockPayload
+      }, 45000).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันบันทึกลงแท็บ "Stock"';
+        if (!res || !res.ok) {
+          if (!res || !res.authError) showToast((res && res.error) || 'บันทึกสต็อกไม่สำเร็จ');
+          return;
+        }
+        setStockStep(3);
+        showToast('บันทึกสต็อก ' + res.count + ' รายการ (' + res.totalUnits + ' เครื่อง) เรียบร้อยแล้ว!');
+        loadCatalogData(true);
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันบันทึกลงแท็บ "Stock"';
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+      });
+    }
+
+    // --- TAB 4: IMAGES MANAGER ---
     function populateBrandFilters() {
       var filterEl = document.getElementById('adminBrandFilter');
       var dataListEl = document.getElementById('brandDataList');
@@ -2228,7 +2636,6 @@
       btn.textContent = 'กำลังบันทึก...';
 
       callBackendApi('saveModelImage', {
-        pin: STATE.verifiedPin,
         brand: brand,
         modelKey: modelKey,
         imageUrl: url
@@ -2236,7 +2643,7 @@
         btn.disabled = false;
         btn.textContent = 'บันทึก';
         if (!res || !res.ok) {
-          showToast((res && res.error) || 'บันทึกรูปภาพไม่สำเร็จ');
+          if (!res || !res.authError) showToast((res && res.error) || 'บันทึกรูปภาพไม่สำเร็จ');
           return;
         }
         document.getElementById('newImgModelKey').value = '';
@@ -2263,13 +2670,12 @@
       }
       showToast('กำลังบันทึกลิงก์รูปภาพ...');
       callBackendApi('saveModelImage', {
-        pin: STATE.verifiedPin,
         brand: brand,
         modelKey: modelDesc,
         imageUrl: url
       }).then(function(res) {
         if (!res || !res.ok) {
-          showToast((res && res.error) || 'บันทึกไม่สำเร็จ');
+          if (!res || !res.authError) showToast((res && res.error) || 'บันทึกไม่สำเร็จ');
           return;
         }
         showToast('บันทึกรูปภาพเรียบร้อยแล้ว');
@@ -2286,7 +2692,6 @@
       var reader = new FileReader();
       reader.onload = function(evt) {
         callBackendApi('uploadModelImageFile', {
-          pin: STATE.verifiedPin,
           brand: brand,
           modelKey: modelKey,
           fileName: file.name,
@@ -2294,7 +2699,7 @@
         }, 45000).then(function(res) {
           if (banner) banner.classList.add('hidden');
           if (!res || !res.ok) {
-            showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
+            if (!res || !res.authError) showToast((res && res.error) || 'อัปโหลดรูปภาพไม่สำเร็จ');
             return;
           }
           showToast('อัปโหลดและบันทึกรูปภาพเรียบร้อยแล้ว');
