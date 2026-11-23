@@ -140,7 +140,7 @@
           </div>
         </div>
 
-        <div id="brandTabsContainer" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
+        <div id="brandTabsContainer" class="flex items-center sm:flex-wrap gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
       </div>
     </div>
   </header>
@@ -1490,7 +1490,7 @@
           wholesale: 0,
           rrp: 0,
           period: '',
-          imageUrl: '',
+          imageUrl: g.imageUrl || '',
           stockTotal: g.totalQty,
           stockColors: g.colors || [],
           isStockOnly: true
