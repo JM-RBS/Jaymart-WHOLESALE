@@ -254,12 +254,12 @@
           </div>
 
           <div>
-            <div class="flex items-center justify-between gap-2 mb-1">
+            <div class="flex items-center justify-between gap-2 mb-0.5">
               <label class="block text-xs font-bold text-slate-700">Username SG Finance+ <span class="text-rose-600">*</span></label>
               <span id="fieldTag_sgUser" class="hidden text-[11px] font-bold"></span>
             </div>
-            <input id="regSgUser" type="text" required oninput="checkSgFinanceCodeWarning()" onblur="checkSgFinanceCodeWarning()" placeholder="เช่น JAY0092592 หรือ JNW148000028" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
-            <p class="text-[11px] text-slate-500 mt-1">ระบุ Username ที่ขึ้นต้นด้วย <strong>JAY</strong> หรือ <strong>JNW</strong> เท่านั้น</p>
+            <p class="text-xs text-rose-600 font-semibold mb-1.5">* ระบุ Username ที่ขึ้นต้นด้วย <strong>JAY</strong> หรือ <strong>JNW</strong> เท่านั้น</p>
+            <input id="regSgUser" type="text" required oninput="checkSgFinanceCodeWarning()" onblur="checkSgFinanceCodeWarning()" placeholder="เช่น JAY1480XXXXX หรือ JNW1480XXXXX" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
             <div id="sgCodeWarningBox" class="hidden mt-1.5 p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-700 text-xs font-semibold leading-snug">
               ⚠️ รบกวนใส่ Username SG Finance+ ที่ขึ้นต้นด้วย JAY หรือ JNW (รหัสที่ท่านระบุเป็นรหัส Samsung Finance+ สาขา)
             </div>
