@@ -236,25 +236,47 @@
           </div>
         </div>
 
+        <!-- แจ้งเตือนเมื่อถูกตีกลับให้แก้เฉพาะบางช่อง -->
+        <div id="partialRejectBanner" class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
+          <div class="font-bold text-rose-900">กรุณาแก้ไขเฉพาะช่องที่มีกรอบสีแดงแล้วกดส่งใหม่</div>
+          <div id="partialRejectBannerNote" class="text-rose-700"></div>
+          <div class="text-[11px] text-slate-600">ช่องที่คลุมสีเทาคือข้อมูลที่ถูกต้องแล้ว ระบบล็อกไว้เพื่อป้องกันการแก้ไขผิดพลาด</div>
+        </div>
+
         <!-- ช่องกรอกสำหรับดีลเลอร์ -->
         <div id="dealerFieldsGroup" class="space-y-3.5">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <label class="block text-xs font-bold text-slate-700">ชื่อร้านค้า (ตามจริง) <span class="text-rose-600">*</span></label>
+              <span id="fieldTag_shopName" class="hidden text-[11px] font-bold"></span>
+            </div>
             <input id="regShopName" type="text" required placeholder="เช่น เจมาร์ทโมบาย, JAYMART..." class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">User SG Finance+ <span class="text-rose-600">*</span></label>
-            <input id="regSgUser" type="text" required placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <label class="block text-xs font-bold text-slate-700">User SG Finance+ <span class="text-rose-600">*</span></label>
+              <span id="fieldTag_sgUser" class="hidden text-[11px] font-bold"></span>
+            </div>
+            <input id="regSgUser" type="text" required oninput="checkSgFinanceCodeWarning()" onblur="checkSgFinanceCodeWarning()" placeholder="รหัส User สำหรับเข้าระบบ SG Finance+" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
+            <div id="sgCodeWarningBox" class="hidden mt-1.5 p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-700 text-xs font-semibold leading-snug">
+              ⚠️ รบกวนใส่รหัส SG Finance+ (รหัสที่ท่านระบุเป็นรหัส Samsung Finance+ สาขา)
+            </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <label class="block text-xs font-bold text-slate-700">เบอร์โทรศัพท์ติดต่อ <span class="text-rose-600">*</span></label>
+              <span id="fieldTag_phone" class="hidden text-[11px] font-bold"></span>
+            </div>
             <input id="regPhone" type="tel" required placeholder="เช่น 081-234-5678" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-num focus:outline-none focus:border-slate-900">
           </div>
 
           <div class="relative">
-            <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล (Email) <span class="text-rose-600">*</span></label>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <label class="block text-xs font-bold text-slate-700">อีเมล (Email) <span class="text-rose-600">*</span></label>
+              <span id="fieldTag_email" class="hidden text-[11px] font-bold"></span>
+            </div>
             <input id="regEmail" type="email" required autocomplete="off" oninput="handleEmailSuggest(this.value)" placeholder="เช่น shop@gmail.com" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900">
             <div id="emailSuggestList" class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden divide-y divide-slate-100"></div>
           </div>
@@ -282,6 +304,8 @@
         <h2 id="pendingTitleText" class="text-lg sm:text-xl font-bold text-slate-900">อยู่ระหว่างรอแอดมินตรวจสอบสิทธิ์</h2>
         <p id="pendingSubText" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">ระบบได้รับข้อมูลลงทะเบียนของท่านเรียบร้อยแล้ว กรุณารอแอดมินอนุมัติก่อนเข้าดูใบราคา</p>
       </div>
+
+      <div id="pendingRejectDetailBox" class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-left text-xs text-rose-800 space-y-1.5"></div>
 
       <div id="pendingSummaryCard" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5 text-slate-700"></div>
 
@@ -337,13 +361,16 @@
       </div>
 
       <div class="p-5 overflow-y-auto space-y-4">
-        <!-- โหมดเลือกประเภท PDF -->
-        <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200">
-          <button type="button" id="pdfModePriceBtn" onclick="switchPdfMode('price')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs">
+        <!-- โหมดเลือกประเภท PDF (3 โหมด) -->
+        <div class="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-100 border border-slate-200">
+          <button type="button" id="pdfModePriceBtn" onclick="switchPdfMode('price')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs">
             ใบราคาขายส่ง
           </button>
-          <button type="button" id="pdfModeStockBtn" onclick="switchPdfMode('stock')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+          <button type="button" id="pdfModeStockBtn" onclick="switchPdfMode('stock')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
             ใบสต็อกพร้อมส่ง
+          </button>
+          <button type="button" id="pdfModeBothBtn" onclick="switchPdfMode('both')" class="py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+            ราคาส่ง + สต็อก
           </button>
         </div>
 
@@ -612,6 +639,91 @@
     </div>
   </div>
 
+
+  <!-- Edit Model Price & Details Modal (Admin Staff Only) -->
+  <div id="editModelModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <span id="editModelBrandLabel" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500"></span>
+          <h2 id="editModelTitleLabel" class="text-sm sm:text-base font-bold text-slate-900 truncate">แก้ไขราคา / รายละเอียด</h2>
+        </div>
+        <button type="button" onclick="closeModal('editModelModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <form onsubmit="submitModelOverride(event)" class="p-5 space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ราคาส่ง (บาท)</label>
+            <input id="editModelWholesale" type="number" min="0" step="1" placeholder="เว้นว่างถ้าไม่มี" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-bold font-num focus:outline-none focus:border-slate-900">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ราคาปกติ RRP (บาท)</label>
+            <input id="editModelRrp" type="number" min="0" step="1" placeholder="ไม่บังคับ" class="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-sm font-semibold font-num focus:outline-none focus:border-slate-900">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">รายละเอียด / ของแถม / เงื่อนไขเพิ่มเติม</label>
+          <textarea id="editModelNote" rows="3" placeholder="เช่น แถมเคส + ฟิล์ม + หัวชาร์จ 25W" class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900 resize-none"></textarea>
+          <p class="text-[11px] text-slate-500 mt-1">ข้อมูลที่บันทึกไว้จะยังอยู่ครบแม้มีการอัปโหลดไฟล์ Excel หรือ PDF สต็อกใหม่</p>
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="btnClearOverride" onclick="clearModelOverride()" class="hidden h-10 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">
+            ล้างค่าที่แก้
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closeModal('editModelModal')" class="h-10 px-4 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-700 cursor-pointer">ยกเลิก</button>
+            <button type="submit" id="btnSaveOverride" class="btn-press h-10 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold cursor-pointer">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Partial Reject Modal (Admin เลือกช่องที่ผิด) -->
+  <div id="rejectReasonModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-rose-600">ระบุจุดที่ต้องแก้ไข</span>
+          <h2 id="rejectModalDealerName" class="text-sm sm:text-base font-bold text-slate-900 truncate">-</h2>
+        </div>
+        <button type="button" onclick="closeModal('rejectReasonModal')" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 flex items-center justify-center cursor-pointer shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div>
+          <p class="text-xs font-bold text-slate-700 mb-2">ติ๊กเลือกช่องที่ข้อมูลไม่ถูกต้อง (ช่องที่ไม่ติ๊กจะถูกล็อกคลุมเทาห้ามแก้ไข):</p>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" name="rejectFieldChk" value="shopName" class="w-4 h-4 rounded border-slate-300 text-rose-600">
+              <span>ชื่อร้านค้า</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" name="rejectFieldChk" value="sgUser" class="w-4 h-4 rounded border-slate-300 text-rose-600">
+              <span>User SG Finance+</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" name="rejectFieldChk" value="phone" class="w-4 h-4 rounded border-slate-300 text-rose-600">
+              <span>เบอร์โทรศัพท์</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50/50 cursor-pointer text-xs font-bold text-slate-800">
+              <input type="checkbox" name="rejectFieldChk" value="email" class="w-4 h-4 rounded border-slate-300 text-rose-600">
+              <span>อีเมล (Email)</span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">หมายเหตุเพิ่มเติมถึงผู้ลงทะเบียน (ไม่บังคับ)</label>
+          <input id="rejectModalNote" type="text" placeholder="เช่น รหัส SG Finance+ ไม่ถูกต้อง กรุณาตรวจสอบใหม่" class="w-full h-10 px-3 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:border-rose-500">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('rejectReasonModal')" class="h-10 px-4 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-700 cursor-pointer">ยกเลิก</button>
+          <button type="button" id="btnConfirmRejectDealer" onclick="confirmPartialRejectDealer()" class="btn-press h-10 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold cursor-pointer">ยืนยันไม่อนุมัติ & แจ้งเตือน</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium shadow-lg"></div>
 
   <script>
@@ -747,7 +859,7 @@
     function closeModal(id) {
       var el = document.getElementById(id);
       if (el) el.classList.add('hidden');
-      var anyOpen = ['pdfModal', 'adminModal'].some(function(mid) {
+      var anyOpen = ['pdfModal', 'adminModal', 'editModelModal', 'rejectReasonModal'].some(function(mid) {
         var m = document.getElementById(mid);
         return m && !m.classList.contains('hidden');
       });
@@ -1115,10 +1227,27 @@
         var titleEl = document.getElementById('pendingTitleText');
         var subEl = document.getElementById('pendingSubText');
 
+        var rejectBox = document.getElementById('pendingRejectDetailBox');
+        if (rejectBox) rejectBox.classList.add('hidden');
+
         if (STATE.dealerStatus === 'Rejected') {
           iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center';
-          titleEl.textContent = 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ';
-          subEl.textContent = 'กรุณาตรวจสอบข้อมูลของท่าน หรือกดแก้ไขข้อมูลเพื่อส่งคำขอใหม่อีกครั้ง';
+          var rFields = (STATE.dealerInfo && Array.isArray(STATE.dealerInfo.rejectFields)) ? STATE.dealerInfo.rejectFields : [];
+          var rNote = (STATE.dealerInfo && STATE.dealerInfo.rejectNote) ? STATE.dealerInfo.rejectNote : '';
+          titleEl.textContent = rFields.length ? 'กรุณาแก้ไขข้อมูลลงทะเบียนบางรายการ' : 'คำขอลงทะเบียนไม่ได้รับการอนุมัติ';
+          subEl.textContent = rFields.length
+            ? 'แอดมินแจ้งจุดที่ต้องแก้ไขด้านล่าง กดปุ่ม "แก้ไขข้อมูลที่ส่ง" เพื่อแก้เฉพาะช่องที่ผิดได้เลยครับ'
+            : 'กรุณาตรวจสอบข้อมูลของท่าน หรือกดแก้ไขข้อมูลเพื่อส่งคำขอใหม่อีกครั้ง';
+
+          if (rejectBox && (rFields.length || rNote)) {
+            var badges = rFields.map(function(fk) {
+              return '<span class="inline-block px-2 py-0.5 rounded-md bg-rose-600 text-white text-[11px] font-bold">' + escapeHtml(getRejectFieldLabel_(fk)) + '</span>';
+            }).join(' ');
+            rejectBox.innerHTML =
+              (rFields.length ? '<div class="font-bold text-rose-900">ช่องที่ต้องแก้ไข:</div><div class="flex flex-wrap gap-1.5">' + badges + '</div>' : '') +
+              (rNote ? '<div class="text-rose-800 pt-1"><strong>หมายเหตุ:</strong> ' + escapeHtml(rNote) + '</div>' : '');
+            rejectBox.classList.remove('hidden');
+          }
         } else if (STATE.dealerStatus === 'Replaced') {
           iconBox.className = 'w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center';
           titleEl.textContent = 'บัญชีนี้ถูกยกเลิกสิทธิ์เนื่องจากเปลี่ยนเครื่อง';
@@ -1242,18 +1371,126 @@
       verifyLineUserAccess(false);
     }
 
+    function getRejectFieldLabel_(key) {
+      var map = {
+        shopName: 'ชื่อร้านค้า',
+        sgUser: 'User SG Finance+',
+        phone: 'เบอร์โทรศัพท์',
+        email: 'อีเมล (Email)'
+      };
+      return map[key] || key;
+    }
+
+    function isSamsungFinanceBranchCode_(val) {
+      return String(val || '').replace(/\s+/g, '').toUpperCase() === 'C070009588';
+    }
+
+    function checkSgFinanceCodeWarning() {
+      var inp = document.getElementById('regSgUser');
+      var box = document.getElementById('sgCodeWarningBox');
+      if (!inp || !box) return false;
+      var bad = isSamsungFinanceBranchCode_(inp.value);
+      box.classList.toggle('hidden', !bad);
+      if (bad) {
+        inp.classList.add('border-rose-500', 'ring-2', 'ring-rose-100');
+      } else {
+        inp.classList.remove('border-rose-500');
+        if (!inp.getAttribute('data-rejected-field')) {
+          inp.classList.remove('ring-2', 'ring-rose-100');
+        }
+      }
+      return bad;
+    }
+
+    function applyPartialRejectFormLocks_(rejectFields, rejectNote) {
+      var fields = Array.isArray(rejectFields) ? rejectFields : [];
+      var isPartial = fields.length > 0;
+      var banner = document.getElementById('partialRejectBanner');
+      var bannerNote = document.getElementById('partialRejectBannerNote');
+      if (banner) banner.classList.toggle('hidden', !isPartial);
+      if (bannerNote) {
+        bannerNote.textContent = rejectNote ? ('หมายเหตุจากแอดมิน: ' + rejectNote) : '';
+        bannerNote.classList.toggle('hidden', !rejectNote);
+      }
+
+      // ล็อกสถานะผู้ลงทะเบียนเมื่อถูกตีกลับเฉพาะช่อง
+      document.querySelectorAll('input[name="regRoleType"]').forEach(function(r) {
+        r.disabled = isPartial;
+        var card = r.nextElementSibling;
+        if (card) card.classList.toggle('opacity-60', isPartial);
+      });
+
+      var fieldMap = [
+        { key: 'shopName', id: 'regShopName', tagId: 'fieldTag_shopName' },
+        { key: 'sgUser',   id: 'regSgUser',   tagId: 'fieldTag_sgUser' },
+        { key: 'phone',    id: 'regPhone',    tagId: 'fieldTag_phone' },
+        { key: 'email',    id: 'regEmail',    tagId: 'fieldTag_email' }
+      ];
+
+      var normalCls = 'w-full h-11 px-3.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:border-slate-900';
+      var lockedCls = 'w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed select-none';
+      var errorCls  = 'w-full h-11 px-3.5 rounded-xl border-2 border-rose-400 ring-2 ring-rose-100 bg-white text-sm focus:outline-none focus:border-rose-600';
+
+      fieldMap.forEach(function(f) {
+        var inp = document.getElementById(f.id);
+        var tag = document.getElementById(f.tagId);
+        if (!inp) return;
+        var numCls = (f.key === 'sgUser' || f.key === 'phone') ? ' font-num' : '';
+
+        if (!isPartial) {
+          inp.readOnly = false;
+          inp.removeAttribute('data-rejected-field');
+          inp.className = normalCls + numCls;
+          if (tag) tag.classList.add('hidden');
+        } else if (fields.indexOf(f.key) !== -1) {
+          inp.readOnly = false;
+          inp.setAttribute('data-rejected-field', '1');
+          inp.className = errorCls + numCls;
+          if (tag) {
+            tag.textContent = '✕ กรุณาแก้ไขช่องนี้';
+            tag.className = 'text-[11px] font-bold text-rose-600';
+          }
+        } else {
+          inp.readOnly = true;
+          inp.removeAttribute('data-rejected-field');
+          inp.className = lockedCls + numCls;
+          if (tag) {
+            tag.textContent = '✓ ข้อมูลถูกต้อง (ล็อกไว้)';
+            tag.className = 'text-[11px] font-bold text-emerald-600';
+          }
+        }
+      });
+    }
+
     function editDealerRegistration() {
       if (STATE.dealerInfo && STATE.dealerInfo.roleType === 'AM (สำหรับสาขา)') {
         showToast('บัญชี AM ที่ลงทะเบียนแล้วไม่สามารถแก้ไขหรือลงซ้ำได้');
         return;
       }
+      var savedInfo = STATE.dealerInfo ? Object.assign({}, STATE.dealerInfo) : null;
+      var savedStatus = STATE.dealerStatus;
       STATE.dealerStatus = 'unregistered';
       applyDealerGateUI();
-      if (STATE.dealerInfo) {
-        if (document.getElementById('regShopName')) document.getElementById('regShopName').value = STATE.dealerInfo.typedShopName || '';
-        if (document.getElementById('regSgUser')) document.getElementById('regSgUser').value = STATE.dealerInfo.sgFinanceUser || '';
-        if (document.getElementById('regPhone')) document.getElementById('regPhone').value = STATE.dealerInfo.phone || '';
-        if (document.getElementById('regEmail')) document.getElementById('regEmail').value = STATE.dealerInfo.email || '';
+
+      if (savedInfo) {
+        if (savedInfo.roleType) {
+          var roleRadio = document.querySelector('input[name="regRoleType"][value="' + savedInfo.roleType + '"]');
+          if (roleRadio) roleRadio.checked = true;
+          toggleRoleFields();
+        }
+        if (document.getElementById('regShopName')) document.getElementById('regShopName').value = savedInfo.typedShopName || '';
+        if (document.getElementById('regSgUser')) document.getElementById('regSgUser').value = savedInfo.sgFinanceUser || '';
+        if (document.getElementById('regPhone')) document.getElementById('regPhone').value = savedInfo.phone || '';
+        if (document.getElementById('regEmail')) document.getElementById('regEmail').value = savedInfo.email || '';
+
+        if (savedStatus === 'Rejected' && Array.isArray(savedInfo.rejectFields) && savedInfo.rejectFields.length > 0) {
+          applyPartialRejectFormLocks_(savedInfo.rejectFields, savedInfo.rejectNote || '');
+        } else {
+          applyPartialRejectFormLocks_([], '');
+        }
+        checkSgFinanceCodeWarning();
+      } else {
+        applyPartialRejectFormLocks_([], '');
       }
     }
 
@@ -1413,6 +1650,12 @@
         }
         payload.employeeId = empId;
       } else {
+        if (checkSgFinanceCodeWarning()) {
+          showToast('รบกวนใส่รหัส SG Finance+ (รหัสที่ท่านระบุเป็นรหัส Samsung Finance+ สาขา)');
+          var sgEl = document.getElementById('regSgUser');
+          if (sgEl) sgEl.focus();
+          return;
+        }
         payload.typedShopName = document.getElementById('regShopName').value.trim();
         payload.sgFinanceUser = document.getElementById('regSgUser').value.trim();
         payload.phone = document.getElementById('regPhone').value.trim();
@@ -1478,22 +1721,36 @@
       return b;
     }
 
+    function sortBrandsAppleFirst_(brandList) {
+      var arr = (brandList || []).slice();
+      var appleIdx = arr.findIndex(function(b) { return normalizeBrandDisplay_(b) === 'APPLE'; });
+      if (appleIdx > 0) {
+        var appleItem = arr.splice(appleIdx, 1)[0];
+        arr.unshift(appleItem);
+      }
+      return arr;
+    }
+
     function getCombinedCatalogItems_() {
       var list = STATE.products.slice();
       var stockOnly = (STATE.stockGroups || []).filter(function(g) {
         return !g.inWholesale && g.totalQty > 0;
       });
       stockOnly.forEach(function(g) {
+        var wPrice = Number(g.wholesale || 0);
+        var rPrice = Number(g.rrp || 0);
         list.push({
           brand: g.brand,
           modelDesc: g.displayName,
-          wholesale: 0,
-          rrp: 0,
+          wholesale: wPrice,
+          rrp: rPrice,
+          note: g.note || '',
+          hasOverride: Boolean(g.hasOverride),
           period: '',
           imageUrl: g.imageUrl || '',
           stockTotal: g.totalQty,
           stockColors: g.colors || [],
-          isStockOnly: true
+          isStockOnly: !(wPrice > 0)
         });
       });
       return list;
@@ -1521,6 +1778,7 @@
           orderedBrands.push(norm);
         }
       });
+      orderedBrands = sortBrandsAppleFirst_(orderedBrands);
 
       var allBrands = ['ALL'].concat(orderedBrands);
       container.innerHTML = allBrands.map(function(b) {
@@ -1561,7 +1819,7 @@
         if (onlyInStock && !(item.stockTotal > 0)) return false;
         if (q) {
           var colorsText = (item.stockColors || []).map(function(c) { return c.color; }).join(' ');
-          var hay = (item.brand + ' ' + item.modelDesc + ' ' + (item.period || '') + ' ' + colorsText).toLowerCase();
+          var hay = (item.brand + ' ' + item.modelDesc + ' ' + (item.period || '') + ' ' + (item.note || '') + ' ' + colorsText).toLowerCase();
           if (hay.indexOf(q) === -1) return false;
         }
         if (hideInactive && !item.isStockOnly) {
@@ -1581,7 +1839,8 @@
 
       if (emptyState) emptyState.classList.add('hidden');
 
-      grid.innerHTML = filtered.map(function(item) {
+      window.LAST_RENDERED_ITEMS = filtered;
+      grid.innerHTML = filtered.map(function(item, itemIdx) {
         var theme = getBrandTheme(item.brand);
         var promo = getPromoInfo(item.period);
         var isInactive = promo.state !== 'active';
@@ -1630,11 +1889,22 @@
           '</div>';
         }
 
+        var noteHtml = item.note
+          ? '<div class="p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-snug">' +
+              '<span class="font-bold text-amber-800">รายละเอียด/ของแถม: </span>' +
+              '<span>' + escapeHtml(item.note) + '</span>' +
+            '</div>'
+          : '';
+
         var periodHtml = item.period
           ? '<div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">' +
               '<span>ระยะเวลา</span>' +
               '<span class="font-medium text-slate-700 font-num">' + escapeHtml(item.period) + '</span>' +
             '</div>'
+          : '';
+
+        var adminEditHtml = STATE.isAdmin
+          ? '<button type="button" onclick="openEditModelByIndex(' + itemIdx + ')" class="btn-press w-full mt-1.5 h-8 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] font-bold cursor-pointer">✎ แก้ไขราคา / รายละเอียด</button>'
           : '';
 
         return '<article class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col ' + (isInactive ? 'expired-card' : '') + '">' +
@@ -1658,15 +1928,76 @@
                     '<span class="text-xs font-bold text-slate-700">ราคาส่ง</span>' +
                     '<span class="text-xl sm:text-2xl font-black text-[#C8102E] font-num tracking-tight">฿' + formatMoney(item.wholesale) + '</span>' +
                   '</div>') +
+              noteHtml +
               stockHtml +
               periodHtml +
+              adminEditHtml +
             '</div>' +
           '</div>' +
         '</article>';
       }).join('');
     }
 
-    // ================= UNIFIED PDF EXPORT (PRICE / STOCK) =================
+    // ================= EDIT MODEL PRICE & DETAILS (ADMIN) =================
+    var EDITING_MODEL = null;
+
+    function openEditModelByIndex(idx) {
+      var it = (window.LAST_RENDERED_ITEMS || [])[idx];
+      if (!it) return;
+      openEditModelModal(it.brand, it.modelDesc, Number(it.wholesale) || 0, Number(it.rrp) || 0, it.note || '', Boolean(it.hasOverride));
+    }
+
+    function openEditModelModal(brand, modelDesc, wholesale, rrp, note, hasOverride) {
+      if (!STATE.isAdmin) return;
+      EDITING_MODEL = { brand: brand, modelKey: modelDesc };
+      document.getElementById('editModelBrandLabel').textContent = brand;
+      document.getElementById('editModelTitleLabel').textContent = modelDesc;
+      document.getElementById('editModelWholesale').value = wholesale > 0 ? wholesale : '';
+      document.getElementById('editModelRrp').value = rrp > 0 ? rrp : '';
+      document.getElementById('editModelNote').value = String(note || '').replace(/\\n/g, '\n');
+      document.getElementById('btnClearOverride').classList.toggle('hidden', !hasOverride);
+      openModal('editModelModal');
+    }
+
+    function submitModelOverride(e) {
+      if (e) e.preventDefault();
+      if (!EDITING_MODEL) return;
+      var btn = document.getElementById('btnSaveOverride');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      callBackendApi('saveModelOverride', {
+        brand: EDITING_MODEL.brand,
+        modelKey: EDITING_MODEL.modelKey,
+        wholesale: document.getElementById('editModelWholesale').value,
+        rrp: document.getElementById('editModelRrp').value,
+        note: document.getElementById('editModelNote').value
+      }).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'บันทึก';
+        if (!res || !res.ok) {
+          if (!res || !res.authError) showToast((res && res.error) || 'บันทึกข้อมูลไม่สำเร็จ');
+          return;
+        }
+        closeModal('editModelModal');
+        showToast('บันทึกราคาและรายละเอียดเรียบร้อยแล้ว');
+        loadCatalogData(true);
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'บันทึก';
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+      });
+    }
+
+    function clearModelOverride() {
+      if (!EDITING_MODEL) return;
+      document.getElementById('editModelWholesale').value = '';
+      document.getElementById('editModelRrp').value = '';
+      document.getElementById('editModelNote').value = '';
+      submitModelOverride();
+    }
+
+    // ================= UNIFIED PDF EXPORT (PRICE / STOCK / BOTH) =================
     function openPdfModal() {
       switchPdfMode('price');
       openModal('pdfModal');
@@ -1676,13 +2007,18 @@
       STATE.pdfMode = mode;
       var priceBtn = document.getElementById('pdfModePriceBtn');
       var stockBtn = document.getElementById('pdfModeStockBtn');
+      var bothBtn  = document.getElementById('pdfModeBothBtn');
       var priceOpt = document.getElementById('pdfPriceOptions');
       var stockOpt = document.getElementById('pdfStockOptions');
-      var genBtn = document.getElementById('generatePdfBtn');
+      var genBtn   = document.getElementById('generatePdfBtn');
+
+      var idleCls = 'py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+      priceBtn.className = idleCls;
+      stockBtn.className = idleCls;
+      bothBtn.className  = idleCls;
 
       if (mode === 'stock') {
-        priceBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
-        stockBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-emerald-600 text-white shadow-xs';
+        stockBtn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer bg-emerald-600 text-white shadow-xs';
         priceOpt.classList.add('hidden');
         stockOpt.classList.remove('hidden');
         genBtn.textContent = 'สร้าง PDF ใบสต็อกพร้อมส่ง';
@@ -1694,14 +2030,20 @@
             : 'ยังไม่มีข้อมูลสต็อกในระบบ กรุณาให้แอดมินอัปโหลดไฟล์ PDF สต็อกก่อน';
         }
         renderPdfBrandList(getUniqueStockBrands_());
+      } else if (mode === 'both') {
+        bothBtn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-900 text-white shadow-xs';
+        priceOpt.classList.remove('hidden');
+        stockOpt.classList.add('hidden');
+        genBtn.textContent = 'สร้าง PDF ราคาส่ง + สต็อก';
+        genBtn.className = 'btn-press h-11 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold cursor-pointer';
+        renderPdfBrandList(getCombinedPdfBrands_());
       } else {
-        priceBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs';
-        stockBtn.className = 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        priceBtn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-slate-900 shadow-xs';
         priceOpt.classList.remove('hidden');
         stockOpt.classList.add('hidden');
         genBtn.textContent = 'สร้าง PDF ใบราคาขายส่ง';
         genBtn.className = 'btn-press h-11 px-5 rounded-xl bg-[#C8102E] hover:bg-red-700 text-white text-sm font-semibold cursor-pointer';
-        renderPdfBrandList(STATE.brands);
+        renderPdfBrandList(sortBrandsAppleFirst_(STATE.brands));
       }
     }
 
@@ -1714,7 +2056,20 @@
           list.push(g.brand);
         }
       });
-      return list;
+      return sortBrandsAppleFirst_(list);
+    }
+
+    function getCombinedPdfBrands_() {
+      var seen = {};
+      var list = [];
+      getCombinedCatalogItems_().forEach(function(it) {
+        var norm = normalizeBrandDisplay_(it.brand);
+        if (norm && !seen[norm]) {
+          seen[norm] = true;
+          list.push(norm);
+        }
+      });
+      return sortBrandsAppleFirst_(list);
     }
 
     function renderPdfBrandList(brands) {
@@ -1780,6 +2135,8 @@
     async function generatePdfDocument() {
       if (STATE.pdfMode === 'stock') {
         await generateStockPdf();
+      } else if (STATE.pdfMode === 'both') {
+        await generateCombinedPriceStockPdf();
       } else {
         await generatePricePdf();
       }
@@ -1839,7 +2196,7 @@
             var profitPct = profit > 0 ? Math.round((profit / item.rrp) * 1000) / 10 : 0;
             return [
               String(idx + 1),
-              item.modelDesc + statusTag,
+              item.modelDesc + statusTag + (item.note ? ('\n[รายละเอียด: ' + item.note + ']') : ''),
               item.rrp > 0 ? formatMoney(item.rrp) : '-',
               formatMoney(item.wholesale),
               profitPct > 0 ? '+' + profitPct + '%' : '-',
@@ -1936,24 +2293,26 @@
           doc.setFontSize(9.5);
           doc.text('ข้อมูลสต็อก ณ ' + stockDateStr + '   |   รวม ' + items.length + ' รุ่น / ' + brandTotal + ' เครื่อง', 14, 32);
 
-          // แยกสีคนละแถว: 1 แถวต่อ 1 รุ่น/ความจุ + 1 สี
+          // แยกสีคนละแถว แต่เลขลำดับและชื่อรุ่นขึ้นเฉพาะแถวแรกของรุ่นนั้น (ไม่ซ้ำซ้อน)
           var rows = [];
-          var rowNo = 0;
-          items.forEach(function(it) {
+          var rowGroupParity = [];
+          items.forEach(function(it, mIdx) {
+            var modelNo = String(mIdx + 1);
+            var modelLabel = it.displayName + (it.note ? ('\n[' + it.note + ']') : '');
             var colorList = (it.colors || []).filter(function(c) { return c.qty > 0; });
             if (!colorList.length) {
-              rowNo++;
-              rows.push([String(rowNo), it.displayName, '-', String(it.totalQty)]);
+              rows.push([modelNo, modelLabel, '-', String(it.totalQty)]);
+              rowGroupParity.push(mIdx % 2);
               return;
             }
-            colorList.forEach(function(c) {
-              rowNo++;
+            colorList.forEach(function(c, cIdx) {
               rows.push([
-                String(rowNo),
-                it.displayName,
+                cIdx === 0 ? modelNo : '',
+                cIdx === 0 ? modelLabel : '',
                 c.color,
                 String(c.qty)
               ]);
+              rowGroupParity.push(mIdx % 2);
             });
           });
 
@@ -1961,13 +2320,19 @@
             startY: 36,
             head: [['#', 'รุ่นสินค้า / ความจุ', 'สี', 'จำนวน']],
             body: rows,
-            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.5 },
+            theme: 'plain',
+            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9.5, cellPadding: 2.5, lineColor: [226, 232, 240], lineWidth: 0.1 },
             headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'normal' },
             columnStyles: {
               0: { halign: 'center', cellWidth: 12 },
               1: { cellWidth: 86 },
               2: { cellWidth: 64 },
               3: { halign: 'right', cellWidth: 20, textColor: [22, 163, 74] }
+            },
+            didParseCell: function(data) {
+              if (data.section === 'body') {
+                data.cell.styles.fillColor = rowGroupParity[data.row.index] === 1 ? [248, 250, 252] : [255, 255, 255];
+              }
             }
           });
         });
@@ -1984,6 +2349,127 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'สร้าง PDF ใบสต็อกพร้อมส่ง';
+      }
+    }
+
+    async function generateCombinedPriceStockPdf() {
+      var selectedBrands = Array.from(document.querySelectorAll('input[name="pdfBrandCheck"]:checked')).map(function(cb) {
+        return cb.value;
+      });
+      if (!selectedBrands.length) {
+        showToast('กรุณาเลือกอย่างน้อย 1 แบรนด์');
+        return;
+      }
+
+      var hideInactive = document.getElementById('pdfHideInactive').checked;
+      var btn = document.getElementById('generatePdfBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้างไฟล์ PDF ราคาส่ง + สต็อก...';
+
+      try {
+        var fontBase64 = await loadThaiFontBase64();
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        doc.addFileToVFS('Sarabun-Regular.ttf', fontBase64);
+        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.setFont('Sarabun', 'normal');
+
+        var pageAdded = false;
+        var combinedAll = getCombinedCatalogItems_();
+        var stockDateStr = STATE.stockPrintedDate || STATE.stockUploadedDate || '-';
+
+        selectedBrands.forEach(function(brand) {
+          var items = combinedAll.filter(function(it) {
+            if (normalizeBrandDisplay_(it.brand) !== normalizeBrandDisplay_(brand)) return false;
+            if (hideInactive && !it.isStockOnly && getPromoInfo(it.period).state !== 'active') return false;
+            return true;
+          });
+          if (!items.length) return;
+
+          if (pageAdded) doc.addPage();
+          pageAdded = true;
+
+          var theme = getBrandTheme(brand);
+          doc.setFillColor(theme.rgb[0], theme.rgb[1], theme.rgb[2]);
+          doc.rect(14, 12, 182, 14, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(13);
+          doc.text('JAYMART WHOLESALE & STOCK — ' + brand.toUpperCase(), 18, 21);
+
+          doc.setTextColor(71, 85, 105);
+          doc.setFontSize(9);
+          doc.text('ชุดราคา: ' + (STATE.docDate || '-') + '   |   สต็อก ณ ' + stockDateStr, 14, 32);
+
+          var rows = [];
+          var rowGroupParity = [];
+          var rowInactive = [];
+
+          items.forEach(function(it, mIdx) {
+            var modelNo = String(mIdx + 1);
+            var promo = !it.isStockOnly ? getPromoInfo(it.period) : { state: 'active', label: '' };
+            var isInactive = promo.state !== 'active';
+            var statusTag = promo.state === 'expired' ? ' [หมดโปรฯ]' : (promo.state === 'upcoming' ? ' [' + promo.label + ']' : '');
+            var modelLabel = it.modelDesc + statusTag + (it.note ? ('\n[' + it.note + ']') : '');
+            var priceText = it.wholesale > 0 ? formatMoney(it.wholesale) : 'ไม่มีราคาส่ง';
+            var colorList = (it.stockColors || []).filter(function(c) { return c.qty > 0; });
+
+            if (!colorList.length) {
+              rows.push([modelNo, modelLabel, priceText, '-', '0']);
+              rowGroupParity.push(mIdx % 2);
+              rowInactive.push(isInactive);
+              return;
+            }
+            colorList.forEach(function(c, cIdx) {
+              rows.push([
+                cIdx === 0 ? modelNo : '',
+                cIdx === 0 ? modelLabel : '',
+                cIdx === 0 ? priceText : '',
+                c.color,
+                String(c.qty)
+              ]);
+              rowGroupParity.push(mIdx % 2);
+              rowInactive.push(isInactive);
+            });
+          });
+
+          doc.autoTable({
+            startY: 36,
+            head: [['#', 'รุ่นสินค้า / ความจุ', 'ราคาส่ง', 'สี', 'สต็อก']],
+            body: rows,
+            theme: 'plain',
+            styles: { font: 'Sarabun', fontStyle: 'normal', fontSize: 9, cellPadding: 2.3, lineColor: [226, 232, 240], lineWidth: 0.1 },
+            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'normal' },
+            columnStyles: {
+              0: { halign: 'center', cellWidth: 10 },
+              1: { cellWidth: 74 },
+              2: { halign: 'right', cellWidth: 26, textColor: [200, 16, 46] },
+              3: { cellWidth: 54 },
+              4: { halign: 'right', cellWidth: 18, textColor: [22, 163, 74] }
+            },
+            didParseCell: function(data) {
+              if (data.section === 'body') {
+                data.cell.styles.fillColor = rowGroupParity[data.row.index] === 1 ? [248, 250, 252] : [255, 255, 255];
+                if (rowInactive[data.row.index]) {
+                  data.cell.styles.textColor = [148, 163, 184];
+                }
+              }
+            }
+          });
+        });
+
+        if (!pageAdded) {
+          showToast('ไม่มีรายการสินค้าตามเงื่อนไขที่เลือก');
+        } else {
+          var safeDate = String(STATE.docDate || 'Latest').replace(/\//g, '-');
+          var fileName = 'Jaymart-Price-Stock-' + safeDate + '.pdf';
+          await saveOrSharePdfDoc_(doc, fileName, 'ใบราคาขายส่งและสต็อก Jaymart (' + (STATE.docDate || 'ล่าสุด') + ')');
+        }
+      } catch (err) {
+        showToast('สร้าง PDF ไม่สำเร็จ: ' + (err.message || err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'สร้าง PDF ราคาส่ง + สต็อก';
       }
     }
 
@@ -2106,10 +2592,58 @@
           '</div>' +
           '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
             (!isApproved ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Approved\')" class="btn-press h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">อนุมัติ</button>' : '') +
-            (d.status !== 'Rejected' ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ระงับ/ไม่อนุมัติ</button>' : '') +
+            (d.status !== 'Rejected'
+              ? (isAm
+                ? '<button type="button" onclick="changeDealerStatus(\'' + escapeHtml(d.lineUserId) + '\', \'Rejected\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ</button>'
+                : '<button type="button" onclick="openRejectReasonModal(\'' + escapeHtml(d.lineUserId) + '\', \'' + escapeHtml(d.typedShopName || d.lineName || '') + '\')" class="btn-press h-9 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer">ไม่อนุมัติ / แจ้งแก้ไข</button>')
+              : '') +
           '</div>' +
         '</div>';
       }).join('');
+    }
+
+    var REJECTING_DEALER = null;
+
+    function openRejectReasonModal(lineUserId, dealerName) {
+      REJECTING_DEALER = { lineUserId: lineUserId, dealerName: dealerName };
+      document.getElementById('rejectModalDealerName').textContent = dealerName || lineUserId;
+      document.getElementById('rejectModalNote').value = '';
+      document.querySelectorAll('input[name="rejectFieldChk"]').forEach(function(cb) {
+        cb.checked = false;
+      });
+      openModal('rejectReasonModal');
+    }
+
+    function confirmPartialRejectDealer() {
+      if (!REJECTING_DEALER) return;
+      var selectedFields = Array.from(document.querySelectorAll('input[name="rejectFieldChk"]:checked')).map(function(cb) {
+        return cb.value;
+      });
+      var note = (document.getElementById('rejectModalNote').value || '').trim();
+      var btn = document.getElementById('btnConfirmRejectDealer');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      callBackendApi('updateDealerStatus', {
+        lineUserId: REJECTING_DEALER.lineUserId,
+        newStatus: 'Rejected',
+        rejectFields: selectedFields,
+        rejectNote: note
+      }).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันไม่อนุมัติ & แจ้งเตือน';
+        if (!res || !res.ok) {
+          if (!res || !res.authError) showToast((res && res.error) || 'อัปเดตสถานะไม่สำเร็จ');
+          return;
+        }
+        closeModal('rejectReasonModal');
+        showToast(selectedFields.length ? 'แจ้งเตือนผู้ลงทะเบียนให้แก้ไขข้อมูลเรียบร้อยแล้ว' : 'อัปเดตสถานะไม่อนุมัติเรียบร้อยแล้ว');
+        loadAdminDealers();
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันไม่อนุมัติ & แจ้งเตือน';
+        showToast('เกิดข้อผิดพลาด: ' + (err.message || err));
+      });
     }
 
     function changeDealerStatus(lineUserId, newStatus) {
