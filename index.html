@@ -1921,9 +1921,9 @@
         }
 
         var noteHtml = item.note
-          ? '<div class="p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-snug">' +
-              '<span class="font-bold text-amber-800">รายละเอียด/ของแถม: </span>' +
-              '<span>' + escapeHtml(item.note) + '</span>' +
+          ? '<div class="p-2.5 rounded-xl bg-rose-50/80 border-2 border-rose-500 text-[11px] text-rose-950 leading-snug space-y-0.5">' +
+              '<div class="font-extrabold text-rose-700">รายละเอียด :</div>' +
+              '<div class="font-semibold text-rose-950 whitespace-pre-line">' + escapeHtml(item.note) + '</div>' +
             '</div>'
           : '';
 
