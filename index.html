@@ -3236,20 +3236,23 @@
       });
     }
 
-    // --- TAB 4: IMAGES MANAGER ---
+    // --- TAB 4: IMAGES MANAGER (รวมทั้งรุ่นในใบราคาและรุ่นเฉพาะสต็อก เช่น APPLE) ---
     function populateBrandFilters() {
       var filterEl = document.getElementById('adminBrandFilter');
       var dataListEl = document.getElementById('brandDataList');
+      var allBrands = getCombinedPdfBrands_();
       if (filterEl) {
         var current = filterEl.value || 'ALL';
-        filterEl.innerHTML = '<option value="ALL">ทุกแบรนด์ (' + STATE.brands.length + ')</option>' +
-          STATE.brands.map(function(b) {
+        filterEl.innerHTML = '<option value="ALL">ทุกแบรนด์ (' + allBrands.length + ')</option>' +
+          allBrands.map(function(b) {
             return '<option value="' + escapeHtml(b) + '">' + escapeHtml(b) + '</option>';
           }).join('');
-        filterEl.value = current;
+        if (current === 'ALL' || allBrands.indexOf(current) !== -1) {
+          filterEl.value = current;
+        }
       }
       if (dataListEl) {
-        dataListEl.innerHTML = STATE.brands.map(function(b) {
+        dataListEl.innerHTML = allBrands.map(function(b) {
           return '<option value="' + escapeHtml(b) + '">';
         }).join('');
       }
@@ -3266,8 +3269,8 @@
 
       var seen = {};
       var uniqueModels = [];
-      STATE.products.forEach(function(p) {
-        var key = p.brand + '||' + p.modelDesc;
+      getCombinedCatalogItems_().forEach(function(p) {
+        var key = normalizeBrandDisplay_(p.brand) + '||' + p.modelDesc.toLowerCase();
         if (!seen[key]) {
           seen[key] = true;
           uniqueModels.push(p);
@@ -3275,7 +3278,7 @@
       });
 
       var filtered = uniqueModels.filter(function(item) {
-        if (brandFilter !== 'ALL' && item.brand !== brandFilter) return false;
+        if (brandFilter !== 'ALL' && normalizeBrandDisplay_(item.brand) !== normalizeBrandDisplay_(brandFilter)) return false;
         if (onlyMissing && item.imageUrl) return false;
         if (q && (item.brand + ' ' + item.modelDesc).toLowerCase().indexOf(q) === -1) return false;
         return true;
