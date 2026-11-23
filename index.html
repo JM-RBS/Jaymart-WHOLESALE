@@ -473,8 +473,13 @@
           </div>
         </div>
 
+        <div class="android-line-upload-hint hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex flex-wrap items-center justify-between gap-2">
+          <span><strong>ผู้ใช้ Android ในแอป LINE:</strong> หากกดเลือกไฟล์แล้วไม่ขึ้น ให้กดเปิดใน Chrome เพื่ออัปโหลดไฟล์ครับ</span>
+          <button type="button" onclick="openInExternalBrowser('excel')" class="btn-press px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer whitespace-nowrap">เปิดใน Chrome</button>
+        </div>
+
         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100/70 transition">
-          <input type="file" id="excelFileInput" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" onchange="handleExcelSelect(event)" class="hidden">
+          <input type="file" id="excelFileInput" onchange="handleExcelSelect(event)" class="sr-only">
           <label for="excelFileInput" class="cursor-pointer flex flex-col items-center">
             <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -536,8 +541,13 @@
           </div>
         </div>
 
+        <div class="android-line-upload-hint hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex flex-wrap items-center justify-between gap-2">
+          <span><strong>ผู้ใช้ Android ในแอป LINE:</strong> หากกดเลือกไฟล์ PDF แล้วไม่ขึ้น ให้กดเปิดใน Chrome เพื่ออัปโหลดไฟล์ครับ</span>
+          <button type="button" onclick="openInExternalBrowser('stock')" class="btn-press px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer whitespace-nowrap">เปิดใน Chrome</button>
+        </div>
+
         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100/70 transition">
-          <input type="file" id="stockPdfInput" accept="application/pdf,.pdf" onchange="handleStockPdfSelect(event)" class="hidden">
+          <input type="file" id="stockPdfInput" onchange="handleStockPdfSelect(event)" class="sr-only">
           <label for="stockPdfInput" class="cursor-pointer flex flex-col items-center">
             <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-2">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -606,7 +616,7 @@
             <div class="sm:col-span-5">
               <label class="block text-[11px] font-bold text-slate-600 mb-1">อัปโหลดไฟล์ หรือ วางลิงก์รูปภาพ</label>
               <div class="flex items-center gap-1.5">
-                <input type="file" id="newImgFileInput" accept="image/*" class="hidden" onchange="handleNewModelImageFile(event)">
+                <input type="file" id="newImgFileInput" accept="image/*" class="sr-only" onchange="handleNewModelImageFile(event)">
                 <label id="newImgFileLabel" for="newImgFileInput" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shrink-0 whitespace-nowrap transition">
                   เลือกไฟล์รูป
                 </label>
@@ -2502,6 +2512,7 @@
       }
       document.getElementById('adminStaffBadge').textContent = STATE.staffName || 'Admin';
       openModal('adminModal');
+      checkAndroidLineUploadHint_();
       switchAdminTab(defaultTab || 'dealers');
       loadAdminDealers();
       if (!STATE.products.length) {
@@ -2733,6 +2744,11 @@
     function handleExcelSelect(e) {
       var file = e.target.files && e.target.files[0];
       if (!file) return;
+      if (!/\.(xlsx|xls|xlsm|xlsb|csv|ods)$/i.test(file.name)) {
+        showToast('กรุณาเลือกไฟล์ Excel (.xlsx, .xls, .csv)');
+        e.target.value = '';
+        return;
+      }
       document.getElementById('excelSelectedFileName').textContent = 'ไฟล์ที่เลือก: ' + file.name;
 
       var reader = new FileReader();
@@ -2860,6 +2876,7 @@
           showToast('อ่านไฟล์ Excel ไม่สำเร็จ: ' + (err.message || err));
         }
       };
+      reader.onloadend = function() { if (e && e.target) e.target.value = ''; };
       reader.readAsArrayBuffer(file);
     }
 
@@ -2981,19 +2998,63 @@
       };
     }
 
+    function readFileAsArrayBuffer_(file) {
+      return new Promise(function(resolve, reject) {
+        if (file && typeof file.arrayBuffer === 'function') {
+          file.arrayBuffer().then(resolve).catch(function() {
+            var fr = new FileReader();
+            fr.onload = function(ev) { resolve(ev.target.result); };
+            fr.onerror = function() { reject(new Error('ไม่สามารถอ่านไฟล์จากเครื่องได้')); };
+            fr.readAsArrayBuffer(file);
+          });
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(ev) { resolve(ev.target.result); };
+        reader.onerror = function() { reject(new Error('ไม่สามารถอ่านไฟล์จากเครื่องได้')); };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function openInExternalBrowser(tabName) {
+      var base = getOAuthRedirectUri();
+      var url = base + '?openExternalBrowser=1' + (tabName ? ('&tab=' + encodeURIComponent(tabName)) : '');
+      window.location.href = url;
+    }
+
+    function checkAndroidLineUploadHint_() {
+      var ua = navigator.userAgent || '';
+      var isAndroidLine = /Android/i.test(ua) && /Line\//i.test(ua);
+      document.querySelectorAll('.android-line-upload-hint').forEach(function(el) {
+        el.classList.toggle('hidden', !isAndroidLine);
+      });
+    }
+
     async function handleStockPdfSelect(e) {
       var file = e.target.files && e.target.files[0];
       if (!file) return;
+      if (!/\.pdf$/i.test(file.name) && file.type && file.type.indexOf('pdf') === -1) {
+        showToast('กรุณาเลือกไฟล์นามสกุล .pdf (รายงาน PSINRP11)');
+        e.target.value = '';
+        return;
+      }
       if (!window.pdfjsLib) {
         showToast('ไม่พบไลบรารี PDF.js กรุณารีเฟรชหน้าเว็บ');
+        e.target.value = '';
         return;
       }
 
       document.getElementById('stockSelectedFileName').textContent = 'กำลังอ่านไฟล์: ' + file.name + '...';
 
       try {
-        var arrayBuf = await file.arrayBuffer();
-        var pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+        var arrayBuf = await readFileAsArrayBuffer_(file);
+        var pdf;
+        try {
+          pdf = await pdfjsLib.getDocument({ data: arrayBuf.slice(0) }).promise;
+        } catch (workerErr) {
+          // Fallback สำหรับ Android WebView ที่บล็อก Web Worker ของ PDF.js
+          pdf = await pdfjsLib.getDocument({ data: arrayBuf.slice(0), disableWorker: true }).promise;
+        }
         var printedDate = '';
         var rawRows = [];
 
@@ -3145,6 +3206,8 @@
       } catch (err) {
         document.getElementById('stockSelectedFileName').textContent = 'อ่านไฟล์ไม่สำเร็จ: ' + file.name;
         showToast('อ่านไฟล์ PDF สต็อกไม่สำเร็จ: ' + (err.message || err));
+      } finally {
+        if (e && e.target) e.target.value = '';
       }
     }
 
@@ -3239,7 +3302,7 @@
             '</div>' +
           '</div>' +
           '<div class="flex items-center gap-1.5 shrink-0">' +
-            '<input type="file" id="rowImgFile_' + idx + '" accept="image/*" class="hidden" onchange="handleRowModelImageFile(event, \'' + escapeHtml(item.brand) + '\', \'' + escapeHtml(item.modelDesc) + '\')">' +
+            '<input type="file" id="rowImgFile_' + idx + '" accept="image/*" class="sr-only" onchange="handleRowModelImageFile(event, \'' + escapeHtml(item.brand) + '\', \'' + escapeHtml(item.modelDesc) + '\')">' +
             '<label for="rowImgFile_' + idx + '" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer whitespace-nowrap">อัปโหลดรูป</label>' +
             '<input type="url" id="rowImgUrl_' + idx + '" value="' + escapeHtml(item.imageUrl || '') + '" placeholder="วางลิงก์รูป..." class="w-36 sm:w-48 h-9 px-2.5 rounded-xl border border-slate-300 text-xs">' +
             '<button type="button" onclick="saveRowModelImage(\'' + escapeHtml(item.brand) + '\', \'' + escapeHtml(item.modelDesc) + '\', \'rowImgUrl_' + idx + '\')" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer whitespace-nowrap">บันทึก</button>' +
